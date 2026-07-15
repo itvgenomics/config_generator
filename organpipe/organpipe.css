@@ -645,10 +645,62 @@
 .y-bool     { color: #56b6c2; }
 .y-null     { color: #56b6c2; font-style: italic; }
 
+/* CSV Syntax Highlighting */
+.csv-header  { color: #61afef; font-weight: 500; }
+.csv-pending { color: rgba(171, 178, 191, 0.38); font-style: italic; }
+
+/* ----------------------------------------------------------------
+   FORMAT BAR
+   ---------------------------------------------------------------- */
+.format-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.format-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.format-bar-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* CSV controls (add/clear row buttons + counter) */
+.csv-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.csv-row-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--organpipe-color);
+  background: var(--organpipe-bg);
+  border: 1px solid rgba(0, 80, 179, 0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
 /* ----------------------------------------------------------------
    UTILITY
    ---------------------------------------------------------------- */
 .hidden { display: none !important; }
+
 
 /* ----------------------------------------------------------------
    RESPONSIVE

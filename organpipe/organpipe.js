@@ -41,6 +41,10 @@ const state = {
   run_nhmmer: 'No',
   nhmmer_db: 'resources/rfam.hmm',
   run_images: 'No',
+
+  // Output format
+  format: 'yaml',   // 'yaml' | 'csv'
+  csvRows: [],      // accumulated CSV rows (snapshots of state)
 };
 
 // ----------------------------------------------------------------
@@ -89,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setRadio('annotation', state.annotation);
   setRadio('run_nhmmer', state.run_nhmmer);
   setRadio('run_images', state.run_images);
+  setRadio('output_format', 'yaml');
   setFieldValue('f-pacbio-adapters', state.pacbio_adapters);
   setFieldValue('f-nhmmer-db', state.nhmmer_db);
 
@@ -171,10 +176,23 @@ function bindEvents() {
   });
 
   // ---- Action buttons ----
-  $('btn-download').addEventListener('click', downloadYAML);
-  $('btn-copy').addEventListener('click', () => copyYAML('btn-copy'));
-  $('btn-copy-yaml').addEventListener('click', () => copyYAML('btn-copy-yaml'));
+  $('btn-download').addEventListener('click', downloadOutput);
+  $('btn-copy').addEventListener('click', () => copyOutput('btn-copy'));
+  $('btn-copy-yaml').addEventListener('click', () => copyOutput('btn-copy-yaml'));
   $('btn-reset').addEventListener('click', resetForm);
+
+  // ---- Format toggle ----
+  document.querySelectorAll('input[name="output_format"]').forEach((radio) => {
+    radio.addEventListener('change', (e) => {
+      state.format = e.target.value;
+      updateFormatUI();
+      updateYAML();
+    });
+  });
+
+  // ---- CSV row management ----
+  $('btn-add-row').addEventListener('click', addCSVRow);
+  $('btn-clear-rows').addEventListener('click', clearCSVRows);
 }
 
 // ----------------------------------------------------------------
@@ -268,6 +286,26 @@ function updateConditionals() {
   // --- Update step number badge ---
   const $stepNum = $('steps-step-number');
   if ($stepNum) $stepNum.textContent = effectivelyShort ? '4' : '3';
+}
+
+// ----------------------------------------------------------------
+// FORMAT UI SYNC
+// ----------------------------------------------------------------
+function updateFormatUI() {
+  const isCSV = state.format === 'csv';
+
+  // Show/hide CSV controls
+  const $csvCtrl = $('csv-controls');
+  if ($csvCtrl) $csvCtrl.classList.toggle('hidden', !isCSV);
+
+  // Update filenames and button labels
+  const $filename  = $('yaml-filename');
+  const $copyLabel = $('btn-copy-label');
+  const $dlLabel   = $('btn-download-label');
+
+  if ($filename)  $filename.textContent  = isCSV ? 'samples.csv' : 'config.yaml';
+  if ($copyLabel) $copyLabel.textContent = isCSV ? 'Copy CSV'    : 'Copy YAML';
+  if ($dlLabel)   $dlLabel.textContent   = isCSV ? 'Download .csv' : 'Download .yml';
 }
 
 // ----------------------------------------------------------------
@@ -369,30 +407,150 @@ function esc(str) {
 }
 
 // ----------------------------------------------------------------
-// UPDATE YAML PREVIEW
+// UPDATE OUTPUT PREVIEW
 // ----------------------------------------------------------------
 function updateYAML() {
-  const yaml = generateYAML();
-  const code = $('yaml-code');
+  const isCSV = state.format === 'csv';
+  const code    = $('yaml-code');
   const counter = $('yaml-line-count');
 
-  if (code) code.innerHTML = highlightYAML(yaml);
-  if (counter) counter.textContent = `${yaml.split('\n').length} lines`;
+  if (isCSV) {
+    const csv = buildCSVPreview();
+    if (code) code.innerHTML = highlightCSV(csv);
+    const rowCount = state.csvRows.length;
+    if (counter) counter.textContent = `${rowCount} saved row${rowCount !== 1 ? 's' : ''}`;
+  } else {
+    const yaml = generateYAML();
+    if (code) code.innerHTML = highlightYAML(yaml);
+    if (counter) counter.textContent = `${yaml.split('\n').length} lines`;
+  }
 }
 
 // ----------------------------------------------------------------
-// COPY YAML
+// CSV — COLUMN DEFINITIONS
 // ----------------------------------------------------------------
-function copyYAML(triggerId) {
-  const yaml = generateYAML();
-  navigator.clipboard.writeText(yaml).then(() => {
+const CSV_COLUMNS = [
+  ['sample',          (s) => s.sample],
+  ['reads_path',      (s) => s.reads_path],
+  ['organelle',       (s) => s.organelle],
+  ['genetic_code',    (s) => s.genetic_code],
+  ['reference',       (s) => s.reference],
+  ['sequencing_type', (s) => s.sequencing_type],
+  ['genome_range',    (s) => s.genome_range],
+  ['annotation',      (s) => s.annotation || 'Yes'],
+  ['run_trimming',    (s) => s.run_trimming],
+  ['adapters',        (s) => s.adapters],
+  ['minlength',       (s) => s.minlength],
+  ['minquality',      (s) => s.minquality],
+  ['seed_format',     (s) => s.seed_format],
+  ['seed_file',       (s) => s.seed_file],
+  ['feature',         (s) => s.feature],
+  ['search_ncbi',     (s) => s.search_ncbi],
+  ['search_genes',    (s) => s.search_genes],
+  ['search_term',     (s) => s.search_term],
+  ['max_references',  (s) => s.max_references],
+  ['kmers',           (s) => s.kmers],
+  ['max_memory',      (s) => s.max_memory],
+  ['reads_length',    (s) => s.reads_length],
+  ['insert_size',     (s) => s.insert_size],
+  ['run_nhmmer',      (s) => s.run_nhmmer || 'No'],
+  ['nhmmer_db',       (s) => s.nhmmer_db],
+  ['run_images',      (s) => s.run_images || 'No'],
+  ['pacbio_adapters', (s) => s.pacbio_adapters],
+];
+
+function csvVal(v) {
+  const str = String(v ?? '');
+  // Quote values that contain commas
+  return str.includes(',') ? `"${str}"` : str;
+}
+
+function stateToCSVRow(s) {
+  return CSV_COLUMNS.map(([, fn]) => csvVal(fn(s))).join(',');
+}
+
+function buildCSVPreview() {
+  const header = CSV_COLUMNS.map(([col]) => col).join(',');
+  const savedRows = state.csvRows.map(stateToCSVRow);
+  const pendingRow = stateToCSVRow(state);
+  return [header, ...savedRows, pendingRow].join('\n');
+}
+
+function generateCSV() {
+  const header = CSV_COLUMNS.map(([col]) => col).join(',');
+  const rows = state.csvRows.map(stateToCSVRow);
+  // Include current state as a final row only if sample is set
+  if (state.sample) rows.push(stateToCSVRow(state));
+  return [header, ...rows].join('\n');
+}
+
+// ----------------------------------------------------------------
+// CSV HIGHLIGHTING
+// ----------------------------------------------------------------
+function highlightCSV(text) {
+  const lines = text.split('\n');
+  const savedCount = state.csvRows.length;
+  return lines.map((line, i) => {
+    if (i === 0) {
+      // Header row
+      return `<span class="csv-header">${esc(line)}</span>`;
+    } else if (i <= savedCount) {
+      // Saved rows — normal colour
+      return esc(line);
+    } else {
+      // Pending (current form) row — muted
+      return `<span class="csv-pending">${esc(line)}</span>`;
+    }
+  }).join('\n');
+}
+
+// ----------------------------------------------------------------
+// ADD / CLEAR CSV ROWS
+// ----------------------------------------------------------------
+function addCSVRow() {
+  // Snapshot current state (exclude format/csvRows)
+  const snap = {};
+  Object.keys(state).forEach((k) => {
+    if (k !== 'format' && k !== 'csvRows') snap[k] = state[k];
+  });
+  state.csvRows.push(snap);
+
+  // Clear only sample + reads_path so user can enter the next sample
+  state.sample    = '';
+  state.reads_path = '';
+  setFieldValue('f-sample', '');
+  setFieldValue('f-reads-path', '');
+
+  updateCSVCounter();
+  updateYAML();
+}
+
+function clearCSVRows() {
+  if (state.csvRows.length === 0) return;
+  if (!confirm(`Clear all ${state.csvRows.length} saved row${state.csvRows.length !== 1 ? 's' : ''}?`)) return;
+  state.csvRows = [];
+  updateCSVCounter();
+  updateYAML();
+}
+
+function updateCSVCounter() {
+  const el = $('csv-row-count');
+  if (!el) return;
+  const n = state.csvRows.length;
+  el.textContent = n === 1 ? '1 row' : `${n} rows`;
+}
+
+// ----------------------------------------------------------------
+// COPY OUTPUT
+// ----------------------------------------------------------------
+function copyOutput(triggerId) {
+  const text = state.format === 'csv' ? generateCSV() : generateYAML();
+  navigator.clipboard.writeText(text).then(() => {
     const toast = $('yaml-copy-toast');
     if (toast) {
       toast.classList.remove('hidden');
       setTimeout(() => toast.classList.add('hidden'), 2000);
     }
-
-    // Flash the button
     const btn = $(triggerId);
     if (btn) {
       const orig = btn.textContent;
@@ -400,9 +558,8 @@ function copyYAML(triggerId) {
       setTimeout(() => { btn.textContent = orig; }, 1800);
     }
   }).catch(() => {
-    // Fallback
     const ta = document.createElement('textarea');
-    ta.value = yaml;
+    ta.value = text;
     ta.style.position = 'fixed';
     ta.style.opacity = '0';
     document.body.appendChild(ta);
@@ -413,15 +570,18 @@ function copyYAML(triggerId) {
 }
 
 // ----------------------------------------------------------------
-// DOWNLOAD YAML
+// DOWNLOAD OUTPUT
 // ----------------------------------------------------------------
-function downloadYAML() {
-  const yaml = generateYAML();
-  const blob = new Blob([yaml], { type: 'text/yaml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'config.yaml';
+function downloadOutput() {
+  const isCSV = state.format === 'csv';
+  const text     = isCSV ? generateCSV()  : generateYAML();
+  const mimeType = isCSV ? 'text/csv'     : 'text/yaml';
+  const filename = isCSV ? 'samples.csv'  : 'config.yaml';
+  const blob = new Blob([text], { type: `${mimeType};charset=utf-8` });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -434,13 +594,15 @@ function downloadYAML() {
 function resetForm() {
   if (!confirm('Reset all fields to their defaults?')) return;
 
-  // Reset state
+  // Reset state (preserve format choice, clear csvRows)
   Object.keys(state).forEach((k) => { state[k] = ''; });
   state.pacbio_adapters = '-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT';
   state.annotation = 'Yes';
   state.run_nhmmer = 'No';
   state.nhmmer_db = 'resources/rfam.hmm';
   state.run_images = 'No';
+  state.format = 'yaml';
+  state.csvRows = [];
 
   // Reset all inputs
   document.querySelectorAll('.field-input, .field-select').forEach((el) => {
@@ -455,10 +617,15 @@ function resetForm() {
   setRadio('annotation', 'Yes');
   setRadio('run_nhmmer', 'No');
   setRadio('run_images', 'No');
+  setRadio('output_format', 'yaml');
+
+  // Reset CSV counter
+  updateCSVCounter();
 
   // Hide revealed sections
   ['section-qc', 'section-assembly', 'section-steps'].forEach(hideSection);
 
+  updateFormatUI();
   updateConditionals();
   updateYAML();
 }

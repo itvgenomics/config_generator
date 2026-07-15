@@ -86,14 +86,14 @@
             <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.5"
               stroke-linecap="round" />
           </svg>
-          Copy YAML
+          <span id="btn-copy-label">Copy YAML</span>
         </button>
         <button id="btn-download" class="op-btn op-btn-primary">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 1v8M4 6l3 3 3-3M1 10v1.5A1.5 1.5 0 002.5 13h9a1.5 1.5 0 001.5-1.5V10" stroke="currentColor"
               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          Download .yml
+          <span id="btn-download-label">Download .yml</span>
         </button>
       </div>
     </div>
@@ -103,6 +103,47 @@
 
       <!-- ======= FORM PANEL ======= -->
       <div class="form-panel" id="form-panel">
+
+        <!-- Format Selector Bar -->
+        <div class="format-bar" id="format-bar">
+          <div class="format-bar-left">
+            <span class="format-bar-label">Output Format</span>
+            <div class="segmented-control" role="radiogroup" aria-label="Output format">
+              <label class="segment" id="seg-fmt-yaml">
+                <input type="radio" name="output_format" value="yaml" checked />
+                <span class="segment-label">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                    <rect x="1" y="1" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.25"/>
+                    <path d="M3.5 4.5h6M3.5 6.5h3.5M3.5 8.5h4.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                  </svg>
+                  YAML
+                  <span class="seg-platform">Single sample</span>
+                </span>
+              </label>
+              <label class="segment" id="seg-fmt-csv">
+                <input type="radio" name="output_format" value="csv" />
+                <span class="segment-label">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                    <rect x="1" y="1" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.25"/>
+                    <path d="M1 4.5h11M1 7.5h11M4.5 1v11" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                  </svg>
+                  CSV
+                  <span class="seg-platform">Multiple samples</span>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="csv-controls hidden" id="csv-controls">
+            <span class="csv-row-badge" id="csv-row-count">0 rows</span>
+            <button id="btn-add-row" class="op-btn op-btn-secondary">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Add Row
+            </button>
+            <button id="btn-clear-rows" class="op-btn op-btn-ghost">Clear All</button>
+          </div>
+        </div>
 
         <!-- ─────────────────────────────────────────── -->
         <!-- SECTION 1: Project Info                    -->
@@ -526,7 +567,7 @@
               <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
               <path d="M4 4.5h6M4 7h4M4 9.5h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
             </svg>
-            config.yaml
+            <span id="yaml-filename">config.yaml</span>
           </div>
           <button id="btn-copy-yaml" class="yaml-copy-btn" title="Copy to clipboard">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
