@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="OrganPipe YAML configuration generator for organelle genome assembly pipelines." />
+  <title>OrganPipe — Pipeline Config Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="organpipe.css" />
+</head>
+
+<body>
+
+  <!-- Top Nav -->
+  <nav class="top-bar" role="navigation" aria-label="Site header">
+    <div class="top-bar-inner">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="1" y="5" width="4" height="12" rx="2" fill="white" />
+          <rect x="7" y="2" width="4" height="15" rx="2" fill="white" opacity="0.8" />
+          <rect x="13" y="6" width="4" height="10" rx="2" fill="white" opacity="0.6" />
+          <rect x="19" y="3" width="3" height="14" rx="1.5" fill="white" opacity="0.4" />
+        </svg>
+      </div>
+      <span class="brand-name">ITVGenomics</span>
+      <div class="brand-divider" aria-hidden="true"></div>
+      <span class="brand-module">Pipeline Config Generator</span>
+      <div class="nav-spacer"></div>
+      <div class="nav-badge">YAML</div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper op-page-wrapper">
+
+    <!-- Breadcrumb -->
+    <nav class="op-breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html" class="op-breadcrumb-link">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1.5L1.5 6.5V12.5H5.5V9.5H8.5V12.5H12.5V6.5L7 1.5Z" stroke="currentColor" stroke-width="1.25"
+            stroke-linejoin="round" />
+        </svg>
+        Home
+      </a>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+      <span class="op-breadcrumb-current">OrganPipe</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="op-page-header">
+      <div class="op-pipeline-logo">
+        <img src="../assets/organpipe-logo.png" alt="OrganPipe logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="op-logo-fallback" style="display:none" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="6" width="4" height="16" rx="2" fill="currentColor" />
+            <rect x="9" y="2" width="4" height="20" rx="2" fill="currentColor" opacity=".75" />
+            <rect x="16" y="8" width="4" height="12" rx="2" fill="currentColor" opacity=".5" />
+            <rect x="23" y="4" width="3" height="18" rx="1.5" fill="currentColor" opacity=".3" />
+          </svg>
+        </div>
+      </div>
+      <div class="op-header-text">
+        <h1>OrganPipe Configuration</h1>
+        <p>Generate a <code>config.yaml</code> file for your organelle genome assembly pipeline</p>
+      </div>
+      <div class="op-header-actions">
+        <button id="btn-reset" class="op-btn op-btn-ghost" title="Reset all fields">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7a5 5 0 105-5H5M5 2L2.5 4.5 5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          Reset
+        </button>
+        <button id="btn-copy" class="op-btn op-btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" />
+          </svg>
+          Copy YAML
+        </button>
+        <button id="btn-download" class="op-btn op-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v8M4 6l3 3 3-3M1 10v1.5A1.5 1.5 0 002.5 13h9a1.5 1.5 0 001.5-1.5V10" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Download .yml
+        </button>
+      </div>
+    </div>
+
+    <!-- Editor Layout -->
+    <div class="editor-layout" id="editor-layout">
+
+      <!-- ======= FORM PANEL ======= -->
+      <div class="form-panel" id="form-panel">
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 1: Project Info                    -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-project">
+          <div class="section-header">
+            <div class="section-step">1</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Project Information</h2>
+              <p class="section-desc">Identify your sample and sequencing setup</p>
+            </div>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-sample">
+              <label class="field-label" for="f-sample">
+                Sample Name <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">
+                Use <code>all</code> to process every sample in the reads directory.
+                Read filenames must include <code>_R1</code>/<code>_R2</code> or
+                <code>_pair1</code>/<code>_pair2</code>.
+              </p>
+              <input class="field-input" type="text" id="f-sample" placeholder="MySample  or  all" autocomplete="off" />
+            </div>
+
+            <div class="field-group" id="fg-reads-path">
+              <label class="field-label" for="f-reads-path">
+                Reads Path <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">
+                Directory containing your sequencing read files.
+                For short reads: only <code>.fastq.gz</code>. For long reads: <code>.fasta</code> or
+                <code>.fastq.gz</code>.
+              </p>
+              <input class="field-input" type="text" id="f-reads-path" placeholder="/data/reads/MySample"
+                autocomplete="off" />
+            </div>
+
+            <div class="field-group" id="fg-organelle">
+              <label class="field-label">
+                Organelle Type <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">
+                Type of organelle genome to assemble. Chloroplast only supports short reads.
+              </p>
+              <div class="segmented-control" role="radiogroup" aria-label="Organelle type">
+                <label class="segment" id="seg-mito">
+                  <input type="radio" name="organelle" value="mito" />
+                  <span class="segment-label">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <ellipse cx="8" cy="8" rx="5.5" ry="3.5" stroke="currentColor" stroke-width="1.5" />
+                      <path d="M2.5 8c.5 2 2.5 3.5 5.5 3.5s5-1.5 5.5-3.5" stroke="currentColor" stroke-width="1"
+                        stroke-dasharray="2 1.5" opacity=".6" />
+                    </svg>
+                    Mitochondrial <em>mito</em>
+                  </span>
+                </label>
+                <label class="segment" id="seg-chloro">
+                  <input type="radio" name="organelle" value="chloro" />
+                  <span class="segment-label">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <ellipse cx="8" cy="8" rx="3.5" ry="5.5" stroke="currentColor" stroke-width="1.5" />
+                      <line x1="8" y1="2.5" x2="8" y2="13.5" stroke="currentColor" stroke-width="1" opacity=".5" />
+                      <path d="M5 6h6M5 10h6" stroke="currentColor" stroke-width="1" opacity=".5" />
+                    </svg>
+                    Chloroplast <em>chloro</em>
+                  </span>
+                </label>
+              </div>
+              <p class="field-note hidden" id="note-chloro">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                  <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.25" />
+                  <path d="M6.5 5v4M6.5 4V3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+                </svg>
+                Chloroplast assembly only supports Short (Illumina) reads.
+              </p>
+            </div>
+
+            <div class="field-group" id="fg-seq-type">
+              <label class="field-label">
+                Sequencing Type <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Illumina short reads or PacBio/ONT long reads.</p>
+              <div class="segmented-control" role="radiogroup" aria-label="Sequencing type">
+                <label class="segment" id="seg-short">
+                  <input type="radio" name="sequencing_type" value="Short" />
+                  <span class="segment-label">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <rect x="2" y="6" width="12" height="4" rx="2" stroke="currentColor" stroke-width="1.5" />
+                      <rect x="4" y="6" width="3" height="4" fill="currentColor" opacity="0.5" rx="0" />
+                    </svg>
+                    Short reads
+                    <span class="seg-platform">Illumina</span>
+                  </span>
+                </label>
+                <label class="segment" id="seg-long">
+                  <input type="radio" name="sequencing_type" value="Long" />
+                  <span class="segment-label">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <rect x="1" y="6" width="14" height="4" rx="2" stroke="currentColor" stroke-width="1.5" />
+                      <rect x="3" y="6" width="10" height="4" fill="currentColor" opacity="0.5" rx="0" />
+                    </svg>
+                    Long reads
+                    <span class="seg-platform">PacBio / ONT</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+          </div><!-- /section-body -->
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 2: Quality Control                 -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section reveal-section" id="section-qc" aria-hidden="true">
+          <div class="section-header">
+            <div class="section-step">2</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Quality Control</h2>
+              <p class="section-desc">Adapter trimming and read filtering</p>
+            </div>
+            <span class="section-tool-badge">Fastp</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-run-trimming">
+              <label class="field-label">
+                Run Trimming <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Use Fastp for adapter trimming and quality control.</p>
+              <div class="yn-control" role="radiogroup" aria-label="Run trimming">
+                <label class="yn-pill"><input type="radio" name="run_trimming" value="Yes"><span>Yes</span></label>
+                <label class="yn-pill"><input type="radio" name="run_trimming" value="No"><span>No</span></label>
+              </div>
+            </div>
+
+            <!-- Short reads + trimming fields -->
+            <div id="group-short-trim" class="conditional-group hidden">
+
+              <div class="field-group" id="fg-adapters">
+                <label class="field-label" for="f-adapters">Adapters File</label>
+                <p class="field-hint">
+                  Path to a text file with adapter sequences. Leave blank for automatic detection by Fastp.
+                </p>
+                <input class="field-input" type="text" id="f-adapters" placeholder="/path/to/adapters.txt  (optional)"
+                  autocomplete="off" />
+              </div>
+
+              <div class="field-row">
+                <div class="field-group" id="fg-minlength">
+                  <label class="field-label" for="f-minlength">Min Read Length</label>
+                  <p class="field-hint">Reads shorter than this length will be discarded.</p>
+                  <input class="field-input" type="number" id="f-minlength" min="1" placeholder="e.g. 50" />
+                </div>
+                <div class="field-group" id="fg-minquality">
+                  <label class="field-label" for="f-minquality">Min Base Quality</label>
+                  <p class="field-hint">Minimum Phred quality score for base trimming.</p>
+                  <input class="field-input" type="number" id="f-minquality" min="1" max="40" placeholder="e.g. 20" />
+                </div>
+              </div>
+
+            </div><!-- /group-short-trim -->
+
+            <!-- Long reads (PacBio) + trimming fields -->
+            <div id="group-long-trim" class="conditional-group hidden">
+              <div class="field-group" id="fg-pacbio-adapters">
+                <label class="field-label" for="f-pacbio-adapters">PacBio Adapter Sequences</label>
+                <p class="field-hint">
+                  Cutadapt adapter arguments. Files must be <code>.fastq.gz</code>. Modify if you need custom adapters.
+                </p>
+                <textarea class="field-input field-textarea" id="f-pacbio-adapters" rows="3"
+                  spellcheck="false">-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT</textarea>
+              </div>
+            </div><!-- /group-long-trim -->
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 3: Assembly — Short reads only     -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section reveal-section" id="section-assembly" aria-hidden="true">
+          <div class="section-header">
+            <div class="section-step">3</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Assembly Configuration</h2>
+              <p class="section-desc">Seed files, NCBI search, and assembly parameters</p>
+            </div>
+            <span class="section-tool-badge">NOVOPlasty</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-reference">
+              <label class="field-label" for="f-reference">Reference Genome</label>
+              <p class="field-hint">
+                Optional. Path to a reference FASTA file to guide assembly and resolve duplicated regions (mitochondria)
+                or inverted repeats (chloroplast).
+              </p>
+              <input class="field-input" type="text" id="f-reference" placeholder="/path/to/reference.fasta  (optional)"
+                autocomplete="off" />
+            </div>
+
+            <!-- Subsection: Seed -->
+            <div class="subsection-divider">
+              <span>Seed Configuration</span>s
+            </div>
+
+            <div class="field-group" id="fg-seed-format">
+              <label class="field-label" for="f-seed-format">Seed Format</label>
+              <p class="field-hint">Format of the seed file used to initialize assembly. Leave as "None" if using NCBI
+                search.</p>
+              <select class="field-select" id="f-seed-format">
+                <option value="">— None (Search NCBI must be set to Yes) —</option>
+                <option value="fasta">FASTA</option>
+                <option value="genbank">GenBank</option>
+              </select>
+            </div>
+
+            <div id="group-seed-file" class="conditional-group hidden">
+              <div class="field-group" id="fg-seed-file">
+                <label class="field-label" for="f-seed-file">Seed File Path</label>
+                <p class="field-hint">Path to the seed file in the format selected above.</p>
+                <input class="field-input" type="text" id="f-seed-file" placeholder="/path/to/seed.fasta"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div id="group-feature" class="conditional-group hidden">
+              <div class="field-group" id="fg-feature">
+                <label class="field-label" for="f-feature">GenBank Feature</label>
+                <p class="field-hint">Feature type from the GenBank seed file to use for assembly.</p>
+                <select class="field-select" id="f-feature">
+                  <option value="">— Select feature —</option>
+                  <option value="CDS">CDS</option>
+                  <option value="rRNA">rRNA</option>
+                  <option value="tRNA">tRNA</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Subsection: NCBI -->
+            <div class="subsection-divider">
+              <span>NCBI Search</span>
+              <span class="subsection-note">Use when no seed file is available — set Seed Format to None</span>
+            </div>
+
+            <div class="field-group" id="fg-search-ncbi">
+              <label class="field-label">
+                Search NCBI <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Automatically fetch reference sequences from NCBI to use as seeds.</p>
+              <div class="yn-control" role="radiogroup" aria-label="Search NCBI">
+                <label class="yn-pill"><input type="radio" name="search_ncbi" value="Yes"><span>Yes</span></label>
+                <label class="yn-pill"><input type="radio" name="search_ncbi" value="No"><span>No</span></label>
+              </div>
+            </div>
+
+            <div id="group-ncbi-fields" class="conditional-group hidden">
+
+              <div class="field-group" id="fg-search-genes">
+                <label class="field-label" for="f-search-genes">Genes to Search</label>
+                <p class="field-hint">Comma-separated gene names to query on NCBI (e.g., <code>COI,16S,ATP6</code>).</p>
+                <input class="field-input" type="text" id="f-search-genes" placeholder="COI,16S,ATP6"
+                  autocomplete="off" />
+              </div>
+
+              <div class="field-row">
+                <div class="field-group" id="fg-search-term">
+                  <label class="field-label" for="f-search-term">Taxon Name</label>
+                  <p class="field-hint">Taxon for NCBI query (e.g., <code>Amphisbaena</code>).</p>
+                  <input class="field-input" type="text" id="f-search-term" placeholder="e.g. Amphisbaena"
+                    autocomplete="off" />
+                </div>
+                <div class="field-group" id="fg-max-refs">
+                  <label class="field-label" for="f-max-refs">Max References</label>
+                  <p class="field-hint">Max sequences to download per gene.</p>
+                  <input class="field-input" type="number" id="f-max-refs" min="1" placeholder="e.g. 5" />
+                </div>
+              </div>
+
+            </div><!-- /group-ncbi-fields -->
+
+            <!-- Subsection: Assembly Parameters -->
+            <div class="subsection-divider">
+              <span>Assembly Parameters</span>
+            </div>
+
+            <div class="field-group" id="fg-genome-range">
+              <label class="field-label" for="f-genome-range">Genome Size Range (bp)</label>
+              <p class="field-hint">Expected genome size in base pairs (e.g., <code>15000-18000</code> for mitochondria,
+                <code>130000-160000</code> for chloroplast).
+              </p>
+              <input class="field-input" type="text" id="f-genome-range" placeholder="15000-18000" autocomplete="off" />
+            </div>
+
+            <div class="field-group" id="fg-kmers">
+              <label class="field-label" for="f-kmers">K-mer Sizes</label>
+              <p class="field-hint">Comma-separated k-mer sizes for assembly (e.g., <code>19,23,28,33,39</code>).</p>
+              <input class="field-input" type="text" id="f-kmers" placeholder="19,23,28,33,39" autocomplete="off" />
+            </div>
+
+            <div class="field-row">
+              <div class="field-group" id="fg-max-memory">
+                <label class="field-label" for="f-max-memory">Max Memory (GB)</label>
+                <p class="field-hint">RAM limit for assembly.</p>
+                <input class="field-input" type="number" id="f-max-memory" min="1" placeholder="e.g. 16" />
+              </div>
+              <div class="field-group" id="fg-reads-length">
+                <label class="field-label" for="f-reads-length">Read Length (bp)</label>
+                <p class="field-hint">Sequencing read length.</p>
+                <input class="field-input" type="number" id="f-reads-length" min="1" placeholder="e.g. 150" />
+              </div>
+            </div>
+
+            <div class="field-group" id="fg-insert-size">
+              <label class="field-label" for="f-insert-size">Insert Size (bp)</label>
+              <p class="field-hint">Average insert size of the sequencing library.</p>
+              <input class="field-input" type="number" id="f-insert-size" min="1" placeholder="e.g. 300" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 4: Pipeline Steps                  -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section reveal-section" id="section-steps" aria-hidden="true">
+          <div class="section-header">
+            <div class="section-step" id="steps-step-number">4</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Pipeline Steps</h2>
+              <p class="section-desc">Configure annotation, nhmmer search, and visualization</p>
+            </div>
+          </div>
+          <div class="section-body">
+
+            <!-- annotation — Short reads + Long mito -->
+            <div id="group-annotation" class="conditional-group hidden">
+              <div class="field-group" id="fg-annotation">
+                <label class="field-label">
+                  Run Annotation <span class="field-required" title="Required">*</span>
+                </label>
+                <p class="field-hint">Run the annotation pipeline for the assembled organelle genome. Not supported for
+                  chloroplast long reads.</p>
+                <div class="yn-control" role="radiogroup" aria-label="Run annotation">
+                  <label class="yn-pill"><input type="radio" name="annotation" value="Yes"
+                      checked><span>Yes</span></label>
+                  <label class="yn-pill"><input type="radio" name="annotation" value="No"><span>No</span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fields that only appear when annotation = Yes -->
+            <div id="group-annotation-fields" class="conditional-group hidden">
+
+              <div class="field-group" id="fg-genetic-code">
+                <label class="field-label" for="f-genetic-code">Genetic Code</label>
+                <p class="field-hint">
+                  NCBI translation table number for annotation (e.g., <code>1</code> = Standard, <code>4</code> =
+                  Mold/Protozoa, <code>5</code> = Invertebrate Mitochondrial). See <a
+                    href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank" rel="noopener">NCBI
+                    genetic codes</a>.
+                </p>
+                <input class="field-input" type="number" id="f-genetic-code" min="1" max="33" placeholder="e.g. 1" />
+              </div>
+
+              <div class="field-group" id="fg-run-nhmmer">
+                <label class="field-label">
+                  Run nhmmer <span class="field-required" title="Required">*</span>
+                </label>
+                <p class="field-hint">Identify non-coding RNA and intergenic regions using nhmmer.</p>
+                <div class="yn-control" role="radiogroup" aria-label="Run nhmmer">
+                  <label class="yn-pill"><input type="radio" name="run_nhmmer" value="Yes"><span>Yes</span></label>
+                  <label class="yn-pill"><input type="radio" name="run_nhmmer" value="No"
+                      checked><span>No</span></label>
+                </div>
+              </div>
+
+              <div id="group-nhmmer-db" class="conditional-group hidden">
+                <div class="field-group" id="fg-nhmmer-db">
+                  <label class="field-label" for="f-nhmmer-db">nhmmer Database Path</label>
+                  <p class="field-hint">Path to the HMM database file for nhmmer.</p>
+                  <input class="field-input" type="text" id="f-nhmmer-db" value="resources/rfam.hmm"
+                    autocomplete="off" />
+                </div>
+              </div>
+
+              <!-- run_images — Short reads only -->
+              <div id="group-run-images" class="conditional-group hidden">
+                <div class="field-group" id="fg-run-images">
+                  <label class="field-label">
+                    Generate Images <span class="field-required" title="Required">*</span>
+                  </label>
+                  <p class="field-hint">Generate OGDraw diagrams, read depth plots.</p>
+                  <div class="yn-control" role="radiogroup" aria-label="Generate images">
+                    <label class="yn-pill"><input type="radio" name="run_images" value="Yes"><span>Yes</span></label>
+                    <label class="yn-pill"><input type="radio" name="run_images" value="No"
+                        checked><span>No</span></label>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /group-annotation-fields -->
+
+          </div>
+        </section>
+
+      </div><!-- /form-panel -->
+
+
+      <!-- ======= YAML PREVIEW PANEL ======= -->
+      <aside class="yaml-panel" id="yaml-panel" aria-label="YAML preview">
+        <div class="yaml-header">
+          <div class="yaml-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
+              <path d="M4 4.5h6M4 7h4M4 9.5h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            config.yaml
+          </div>
+          <button id="btn-copy-yaml" class="yaml-copy-btn" title="Copy to clipboard">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.25" />
+              <path d="M9.5 3.5V2.5A1 1 0 008.5 1.5H2.5a1 1 0 00-1 1V8.5a1 1 0 001 1H3.5" stroke="currentColor"
+                stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div class="yaml-body">
+          <pre class="yaml-pre" id="yaml-output" aria-live="polite"
+            aria-label="Generated YAML output"><code id="yaml-code"></code></pre>
+        </div>
+        <div class="yaml-footer" id="yaml-footer">
+          <span id="yaml-line-count">— lines</span>
+          <span id="yaml-copy-toast" class="copy-toast hidden">Copied!</span>
+        </div>
+      </aside>
+
+    </div><!-- /editor-layout -->
+  </div><!-- /page-wrapper -->
+
+  <script src="organpipe.js"></script>
+</body>
+
+</html>

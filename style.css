@@ -1,0 +1,428 @@
+/* ============================================================
+   DESIGN TOKENS — Corporate Theme
+   ============================================================ */
+:root {
+  /* Palette */
+  --navy-900:   #0d1b2e;
+  --navy-800:   #162338;
+  --navy-700:   #1e3352;
+  --navy-600:   #1a4480;
+  --navy-500:   #2155a3;
+  --blue-400:   #4a90d9;
+  --blue-300:   #6aaee8;
+  --accent:     #0050b3;
+  --accent-hover: #003d8f;
+
+  --bg-page:    #f5f6f8;
+  --bg-white:   #ffffff;
+  --bg-section: #eef0f4;
+
+  --border:     #d8dce6;
+  --border-card: #e4e7ef;
+
+  --text-primary:   #0d1b2e;
+  --text-secondary: #445069;
+  --text-muted:     #8490aa;
+  --text-on-dark:   #ffffff;
+
+  --organpipe-color: #0050b3;
+  --pipeasm-color:   #005f5f;
+  --procura-color:   #5b2a86;
+
+  --organpipe-bg: #e8f0fb;
+  --pipeasm-bg:   #e6f4f4;
+  --procura-bg:   #f0eaf8;
+
+  --shadow-sm:  0 1px 3px rgba(13, 27, 46, 0.08), 0 1px 2px rgba(13, 27, 46, 0.04);
+  --shadow-md:  0 4px 16px rgba(13, 27, 46, 0.10), 0 2px 6px rgba(13, 27, 46, 0.06);
+  --shadow-lg:  0 12px 40px rgba(13, 27, 46, 0.12), 0 4px 12px rgba(13, 27, 46, 0.08);
+
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --transition: 0.2s ease;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* ============================================================
+   TOP NAV BAR
+   ============================================================ */
+.top-bar {
+  background: var(--navy-900);
+  border-bottom: 3px solid var(--accent);
+}
+
+.top-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 64px;
+}
+
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-on-dark);
+  letter-spacing: -0.01em;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 4px;
+}
+
+.brand-module {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.02em;
+}
+
+.nav-spacer { flex: 1; }
+
+.nav-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-300);
+  background: rgba(74, 144, 217, 0.15);
+  border: 1px solid rgba(74, 144, 217, 0.3);
+  border-radius: 4px;
+  padding: 4px 10px;
+}
+
+/* ============================================================
+   PAGE LAYOUT
+   ============================================================ */
+.page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px 64px;
+}
+
+/* ============================================================
+   HERO / INTRO SECTION
+   ============================================================ */
+.hero {
+  padding: 56px 0 48px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.eyebrow-line {
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.hero-title {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 520px;
+}
+
+/* ============================================================
+   SECTION LABEL
+   ============================================================ */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.section-label-text {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.section-label-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ============================================================
+   CARDS GRID
+   ============================================================ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  list-style: none;
+}
+
+/* ============================================================
+   PIPELINE CARD
+   ============================================================ */
+.pipeline-card {
+  display: block;
+  background: var(--bg-white);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+  overflow: hidden;
+  position: relative;
+}
+
+.pipeline-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  border-color: transparent;
+}
+
+.pipeline-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Colored top stripe */
+.card-stripe {
+  height: 4px;
+  width: 100%;
+}
+
+#card-organpipe .card-stripe { background: var(--organpipe-color); }
+#card-pipeasm   .card-stripe { background: var(--pipeasm-color); }
+#card-procura   .card-stripe { background: var(--procura-color); }
+
+/* Card inner layout */
+.card-inner {
+  padding: 24px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Logo area */
+.card-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+#card-organpipe .card-logo { background: var(--organpipe-bg); }
+#card-pipeasm   .card-logo { background: var(--pipeasm-bg); }
+#card-procura   .card-logo { background: var(--procura-bg); }
+
+.card-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.logo-fallback {
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#card-organpipe .logo-fallback { color: var(--organpipe-color); }
+#card-pipeasm   .logo-fallback { color: var(--pipeasm-color); }
+#card-procura   .logo-fallback { color: var(--procura-color); }
+
+/* Card content */
+.card-content { display: flex; flex-direction: column; gap: 6px; }
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.card-description {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Tags */
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 8px;
+}
+
+/* Card footer action row */
+.card-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-top: 1px solid var(--border-card);
+  background: var(--bg-page);
+}
+
+.card-action-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+#card-organpipe:hover .card-action-label { color: var(--organpipe-color); }
+#card-pipeasm:hover   .card-action-label { color: var(--pipeasm-color); }
+#card-procura:hover   .card-action-label { color: var(--procura-color); }
+
+.card-action-label,
+.card-action-arrow {
+  transition: color var(--transition), transform var(--transition);
+}
+
+.card-action-arrow {
+  color: var(--text-muted);
+}
+
+#card-organpipe:hover .card-action-arrow { color: var(--organpipe-color); transform: translateX(3px); }
+#card-pipeasm:hover   .card-action-arrow { color: var(--pipeasm-color);   transform: translateX(3px); }
+#card-procura:hover   .card-action-arrow { color: var(--procura-color);   transform: translateX(3px); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-left {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.footer-right {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 840px) {
+  .page-wrapper { padding: 0 20px 48px; }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+
+  .top-bar-inner { padding: 0 20px; }
+  .hero { padding: 40px 0 36px; }
+}
+
+@media (max-width: 480px) {
+  .brand-module,
+  .brand-divider { display: none; }
+}
+
+/* ============================================================
+   ENTRANCE ANIMATIONS
+   ============================================================ */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow  { animation: fade-in-up 0.45s ease both 0.05s; }
+.hero-title    { animation: fade-in-up 0.45s ease both 0.12s; }
+.hero-subtitle { animation: fade-in-up 0.45s ease both 0.18s; }
+.section-label { animation: fade-in-up 0.45s ease both 0.24s; }
+
+.pipeline-card:nth-child(1) { animation: fade-in-up 0.45s ease both 0.28s; }
+.pipeline-card:nth-child(2) { animation: fade-in-up 0.45s ease both 0.36s; }
+.pipeline-card:nth-child(3) { animation: fade-in-up 0.45s ease both 0.44s; }
