@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PipeASM YAML configuration generator for genome assembly pipelines." />
+  <title>PipeASM — Pipeline Config Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="pipeasm.css" />
+</head>
+
+<body>
+
+  <!-- Top Nav -->
+  <nav class="top-bar" role="navigation" aria-label="Site header">
+    <div class="top-bar-inner">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="1" y="5" width="4" height="12" rx="2" fill="white" />
+          <rect x="7" y="2" width="4" height="15" rx="2" fill="white" opacity="0.8" />
+          <rect x="13" y="6" width="4" height="10" rx="2" fill="white" opacity="0.6" />
+          <rect x="19" y="3" width="3" height="14" rx="1.5" fill="white" opacity="0.4" />
+        </svg>
+      </div>
+      <span class="brand-name">ITVGenomics</span>
+      <div class="brand-divider" aria-hidden="true"></div>
+      <span class="brand-module">Pipeline Config Generator</span>
+      <div class="nav-spacer"></div>
+      <div class="nav-badge">YAML</div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper op-page-wrapper">
+
+    <!-- Breadcrumb -->
+    <nav class="op-breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html" class="op-breadcrumb-link">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1.5L1.5 6.5V12.5H5.5V9.5H8.5V12.5H12.5V6.5L7 1.5Z" stroke="currentColor" stroke-width="1.25"
+            stroke-linejoin="round" />
+        </svg>
+        Home
+      </a>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+      <span class="op-breadcrumb-current">PipeASM</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="op-page-header">
+      <div class="op-pipeline-logo pa-logo-bg">
+        <img src="../assets/pipeasm-logo.png" alt="PipeASM logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="op-logo-fallback" style="display:none" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M4 8h6v4H4zM11 4h6v4h-6zM18 8h6v4h-6z" fill="currentColor" opacity="0.9" />
+            <path d="M10 10h1M17 6h1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M14 12v4M14 16H22v4H6v-4h8" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="op-header-text">
+        <h1>PipeASM Configuration</h1>
+        <p>Generate a <code>config.yaml</code> file for your genome assembly pipeline</p>
+      </div>
+      <div class="op-header-actions">
+        <button id="btn-reset" class="op-btn op-btn-ghost" title="Reset all fields">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7a5 5 0 105-5H5M5 2L2.5 4.5 5 7" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Reset
+        </button>
+        <button id="btn-copy" class="op-btn op-btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" />
+          </svg>
+          Copy YAML
+        </button>
+        <button id="btn-download" class="op-btn op-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v8M4 6l3 3 3-3M1 10v1.5A1.5 1.5 0 002.5 13h9a1.5 1.5 0 001.5-1.5V10" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Download .yml
+        </button>
+      </div>
+    </div>
+
+    <!-- Editor Layout -->
+    <div class="editor-layout" id="editor-layout">
+
+      <!-- ======= FORM PANEL ======= -->
+      <div class="form-panel" id="form-panel">
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 1: Sample & Reads                  -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-sample">
+          <div class="section-header">
+            <div class="section-step pa-step">1</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Sample &amp; Reads</h2>
+              <p class="section-desc">Sample identifier and input read files</p>
+            </div>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-sample">
+              <label class="field-label" for="f-sample">
+                Sample Name <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Unique identifier for the sample, e.g., a DToL ID.</p>
+              <input class="field-input" type="text" id="f-sample" placeholder="e.g. idAphHypo1" autocomplete="off" />
+            </div>
+
+            <div class="field-group" id="fg-hifi-reads">
+              <label class="field-label" for="f-hifi-reads">
+                HiFi Reads <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Absolute path to HiFi reads merged into a single <code>.fastq.gz</code> file.</p>
+              <input class="field-input" type="text" id="f-hifi-reads" placeholder="/data/hifi/sample.fastq.gz"
+                autocomplete="off" />
+            </div>
+
+            <div class="subsection-divider"><span>Optional Read Files</span></div>
+
+            <div class="field-row">
+              <div class="field-group" id="fg-hic-r1">
+                <label class="field-label" for="f-hic-r1">Hi-C Forward Reads (R1)</label>
+                <p class="field-hint">Absolute path to Hi-C forward reads (<code>.fastq.gz</code>).</p>
+                <input class="field-input" type="text" id="f-hic-r1" placeholder="/data/hic/sample_R1.fastq.gz"
+                  autocomplete="off" />
+              </div>
+              <div class="field-group" id="fg-hic-r2">
+                <label class="field-label" for="f-hic-r2">Hi-C Reverse Reads (R2)</label>
+                <p class="field-hint">Absolute path to Hi-C reverse reads (<code>.fastq.gz</code>).</p>
+                <input class="field-input" type="text" id="f-hic-r2" placeholder="/data/hic/sample_R2.fastq.gz"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="field-group" id="fg-ont-reads">
+              <label class="field-label" for="f-ont-reads">ONT Reads</label>
+              <p class="field-hint">Absolute path to Oxford Nanopore reads in <code>.fastq.gz</code> format.</p>
+              <input class="field-input" type="text" id="f-ont-reads" placeholder="/data/ont/sample.fastq.gz"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 2: Assembly Settings               -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-assembly">
+          <div class="section-header">
+            <div class="section-step pa-step">2</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Assembly Settings</h2>
+              <p class="section-desc">Taxonomy, BUSCO lineage, and assembly mode</p>
+            </div>
+          </div>
+          <div class="section-body">
+
+            <div class="field-row">
+              <div class="field-group" id="fg-taxid">
+                <label class="field-label" for="f-taxid">
+                  NCBI Taxonomy ID <span class="field-required" title="Required">*</span>
+                </label>
+                <p class="field-hint">Use a close relative if unavailable. Critical for decontamination.</p>
+                <input class="field-input" type="number" id="f-taxid" min="1" placeholder="e.g. 9606" />
+              </div>
+              <div class="field-group" id="fg-buscodb">
+                <label class="field-label" for="f-buscodb">
+                  BUSCO Lineage <span class="field-required" title="Required">*</span>
+                </label>
+                <p class="field-hint">Closest taxonomic group. Omit <code>_odb10</code> suffix.</p>
+                <input class="field-input" type="text" id="f-buscodb" placeholder="e.g. aves" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="field-group" id="fg-sif-dir">
+              <label class="field-label" for="f-sif-dir">
+                Singularity Images Directory <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Directory for storing Singularity <code>.sif</code> image files.</p>
+              <input class="field-input" type="text" id="f-sif-dir" placeholder="/scratch/sif_files/pipeasm"
+                autocomplete="off" />
+            </div>
+
+            <div class="field-group" id="fg-solo-asm">
+              <label class="field-label">
+                Solo Assembly <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Set <code>Yes</code> for both solo and phased assemblies, or <code>No</code> for
+                phased only.</p>
+              <div class="yn-control" role="radiogroup" aria-label="Solo assembly">
+                <label class="yn-pill"><input type="radio" name="solo_asm" value="Yes"><span>Yes</span></label>
+                <label class="yn-pill"><input type="radio" name="solo_asm" value="No"
+                    checked><span>No</span></label>
+              </div>
+            </div>
+
+            <div class="field-group" id="fg-diff-species-hic">
+              <label class="field-label">
+                Different Species Hi-C <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Set <code>Yes</code> if Hi-C data is from a different species. Runs Hifiasm in solo
+                primary mode and YAHS on that assembly only.</p>
+              <div class="yn-control" role="radiogroup" aria-label="Different species Hi-C">
+                <label class="yn-pill"><input type="radio" name="diff_species_hic" value="Yes"><span>Yes</span></label>
+                <label class="yn-pill"><input type="radio" name="diff_species_hic" value="No"
+                    checked><span>No</span></label>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 3: Mitochondrial Assembly          -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-mito">
+          <div class="section-header">
+            <div class="section-step pa-step">3</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Mitochondrial Assembly</h2>
+              <p class="section-desc">MitoHiFi settings for mitochondrial genome assembly</p>
+            </div>
+            <span class="section-tool-badge pa-badge">MitoHiFi</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-run-mitohifi">
+              <label class="field-label">
+                Run MitoHiFi <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Run MitoHiFi for mitochondrial genome assembly.</p>
+              <div class="yn-control" role="radiogroup" aria-label="Run MitoHiFi">
+                <label class="yn-pill"><input type="radio" name="run_mitohifi" value="Yes"><span>Yes</span></label>
+                <label class="yn-pill"><input type="radio" name="run_mitohifi" value="No"
+                    checked><span>No</span></label>
+              </div>
+            </div>
+
+            <!-- species + genetic code only shown when run_mitohifi = Yes -->
+            <div id="group-mitohifi-fields" class="conditional-group hidden">
+
+              <div class="field-group" id="fg-species">
+                <label class="field-label" for="f-species">Species Name</label>
+                <p class="field-hint">Scientific name of the species for naming and mito annotation reference. Must be
+                  present in NCBI taxonomy database.</p>
+                <input class="field-input" type="text" id="f-species" placeholder="e.g. Homo sapiens"
+                  autocomplete="off" />
+              </div>
+
+              <div class="field-group" id="fg-geneticcode">
+                <label class="field-label" for="f-geneticcode">Mitochondrial Genetic Code</label>
+                <p class="field-hint">Genetic code for mitochondrial annotation (e.g. <code>2</code> for vertebrates).
+                  See <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank"
+                    rel="noopener">NCBI genetic codes</a>.</p>
+                <input class="field-input" type="number" id="f-geneticcode" min="1" max="33" placeholder="e.g. 2" />
+              </div>
+
+            </div><!-- /group-mitohifi-fields -->
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 4: Databases                       -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-dbs">
+          <div class="section-header">
+            <div class="section-step pa-step">4</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Databases</h2>
+              <p class="section-desc">External database paths for contamination screening</p>
+            </div>
+            <span class="section-tool-badge pa-badge">FCS-GX</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-gxdb">
+              <label class="field-label" for="f-gxdb">FCS-GX Database Path</label>
+              <p class="field-hint">Path to FCS-GX contamination database. Leave empty to skip contamination screening.
+              </p>
+              <input class="field-input" type="text" id="f-gxdb" placeholder="/path/to/gxdb  (optional)"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 5: Read QC                         -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-qc">
+          <div class="section-header">
+            <div class="section-step pa-step">5</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Read QC</h2>
+              <p class="section-desc">Adapter trimming and quality control parameters</p>
+            </div>
+            <span class="section-tool-badge pa-badge">Fastp · Cutadapt</span>
+          </div>
+          <div class="section-body">
+
+            <div class="subsection-divider"><span>Fastp</span></div>
+
+            <div class="field-group" id="fg-fastp-flags">
+              <label class="field-label" for="f-fastp-flags">Fastp Flags</label>
+              <p class="field-hint">Main fastp flags for adapter detection and trimming.</p>
+              <input class="field-input" type="text" id="f-fastp-flags"
+                placeholder="--cut_tail --detect_adapter_for_pe --dont_eval_duplication --trim_poly_g"
+                autocomplete="off" />
+            </div>
+
+            <div class="field-row">
+              <div class="field-group" id="fg-fastp-minlen">
+                <label class="field-label" for="f-fastp-minlen">Min Read Length</label>
+                <p class="field-hint">Minimum read length flag, e.g. <code>--length_required 35</code>.</p>
+                <input class="field-input" type="text" id="f-fastp-minlen" placeholder="--length_required 35"
+                  autocomplete="off" />
+              </div>
+              <div class="field-group" id="fg-fastp-quality">
+                <label class="field-label" for="f-fastp-quality">Quality Threshold</label>
+                <p class="field-hint">Mean quality trim flag, e.g. <code>--cut_mean_quality 24</code>.</p>
+                <input class="field-input" type="text" id="f-fastp-quality" placeholder="--cut_mean_quality 24"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="field-group" id="fg-fastp-crop">
+              <label class="field-label" for="f-fastp-crop">5′ Crop</label>
+              <p class="field-hint">Trim bases from start of read 1, e.g. <code>--trim_front1 5</code>.</p>
+              <input class="field-input" type="text" id="f-fastp-crop" placeholder="--trim_front1 5"
+                autocomplete="off" />
+            </div>
+
+            <div class="subsection-divider"><span>Cutadapt</span></div>
+
+            <div class="field-group" id="fg-cutadapt-adaptors">
+              <label class="field-label" for="f-cutadapt-adaptors">Adapter Sequences</label>
+              <p class="field-hint">Adapter sequences to remove. Customize if needed.</p>
+              <textarea class="field-input field-textarea" id="f-cutadapt-adaptors" rows="3"
+                spellcheck="false">-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT</textarea>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group" id="fg-cutadapt-filtering">
+                <label class="field-label" for="f-cutadapt-filtering">Filtering</label>
+                <p class="field-hint">Discard reads without adapter and require overlap, e.g.
+                  <code>--discard -O 35</code>.</p>
+                <input class="field-input" type="text" id="f-cutadapt-filtering" placeholder="--discard -O 35"
+                  autocomplete="off" />
+              </div>
+              <div class="field-group" id="fg-cutadapt-adap-find">
+                <label class="field-label" for="f-cutadapt-adap-find">Adapter Finding</label>
+                <p class="field-hint">RC search &amp; error rate, e.g. <code>--rc -e 0.1</code>.</p>
+                <input class="field-input" type="text" id="f-cutadapt-adap-find" placeholder="--rc -e 0.1"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 6: Read Quality Plots              -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-nanoplot">
+          <div class="section-header">
+            <div class="section-step pa-step">6</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Read Quality Plots</h2>
+              <p class="section-desc">NanoPlot output format and plot types</p>
+            </div>
+            <span class="section-tool-badge pa-badge">NanoPlot</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-nanoplot-args">
+              <label class="field-label" for="f-nanoplot-args">NanoPlot Arguments</label>
+              <p class="field-hint">Output format and statistical tables, e.g. <code>--tsv_stats --format svg</code>.
+              </p>
+              <input class="field-input" type="text" id="f-nanoplot-args" placeholder="--tsv_stats --format svg"
+                autocomplete="off" />
+            </div>
+
+            <div class="field-group" id="fg-nanoplot-plots">
+              <label class="field-label" for="f-nanoplot-plots">Plot Types</label>
+              <p class="field-hint">Types of plots to generate, e.g. <code>--plots kde hex dot</code>.</p>
+              <input class="field-input" type="text" id="f-nanoplot-plots" placeholder="--plots kde hex dot"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 7: K-mer Analysis                  -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-kmer">
+          <div class="section-header">
+            <div class="section-step pa-step">7</div>
+            <div class="section-header-text">
+              <h2 class="section-title">K-mer Analysis</h2>
+              <p class="section-desc">K-mer counting, genome scope, and ploidy estimation</p>
+            </div>
+            <span class="section-tool-badge pa-badge">FastK · GeneScopeFK · SmudgePlot</span>
+          </div>
+          <div class="section-body">
+
+            <div class="subsection-divider"><span>FastK</span></div>
+
+            <div class="field-row">
+              <div class="field-group" id="fg-fastk-default">
+                <label class="field-label" for="f-fastk-default">FastK Default Flags</label>
+                <p class="field-hint">General options, e.g. <code>-v -M32 -t1</code>.</p>
+                <input class="field-input" type="text" id="f-fastk-default" placeholder="-v -M32 -t1"
+                  autocomplete="off" />
+              </div>
+              <div class="field-group" id="fg-fastk-kmer">
+                <label class="field-label" for="f-fastk-kmer">K-mer Size</label>
+                <p class="field-hint">K-mer size flag, e.g. <code>-k31</code>.</p>
+                <input class="field-input" type="text" id="f-fastk-kmer" placeholder="-k31" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="subsection-divider"><span>GeneScopeFK</span></div>
+
+            <div class="field-row">
+              <div class="field-group" id="fg-genescopefk-kmer">
+                <label class="field-label" for="f-genescopefk-kmer">K-mer Size</label>
+                <p class="field-hint">Should match FastK, e.g. <code>-k 31</code>.</p>
+                <input class="field-input" type="text" id="f-genescopefk-kmer" placeholder="-k 31"
+                  autocomplete="off" />
+              </div>
+              <div class="field-group" id="fg-genescopefk-ploidy">
+                <label class="field-label" for="f-genescopefk-ploidy">Ploidy</label>
+                <p class="field-hint">Ploidy level, e.g. <code>-p 2</code> for diploids.</p>
+                <input class="field-input" type="text" id="f-genescopefk-ploidy" placeholder="-p 2"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="subsection-divider"><span>SmudgePlot</span></div>
+
+            <div class="field-group" id="fg-smudgeplot-minsize">
+              <label class="field-label" for="f-smudgeplot-minsize">Min K-mer Pair Size</label>
+              <p class="field-hint">Minimum size of k-mer pairs to consider, e.g. <code>-L 12</code>.</p>
+              <input class="field-input" type="text" id="f-smudgeplot-minsize" placeholder="-L 12"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 8: Assembly Tools                  -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-asm-tools">
+          <div class="section-header">
+            <div class="section-step pa-step">8</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Assembly Tools</h2>
+              <p class="section-desc">Hifiasm, gfastats, and Bellerophon parameters</p>
+            </div>
+            <span class="section-tool-badge pa-badge">Hifiasm · gfastats · Bellerophon</span>
+          </div>
+          <div class="section-body">
+
+            <div class="subsection-divider"><span>Hifiasm</span></div>
+
+            <div class="field-row">
+              <div class="field-group" id="fg-hifiasm-purge">
+                <label class="field-label" for="f-hifiasm-purge">Purge Level</label>
+                <p class="field-hint">Controls haplotig purging, e.g. <code>-l 1 -O 1</code>.</p>
+                <input class="field-input" type="text" id="f-hifiasm-purge" placeholder="-l 1 -O 1"
+                  autocomplete="off" />
+              </div>
+              <div class="field-group" id="fg-hifiasm-similarity">
+                <label class="field-label" for="f-hifiasm-similarity">Similarity</label>
+                <p class="field-hint">Contig comparison stringency, e.g. <code>-s 0.75</code>.</p>
+                <input class="field-input" type="text" id="f-hifiasm-similarity" placeholder="-s 0.75"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="subsection-divider"><span>gfastats</span></div>
+
+            <div class="field-group" id="fg-gfastats-params">
+              <label class="field-label" for="f-gfastats-params">gfastats Parameters</label>
+              <p class="field-hint">Output format and stats options, e.g. <code>-o fa --discover-paths</code>.</p>
+              <input class="field-input" type="text" id="f-gfastats-params" placeholder="-o fa --discover-paths"
+                autocomplete="off" />
+            </div>
+
+            <div class="subsection-divider"><span>Bellerophon</span></div>
+
+            <div class="field-group" id="fg-bellerophon">
+              <label class="field-label" for="f-bellerophon">Bellerophon Flags</label>
+              <p class="field-hint">Filter mapped reads spanning junctions, e.g. <code>--quality 10</code>.</p>
+              <input class="field-input" type="text" id="f-bellerophon" placeholder="--quality 10"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 9: Scaffolding & Visualization     -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-scaffold">
+          <div class="section-header">
+            <div class="section-step pa-step">9</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Scaffolding &amp; Visualization</h2>
+              <p class="section-desc">Hi-C scaffolding and contact map generation</p>
+            </div>
+            <span class="section-tool-badge pa-badge">YAHS · Pretext</span>
+          </div>
+          <div class="section-body">
+
+            <div class="subsection-divider"><span>Pretext</span></div>
+
+            <div class="field-group" id="fg-pretext-map">
+              <label class="field-label" for="f-pretext-map">PretextMap Flags</label>
+              <p class="field-hint">Minimum mapping quality for PretextMap, e.g. <code>--mapq 10</code>.</p>
+              <input class="field-input" type="text" id="f-pretext-map" placeholder="--mapq 10" autocomplete="off" />
+            </div>
+
+            <div class="field-group" id="fg-pretext-snapshot">
+              <label class="field-label" for="f-pretext-snapshot">PretextSnapshot Flags</label>
+              <p class="field-hint">Snapshot rendering settings for Hi-C contact maps.</p>
+              <input class="field-input" type="text" id="f-pretext-snapshot"
+                placeholder="--sequences '=full' -c 'Mellow Rainbow' --gridSize 1 --gridColour black --jpegQuality 100 -r 4000"
+                autocomplete="off" />
+            </div>
+
+            <div class="subsection-divider"><span>YAHS</span></div>
+
+            <div class="field-group" id="fg-yahs">
+              <label class="field-label" for="f-yahs">YAHS Flags</label>
+              <p class="field-hint">Enzyme cut sites and scaffolding options, e.g.
+                <code>-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1</code>.</p>
+              <input class="field-input" type="text" id="f-yahs"
+                placeholder="-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1" autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+      </div><!-- /form-panel -->
+
+
+      <!-- ======= YAML PREVIEW PANEL ======= -->
+      <aside class="yaml-panel" id="yaml-panel" aria-label="YAML preview">
+        <div class="yaml-header">
+          <div class="yaml-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
+              <path d="M4 4.5h6M4 7h4M4 9.5h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            config.yaml
+          </div>
+          <button id="btn-copy-yaml" class="yaml-copy-btn" title="Copy to clipboard">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.25" />
+              <path d="M9.5 3.5V2.5A1 1 0 008.5 1.5H2.5a1 1 0 00-1 1V8.5a1 1 0 001 1H3.5" stroke="currentColor"
+                stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div class="yaml-body">
+          <pre class="yaml-pre" id="yaml-output" aria-live="polite"
+            aria-label="Generated YAML output"><code id="yaml-code"></code></pre>
+        </div>
+        <div class="yaml-footer" id="yaml-footer">
+          <span id="yaml-line-count">— lines</span>
+          <span id="yaml-copy-toast" class="copy-toast hidden">Copied!</span>
+        </div>
+      </aside>
+
+    </div><!-- /editor-layout -->
+  </div><!-- /page-wrapper -->
+
+  <script src="pipeasm.js"></script>
+</body>
+
+</html>
