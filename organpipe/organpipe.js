@@ -43,8 +43,9 @@ const state = {
   run_images: 'No',
 
   // Output format
-  format: 'yaml',   // 'yaml' | 'csv'
-  csvRows: [],      // accumulated CSV rows (snapshots of state)
+  format: 'yaml',      // 'yaml' | 'csv'
+  csvRows: [],         // manually added CSV rows (state snapshots)
+  importedRows: [],    // raw rows from an uploaded CSV file
 };
 
 // ----------------------------------------------------------------
@@ -193,6 +194,35 @@ function bindEvents() {
   // ---- CSV row management ----
   $('btn-add-row').addEventListener('click', addCSVRow);
   $('btn-clear-rows').addEventListener('click', clearCSVRows);
+
+  // ---- CSV import ----
+  const fileInput = $('f-csv-import');
+  const dropZone  = $('csv-drop-zone');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) handleImport(e.target.files[0]);
+    });
+  }
+
+  if (dropZone) {
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('drag-over');
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) handleImport(file);
+    });
+  }
+
+  const $clearImport = $('btn-clear-import');
+  if ($clearImport) $clearImport.addEventListener('click', clearImport);
 }
 
 // ----------------------------------------------------------------
@@ -294,9 +324,11 @@ function updateConditionals() {
 function updateFormatUI() {
   const isCSV = state.format === 'csv';
 
-  // Show/hide CSV controls
-  const $csvCtrl = $('csv-controls');
-  if ($csvCtrl) $csvCtrl.classList.toggle('hidden', !isCSV);
+  // Show/hide CSV controls + import bar
+  const $csvCtrl   = $('csv-controls');
+  const $importBar = $('csv-import-bar');
+  if ($csvCtrl)   $csvCtrl.classList.toggle('hidden', !isCSV);
+  if ($importBar) $importBar.classList.toggle('hidden', !isCSV);
 
   // Update filenames and button labels
   const $filename  = $('yaml-filename');
@@ -469,17 +501,36 @@ function stateToCSVRow(s) {
   return CSV_COLUMNS.map(([, fn]) => csvVal(fn(s))).join(',');
 }
 
+// ----------------------------------------------------------------
+// CSV — MERGE IMPORTED ROW WITH FORM DEFAULTS
+// ----------------------------------------------------------------
+function mergeWithDefaults(importedRow) {
+  // Start with current state fields as defaults
+  const merged = {};
+  Object.keys(state).forEach((k) => {
+    if (k !== 'format' && k !== 'csvRows' && k !== 'importedRows') merged[k] = state[k];
+  });
+  // Override with non-empty values from the uploaded CSV row
+  Object.keys(importedRow).forEach((col) => {
+    const val = importedRow[col];
+    if (val !== undefined && val !== '') merged[col] = val;
+  });
+  return merged;
+}
+
 function buildCSVPreview() {
-  const header = CSV_COLUMNS.map(([col]) => col).join(',');
-  const savedRows = state.csvRows.map(stateToCSVRow);
-  const pendingRow = stateToCSVRow(state);
-  return [header, ...savedRows, pendingRow].join('\n');
+  const header      = CSV_COLUMNS.map(([col]) => col).join(',');
+  const importedRows = state.importedRows.map((r) => stateToCSVRow(mergeWithDefaults(r)));
+  const savedRows   = state.csvRows.map(stateToCSVRow);
+  const pendingRow  = stateToCSVRow(state);
+  return [header, ...importedRows, ...savedRows, pendingRow].join('\n');
 }
 
 function generateCSV() {
-  const header = CSV_COLUMNS.map(([col]) => col).join(',');
-  const rows = state.csvRows.map(stateToCSVRow);
-  // Include current state as a final row only if sample is set
+  const header       = CSV_COLUMNS.map(([col]) => col).join(',');
+  const importedRows = state.importedRows.map((r) => stateToCSVRow(mergeWithDefaults(r)));
+  const savedRows    = state.csvRows.map(stateToCSVRow);
+  const rows         = [...importedRows, ...savedRows];
   if (state.sample) rows.push(stateToCSVRow(state));
   return [header, ...rows].join('\n');
 }
@@ -488,14 +539,17 @@ function generateCSV() {
 // CSV HIGHLIGHTING
 // ----------------------------------------------------------------
 function highlightCSV(text) {
-  const lines = text.split('\n');
-  const savedCount = state.csvRows.length;
+  const lines         = text.split('\n');
+  const importedCount = state.importedRows.length;
+  const savedCount    = state.csvRows.length;
   return lines.map((line, i) => {
     if (i === 0) {
-      // Header row
       return `<span class="csv-header">${esc(line)}</span>`;
-    } else if (i <= savedCount) {
-      // Saved rows — normal colour
+    } else if (i <= importedCount) {
+      // Rows from the uploaded file — amber tint
+      return `<span class="csv-imported">${esc(line)}</span>`;
+    } else if (i <= importedCount + savedCount) {
+      // Manually added rows — normal colour
       return esc(line);
     } else {
       // Pending (current form) row — muted
@@ -536,8 +590,82 @@ function clearCSVRows() {
 function updateCSVCounter() {
   const el = $('csv-row-count');
   if (!el) return;
-  const n = state.csvRows.length;
+  const n = state.importedRows.length + state.csvRows.length;
   el.textContent = n === 1 ? '1 row' : `${n} rows`;
+}
+
+// ----------------------------------------------------------------
+// CSV IMPORT (file upload + drag & drop)
+// ----------------------------------------------------------------
+function parseCsvLine(line) {
+  // Handles quoted values (e.g. "19,23,33")
+  const result = [];
+  let current = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function parseCsvImport(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = parseCsvLine(lines[0]).map((h) => h.trim());
+  return lines.slice(1).filter(Boolean).map((line) => {
+    const values = parseCsvLine(line);
+    const row = {};
+    headers.forEach((h, i) => { row[h] = (values[i] ?? '').trim(); });
+    return row;
+  });
+}
+
+function handleImport(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const rows = parseCsvImport(e.target.result);
+    state.importedRows = rows;
+
+    // Switch UI: hide drop zone, show status
+    const $dz = $('csv-drop-zone');
+    const $ok = $('csv-import-ok');
+    if ($dz) $dz.classList.add('hidden');
+    if ($ok) $ok.classList.remove('hidden');
+
+    const $label    = $('csv-import-label');
+    const $filename = $('csv-import-filename');
+    if ($label)    $label.textContent    = `${rows.length} row${rows.length !== 1 ? 's' : ''} imported`;
+    if ($filename) $filename.textContent = file.name;
+
+    updateCSVCounter();
+    updateYAML();
+  };
+  reader.readAsText(file);
+}
+
+function clearImport() {
+  state.importedRows = [];
+
+  // Switch UI: show drop zone, hide status
+  const $dz = $('csv-drop-zone');
+  const $ok = $('csv-import-ok');
+  if ($dz) $dz.classList.remove('hidden');
+  if ($ok) $ok.classList.add('hidden');
+
+  // Clear the file input so the same file can be re-selected
+  const $fi = $('f-csv-import');
+  if ($fi) $fi.value = '';
+
+  updateCSVCounter();
+  updateYAML();
 }
 
 // ----------------------------------------------------------------
@@ -594,15 +722,16 @@ function downloadOutput() {
 function resetForm() {
   if (!confirm('Reset all fields to their defaults?')) return;
 
-  // Reset state (preserve format choice, clear csvRows)
+  // Reset state
   Object.keys(state).forEach((k) => { state[k] = ''; });
   state.pacbio_adapters = '-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT';
-  state.annotation = 'Yes';
-  state.run_nhmmer = 'No';
-  state.nhmmer_db = 'resources/rfam.hmm';
-  state.run_images = 'No';
-  state.format = 'yaml';
-  state.csvRows = [];
+  state.annotation  = 'Yes';
+  state.run_nhmmer  = 'No';
+  state.nhmmer_db   = 'resources/rfam.hmm';
+  state.run_images  = 'No';
+  state.format      = 'yaml';
+  state.csvRows     = [];
+  state.importedRows = [];
 
   // Reset all inputs
   document.querySelectorAll('.field-input, .field-select').forEach((el) => {
@@ -619,8 +748,9 @@ function resetForm() {
   setRadio('run_images', 'No');
   setRadio('output_format', 'yaml');
 
-  // Reset CSV counter
+  // Reset CSV counter and import UI
   updateCSVCounter();
+  clearImport();
 
   // Hide revealed sections
   ['section-qc', 'section-assembly', 'section-steps'].forEach(hideSection);

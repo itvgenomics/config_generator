@@ -145,9 +145,41 @@
           </div>
         </div>
 
+        <!-- CSV Import Bar (visible only in CSV mode) -->
+        <div class="csv-import-bar conditional-group hidden" id="csv-import-bar">
+          <!-- Drop zone: shown until a file is loaded -->
+          <div class="csv-drop-zone" id="csv-drop-zone">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.25" />
+              <path d="M7 7h6M7 10h4M7 13h3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            <div class="csv-drop-content">
+              <span class="csv-drop-text">Drop a samples CSV here, or</span>
+              <label for="f-csv-import" class="csv-browse-link">browse file</label>
+              <input type="file" id="f-csv-import" accept=".csv,.txt" class="csv-file-input" />
+            </div>
+            <p class="csv-drop-hint">Minimum columns: <code>sample</code>, <code>reads_path</code>. Optional
+              overrides: <code>seed_file</code>, <code>reference</code>, <code>genome_range</code>, etc. All other
+              values are taken from the form below.</p>
+          </div>
+          <!-- Status bar: shown after a file is loaded -->
+          <div class="csv-import-ok hidden" id="csv-import-ok">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+              <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" stroke-width="1.25" />
+              <path d="M4.5 7.5l2 2 4-4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+            <span id="csv-import-label">0 rows imported</span>
+            <span class="csv-import-sep">·</span>
+            <span class="csv-import-filename" id="csv-import-filename"></span>
+            <button id="btn-clear-import" class="op-btn op-btn-ghost csv-remove-btn">Remove</button>
+          </div>
+        </div>
+
         <!-- ─────────────────────────────────────────── -->
         <!-- SECTION 1: Project Info                    -->
         <!-- ─────────────────────────────────────────── -->
+
         <section class="form-section" id="section-project">
           <div class="section-header">
             <div class="section-step">1</div>
