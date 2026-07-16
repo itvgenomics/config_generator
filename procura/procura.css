@@ -1,0 +1,635 @@
+/* =================================================================
+   ProCura Configurator — procura.css
+   Extends ../style.css — uses --procura-color / --procura-bg tokens
+   ================================================================= */
+
+/* ----------------------------------------------------------------
+   PAGE LAYOUT
+   ---------------------------------------------------------------- */
+.pc-page-wrapper {
+  max-width: 1280px;
+  padding-bottom: 80px;
+}
+
+/* ----------------------------------------------------------------
+   BREADCRUMB
+   ---------------------------------------------------------------- */
+.pc-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pc-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.pc-breadcrumb-link:hover { color: var(--procura-color); }
+.pc-breadcrumb-current { color: var(--text-primary); font-weight: 500; }
+
+/* ----------------------------------------------------------------
+   PAGE HEADER
+   ---------------------------------------------------------------- */
+.pc-page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+
+.pc-pipeline-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--border-card);
+  background: var(--procura-bg);
+}
+
+.pc-pipeline-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.pc-logo-fallback {
+  color: var(--procura-color);
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.pc-header-text { flex: 1; min-width: 0; }
+.pc-header-text h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.pc-header-text p {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+.pc-header-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--text-primary);
+}
+
+.pc-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ----------------------------------------------------------------
+   BUTTONS
+   ---------------------------------------------------------------- */
+.pc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.pc-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.pc-btn-ghost:hover { background: var(--bg-section); color: var(--text-primary); }
+
+.pc-btn-secondary {
+  background: var(--bg-white);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.pc-btn-secondary:hover { background: var(--bg-section); box-shadow: var(--shadow-md); }
+
+.pc-btn-primary {
+  background: var(--procura-color);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(91, 42, 134, 0.3);
+}
+.pc-btn-primary:hover {
+  background: #4a2070;
+  box-shadow: 0 4px 14px rgba(91, 42, 134, 0.4);
+}
+
+/* ----------------------------------------------------------------
+   EDITOR LAYOUT (two-column)
+   ---------------------------------------------------------------- */
+.pc-editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* ----------------------------------------------------------------
+   FORM PANEL
+   ---------------------------------------------------------------- */
+.pc-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* ----------------------------------------------------------------
+   MODE SELECTOR SECTION
+   ---------------------------------------------------------------- */
+.pc-mode-section {
+  background: var(--bg-white);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pc-mode-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.pc-mode-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* Each mode card */
+.pc-mode-card {
+  display: flex;
+  cursor: pointer;
+  position: relative;
+}
+
+.pc-mode-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.pc-mode-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-white);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  width: 100%;
+  position: relative;
+}
+
+.pc-mode-card-inner:hover {
+  border-color: var(--procura-color);
+  background: var(--procura-bg);
+}
+
+.pc-mode-card input:checked + .pc-mode-card-inner {
+  border-color: var(--procura-color);
+  background: var(--procura-bg);
+  box-shadow: 0 0 0 3px rgba(91, 42, 134, 0.1);
+}
+
+.pc-mode-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg-section);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.pc-mode-card:hover .pc-mode-icon,
+.pc-mode-card input:checked ~ .pc-mode-card-inner .pc-mode-icon {
+  background: rgba(91, 42, 134, 0.12);
+  color: var(--procura-color);
+}
+
+.pc-mode-card input:checked + .pc-mode-card-inner .pc-mode-icon {
+  background: rgba(91, 42, 134, 0.12);
+  color: var(--procura-color);
+}
+
+.pc-mode-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pc-mode-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.pc-mode-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.pc-mode-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--border);
+  transition: color 0.15s;
+}
+
+.pc-mode-card input:checked + .pc-mode-card-inner .pc-mode-check {
+  color: var(--procura-color);
+}
+
+.pc-mode-hint {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 4px 0;
+}
+
+.pc-mode-hint.hidden { display: none; }
+
+/* ----------------------------------------------------------------
+   FORM SECTIONS
+   ---------------------------------------------------------------- */
+.pc-form-section {
+  background: var(--bg-white);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Hidden state — off-screen with fade */
+.pc-section-hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  animation: none;
+}
+
+.pc-form-section:not(.pc-section-hidden) {
+  animation: pcSlideIn 0.3s ease forwards;
+}
+
+@keyframes pcSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Section header */
+.pc-section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-card);
+  background: var(--bg-page);
+}
+
+.pc-section-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--procura-color);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+.pc-section-header-text { flex: 1; }
+.pc-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+.pc-section-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.pc-section-badge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--procura-color);
+  background: var(--procura-bg);
+  border: 1px solid rgba(91, 42, 134, 0.2);
+  border-radius: 4px;
+  padding: 3px 8px;
+  flex-shrink: 0;
+}
+
+.pc-section-badge-tool {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Section body */
+.pc-section-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ----------------------------------------------------------------
+   FIELD COMPONENTS
+   ---------------------------------------------------------------- */
+.pc-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pc-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pc-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.005em;
+}
+
+.pc-field-req {
+  color: #c0392b;
+  margin-left: 2px;
+  font-size: 12px;
+}
+
+.pc-field-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.pc-field-hint code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  color: var(--text-secondary);
+}
+
+.pc-field-input {
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  width: 100%;
+}
+
+.pc-field-input::placeholder { color: var(--text-muted); }
+
+.pc-field-input:focus {
+  border-color: var(--procura-color);
+  box-shadow: 0 0 0 3px rgba(91, 42, 134, 0.1);
+}
+
+.pc-field-textarea {
+  resize: vertical;
+  min-height: 68px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ----------------------------------------------------------------
+   CONDITIONAL GROUP
+   ---------------------------------------------------------------- */
+.pc-conditional-group {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-height: 2000px;
+  overflow: visible;
+  transition: max-height 0.3s ease, opacity 0.25s ease;
+  opacity: 1;
+}
+
+.pc-conditional-group.hidden {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------------
+   SUBSECTION DIVIDER
+   ---------------------------------------------------------------- */
+.pc-subsection-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+.pc-subsection-divider span:first-child {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pc-subsection-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ----------------------------------------------------------------
+   YAML PREVIEW PANEL
+   ---------------------------------------------------------------- */
+.pc-yaml-panel {
+  position: sticky;
+  top: 24px;
+  background: var(--navy-900);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 48px);
+}
+
+.pc-yaml-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  flex-shrink: 0;
+}
+
+.pc-yaml-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pc-yaml-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.pc-yaml-copy-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+.pc-yaml-body { overflow-y: auto; flex: 1; }
+
+.pc-yaml-pre {
+  margin: 0;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #abb2bf;
+  white-space: pre;
+  background: transparent;
+}
+
+.pc-yaml-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  flex-shrink: 0;
+}
+
+#yaml-line-count {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pc-copy-toast {
+  font-size: 11px;
+  font-weight: 600;
+  color: #34d399;
+  transition: opacity 0.3s;
+}
+.pc-copy-toast.hidden { opacity: 0; }
+
+/* YAML placeholder text */
+.pc-yaml-placeholder {
+  color: rgba(171, 178, 191, 0.4);
+  font-style: italic;
+}
+
+/* YAML syntax highlighting */
+.y-key    { color: #e06c75; }
+.y-sep    { color: #abb2bf; }
+.y-string { color: #98c379; }
+.y-number { color: #d19a66; }
+.y-bool   { color: #56b6c2; }
+.y-comment { color: #5c6370; font-style: italic; }
+
+/* ----------------------------------------------------------------
+   UTILITY
+   ---------------------------------------------------------------- */
+.hidden { display: none !important; }
+
+/* ----------------------------------------------------------------
+   RESPONSIVE
+   ---------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .pc-editor-layout { grid-template-columns: 1fr; }
+  .pc-yaml-panel { position: static; max-height: 480px; order: -1; }
+  .pc-header-actions { display: none; }
+  .pc-mode-cards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .pc-page-header { flex-wrap: wrap; }
+  .pc-field-row { grid-template-columns: 1fr; }
+}

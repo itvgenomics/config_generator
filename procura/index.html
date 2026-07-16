@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="ProCura YAML configuration generator — Haplotype Curation, Dual Curation, and Final Genome modes." />
+  <title>ProCura — Pipeline Config Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="procura.css" />
+</head>
+
+<body>
+
+  <!-- Top Nav -->
+  <nav class="top-bar" role="navigation" aria-label="Site header">
+    <div class="top-bar-inner">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="1" y="5" width="4" height="12" rx="2" fill="white" />
+          <rect x="7" y="2" width="4" height="15" rx="2" fill="white" opacity="0.8" />
+          <rect x="13" y="6" width="4" height="10" rx="2" fill="white" opacity="0.6" />
+          <rect x="19" y="3" width="3" height="14" rx="1.5" fill="white" opacity="0.4" />
+        </svg>
+      </div>
+      <span class="brand-name">ITVGenomics</span>
+      <div class="brand-divider" aria-hidden="true"></div>
+      <span class="brand-module">Pipeline Config Generator</span>
+      <div class="nav-spacer"></div>
+      <div class="nav-badge">YAML</div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper pc-page-wrapper">
+
+    <!-- Breadcrumb -->
+    <nav class="pc-breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html" class="pc-breadcrumb-link">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1.5L1.5 6.5V12.5H5.5V9.5H8.5V12.5H12.5V6.5L7 1.5Z" stroke="currentColor" stroke-width="1.25"
+            stroke-linejoin="round" />
+        </svg>
+        Home
+      </a>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+      <span class="pc-breadcrumb-current">ProCura</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="pc-page-header">
+      <div class="pc-pipeline-logo">
+        <img src="../assets/procura-logo.jpg" alt="ProCura logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="pc-logo-fallback" style="display:none" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="9" stroke="currentColor" stroke-width="2" fill="none" />
+            <path d="M10 14l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="pc-header-text">
+        <h1>ProCura Configuration</h1>
+        <p>Generate a <code>config.yaml</code> file for your genome curation pipeline</p>
+      </div>
+      <div class="pc-header-actions">
+        <button id="btn-reset" class="pc-btn pc-btn-ghost" title="Reset all fields">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7a5 5 0 105-5H5M5 2L2.5 4.5 5 7" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Reset
+        </button>
+        <button id="btn-copy" class="pc-btn pc-btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" />
+          </svg>
+          Copy YAML
+        </button>
+        <button id="btn-download" class="pc-btn pc-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v8M4 6l3 3 3-3M1 10v1.5A1.5 1.5 0 002.5 13h9a1.5 1.5 0 001.5-1.5V10" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Download .yml
+        </button>
+      </div>
+    </div>
+
+    <!-- Editor Layout -->
+    <div class="pc-editor-layout" id="editor-layout">
+
+      <!-- ======= FORM PANEL ======= -->
+      <div class="pc-form-panel" id="form-panel">
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- MODE SELECTOR                              -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-mode-section" id="section-mode">
+          <div class="pc-mode-label">Select a pipeline mode</div>
+          <div class="pc-mode-cards" role="radiogroup" aria-label="Pipeline mode">
+
+            <label class="pc-mode-card" id="mc-hap">
+              <input type="radio" name="procura_mode" value="hapcuration" />
+              <div class="pc-mode-card-inner">
+                <div class="pc-mode-icon">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <rect x="2" y="4" width="8" height="14" rx="2" stroke="currentColor" stroke-width="1.5" />
+                    <rect x="12" y="4" width="8" height="14" rx="2" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M10 11h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="pc-mode-card-body">
+                  <span class="pc-mode-title">Haplotype Curation</span>
+                  <span class="pc-mode-desc">Hi-C contact maps for hap1 &amp; hap2</span>
+                </div>
+                <div class="pc-mode-check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7l2 2 3-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+            <label class="pc-mode-card" id="mc-dual">
+              <input type="radio" name="procura_mode" value="dualcuration" />
+              <div class="pc-mode-card-inner">
+                <div class="pc-mode-icon">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <rect x="2" y="4" width="8" height="14" rx="2" stroke="currentColor" stroke-width="1.5" />
+                    <rect x="12" y="4" width="8" height="14" rx="2" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M10 11h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M5 8.5h2M5 11.5h2M5 14.5h2M15 8.5h2M15 11.5h2M15 14.5h2" stroke="currentColor"
+                      stroke-width="1" stroke-linecap="round" opacity="0.5" />
+                  </svg>
+                </div>
+                <div class="pc-mode-card-body">
+                  <span class="pc-mode-title">Dual Curation</span>
+                  <span class="pc-mode-desc">Scaffolded contact maps with AGP files</span>
+                </div>
+                <div class="pc-mode-check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7l2 2 3-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+            <label class="pc-mode-card" id="mc-final">
+              <input type="radio" name="procura_mode" value="finalgenome" />
+              <div class="pc-mode-card-inner">
+                <div class="pc-mode-icon">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M7.5 11l2.5 2.5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <div class="pc-mode-card-body">
+                  <span class="pc-mode-title">Final Genome</span>
+                  <span class="pc-mode-desc">Full QC &amp; validation for diploid assembly</span>
+                </div>
+                <div class="pc-mode-check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7l2 2 3-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+          </div>
+          <!-- Mode hint (hidden after selection) -->
+          <p class="pc-mode-hint" id="mode-hint">Select a mode above to configure the pipeline</p>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 1: Sample & Reads                  -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-reads" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">1</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Sample &amp; Reads</h2>
+              <p class="pc-section-desc">Sample name and Hi-C / HiFi input reads</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-sample">
+              <label class="pc-field-label" for="f-sample">
+                Sample Name <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Unique identifier used for naming outputs.</p>
+              <input class="pc-field-input" type="text" id="f-sample" placeholder="e.g. idAphHypo1"
+                autocomplete="off" />
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-r1">
+                <label class="pc-field-label" for="f-r1">
+                  Hi-C Read R1 <span class="pc-field-req" title="Required">*</span>
+                </label>
+                <p class="pc-field-hint">Forward read (<code>.fastq.gz</code>, QC-passed).</p>
+                <input class="pc-field-input" type="text" id="f-r1" placeholder="/data/hic/sample_R1.fastq.gz"
+                  autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-r2">
+                <label class="pc-field-label" for="f-r2">
+                  Hi-C Read R2 <span class="pc-field-req" title="Required">*</span>
+                </label>
+                <p class="pc-field-hint">Reverse read (<code>.fastq.gz</code>, QC-passed).</p>
+                <input class="pc-field-input" type="text" id="f-r2" placeholder="/data/hic/sample_R2.fastq.gz"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="pc-field-group" id="fg-hifi">
+              <label class="pc-field-label" for="f-hifi">HiFi Reads</label>
+              <p class="pc-field-hint">HiFi reads if available (<code>.fastq.gz</code>). Leave empty to skip.</p>
+              <input class="pc-field-input" type="text" id="f-hifi" placeholder="/data/hifi/sample.fastq.gz"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 2: Assembly Files                  -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-assembly" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">2</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Assembly Files</h2>
+              <p class="pc-section-desc">Input FASTA assemblies and AGP scaffold files</p>
+            </div>
+            <span class="pc-section-badge" id="assembly-badge">—</span>
+          </div>
+          <div class="pc-section-body">
+
+            <!-- Hap1 + Hap2 paths (hapcuration & dualcuration) -->
+            <div id="group-hap-paths" class="pc-conditional-group hidden">
+              <div class="pc-field-row">
+                <div class="pc-field-group" id="fg-hap1">
+                  <label class="pc-field-label" for="f-hap1">
+                    Haplotype 1 FASTA <span class="pc-field-req" title="Required">*</span>
+                  </label>
+                  <p class="pc-field-hint">Path to hap1 FASTA. Must be uncompressed.</p>
+                  <input class="pc-field-input" type="text" id="f-hap1" placeholder="/data/hap1.fasta"
+                    autocomplete="off" />
+                </div>
+                <div class="pc-field-group" id="fg-hap2">
+                  <label class="pc-field-label" for="f-hap2">
+                    Haplotype 2 FASTA <span class="pc-field-req" title="Required">*</span>
+                  </label>
+                  <p class="pc-field-hint">Path to hap2 FASTA. Must be uncompressed.</p>
+                  <input class="pc-field-input" type="text" id="f-hap2" placeholder="/data/hap2.fasta"
+                    autocomplete="off" />
+                </div>
+              </div>
+            </div>
+
+            <!-- AGP files (dualcuration only) -->
+            <div id="group-agp-hap" class="pc-conditional-group hidden">
+              <div class="pc-subsection-divider"><span>AGP Scaffold Files</span></div>
+              <div class="pc-field-row">
+                <div class="pc-field-group" id="fg-agp-hap1">
+                  <label class="pc-field-label" for="f-agp-hap1">AGP — Hap1</label>
+                  <p class="pc-field-hint">AGP file for haplotype 1 scaffolding.</p>
+                  <input class="pc-field-input" type="text" id="f-agp-hap1" placeholder="/data/hap1.agp"
+                    autocomplete="off" />
+                </div>
+                <div class="pc-field-group" id="fg-agp-hap2">
+                  <label class="pc-field-label" for="f-agp-hap2">AGP — Hap2</label>
+                  <p class="pc-field-hint">AGP file for haplotype 2 scaffolding.</p>
+                  <input class="pc-field-input" type="text" id="f-agp-hap2" placeholder="/data/hap2.agp"
+                    autocomplete="off" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Diploid path + AGP (finalgenome only) -->
+            <div id="group-diploid" class="pc-conditional-group hidden">
+              <div class="pc-field-group" id="fg-diploid">
+                <label class="pc-field-label" for="f-diploid">
+                  Diploid FASTA <span class="pc-field-req" title="Required">*</span>
+                </label>
+                <p class="pc-field-hint">Path to the diploid assembly FASTA. Must be uncompressed.</p>
+                <input class="pc-field-input" type="text" id="f-diploid" placeholder="/data/diploid.fasta"
+                  autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-agp-diploid">
+                <label class="pc-field-label" for="f-agp-diploid">AGP — Diploid</label>
+                <p class="pc-field-hint">AGP scaffold file for the diploid assembly.</p>
+                <input class="pc-field-input" type="text" id="f-agp-diploid" placeholder="/data/diploid.agp"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 3: References & Extras             -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-refs" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">3</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">References &amp; Extras</h2>
+              <p class="pc-section-desc">Annotation references and quality databases</p>
+            </div>
+            <span class="pc-section-badge" id="refs-badge">—</span>
+          </div>
+          <div class="pc-section-body">
+
+            <!-- BUSCO database (finalgenome only) -->
+            <div id="group-buscodb" class="pc-conditional-group hidden">
+              <div class="pc-field-group" id="fg-buscodb">
+                <label class="pc-field-label" for="f-buscodb">
+                  BUSCO Database <span class="pc-field-req" title="Required">*</span>
+                </label>
+                <p class="pc-field-hint">Compleasm lineage name, e.g. <code>eukaryota</code>. Required for Final Genome
+                  mode.</p>
+                <input class="pc-field-input" type="text" id="f-buscodb" placeholder="e.g. eukaryota"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <!-- NCBI RefSeq (hapcuration & finalgenome) -->
+            <div id="group-ncbi-refseq" class="pc-conditional-group hidden">
+              <div class="pc-field-group" id="fg-ncbi-refseq">
+                <label class="pc-field-label" for="f-ncbi-refseq">NCBI RefSeq Assembly</label>
+                <p class="pc-field-hint">
+                  Accession(s) starting with <code>GCF_</code> to extract annotations. Enter <strong>one per
+                    line</strong> for multiple assemblies. Leave empty to skip.
+                </p>
+                <textarea class="pc-field-input pc-field-textarea" id="f-ncbi-refseq" rows="2"
+                  placeholder="GCF_016699485.2&#10;GCF_016699489.2" spellcheck="false"></textarea>
+              </div>
+            </div>
+
+            <!-- OrthoFinder taxon (hapcuration only) -->
+            <div id="group-ortholog" class="pc-conditional-group hidden">
+              <div class="pc-field-group" id="fg-ortholog">
+                <label class="pc-field-label" for="f-ortholog">OrthoFinder Taxon</label>
+                <p class="pc-field-hint">Ortholog taxon name for OrthoFinder, e.g. <code>Hyloidea</code>. Optional —
+                  leave empty to skip.</p>
+                <input class="pc-field-input" type="text" id="f-ortholog" placeholder="e.g. Hyloidea"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 4: Tool Parameters                 -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-tools" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step" id="tools-step-num">4</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Tool Parameters</h2>
+              <p class="pc-section-desc">PretextMap, BWA-MEM2, Pairtools, and FastK flags</p>
+            </div>
+            <span class="pc-section-badge-tool">PretextMap · BWA-MEM2 · Pairtools</span>
+          </div>
+          <div class="pc-section-body">
+
+            <!-- FastK — only for finalgenome -->
+            <div id="group-fastk" class="pc-conditional-group hidden">
+              <div class="pc-subsection-divider"><span>FastK</span></div>
+              <div class="pc-field-row">
+                <div class="pc-field-group" id="fg-fastk-default">
+                  <label class="pc-field-label" for="f-fastk-default">FastK Default Flags</label>
+                  <p class="pc-field-hint">General options, e.g. <code>-v -M32 -t1</code>.</p>
+                  <input class="pc-field-input" type="text" id="f-fastk-default" placeholder="-v -M32 -t1"
+                    autocomplete="off" />
+                </div>
+                <div class="pc-field-group" id="fg-fastk-kmer">
+                  <label class="pc-field-label" for="f-fastk-kmer">K-mer Size</label>
+                  <p class="pc-field-hint">Integer k-mer size, e.g. <code>31</code>.</p>
+                  <input class="pc-field-input" type="number" id="f-fastk-kmer" min="1" placeholder="31" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pc-subsection-divider"><span>PretextMap</span></div>
+
+            <div class="pc-field-group" id="fg-pretexmap">
+              <label class="pc-field-label" for="f-pretexmap">PretextMap Default Flags</label>
+              <p class="pc-field-hint">Sorting and mapping options. Mode default applied automatically.</p>
+              <input class="pc-field-input" type="text" id="f-pretexmap" placeholder="--sortby nosort"
+                autocomplete="off" />
+            </div>
+
+            <div class="pc-subsection-divider"><span>BWA-MEM2</span></div>
+
+            <div class="pc-field-group" id="fg-bwa-mem2">
+              <label class="pc-field-label" for="f-bwa-mem2">BWA-MEM2 mem Flags</label>
+              <p class="pc-field-hint">Alignment flags, e.g. <code>-SP -T0</code>.</p>
+              <input class="pc-field-input" type="text" id="f-bwa-mem2" placeholder="-SP -T0" autocomplete="off" />
+            </div>
+
+            <div class="pc-subsection-divider"><span>Pairtools</span></div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-pairtools-mapq">
+                <label class="pc-field-label" for="f-pairtools-mapq">Min MAPQ</label>
+                <p class="pc-field-hint">Minimum mapping quality score.</p>
+                <input class="pc-field-input" type="number" id="f-pairtools-mapq" min="0" max="60" placeholder="5" />
+              </div>
+              <div class="pc-field-group" id="fg-pairtools">
+                <label class="pc-field-label" for="f-pairtools">Pairtools Default Flags</label>
+                <p class="pc-field-hint">Walk policy and gap settings.</p>
+                <input class="pc-field-input" type="text" id="f-pairtools"
+                  placeholder="--walks-policy 5unique --max-inter-align-gap 30" autocomplete="off" />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div><!-- /form-panel -->
+
+
+      <!-- ======= YAML PREVIEW PANEL ======= -->
+      <aside class="pc-yaml-panel" id="yaml-panel" aria-label="YAML preview">
+        <div class="pc-yaml-header">
+          <div class="pc-yaml-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
+              <path d="M4 4.5h6M4 7h4M4 9.5h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            config.yaml
+          </div>
+          <button id="btn-copy-yaml" class="pc-yaml-copy-btn" title="Copy to clipboard">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.25" />
+              <path d="M9.5 3.5V2.5A1 1 0 008.5 1.5H2.5a1 1 0 00-1 1V8.5a1 1 0 001 1H3.5" stroke="currentColor"
+                stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div class="pc-yaml-body">
+          <pre class="pc-yaml-pre" id="yaml-output" aria-live="polite"
+            aria-label="Generated YAML output"><code id="yaml-code"><span class="pc-yaml-placeholder">← Select a mode to generate YAML</span></code></pre>
+        </div>
+        <div class="pc-yaml-footer">
+          <span id="yaml-line-count">— lines</span>
+          <span id="yaml-copy-toast" class="pc-copy-toast hidden">Copied!</span>
+        </div>
+      </aside>
+
+    </div><!-- /editor-layout -->
+  </div><!-- /page-wrapper -->
+
+  <script src="procura.js"></script>
+</body>
+
+</html>
