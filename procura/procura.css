@@ -310,12 +310,9 @@
   overflow: hidden;
 }
 
-/* Hidden state — off-screen with fade */
+/* Hidden state — removed from layout flow entirely */
 .pc-section-hidden {
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  animation: none;
+  display: none;
 }
 
 .pc-form-section:not(.pc-section-hidden) {
