@@ -246,8 +246,8 @@ function line(key, val) {
 }
 
 function sline(key, val) {
-  // Single-quoted string
-  return `${key}: '${val ?? ''}'\n`;
+  // Double-quoted string (safe for values containing single quotes)
+  return `${key}: "${val ?? ''}"\n`;
 }
 
 function iline(indent, key, val) {
@@ -255,22 +255,22 @@ function iline(indent, key, val) {
 }
 
 function isline(indent, key, val) {
-  return `${indent}${key}: '${val ?? ''}'\n`;
+  return `${indent}${key}: "${val ?? ''}"\n`;
 }
 
 function formatNcbiRefseq(raw, forceList = false) {
   const lines = (raw || '').split('\n').map((l) => l.trim()).filter(Boolean);
 
   if (lines.length === 0) {
-    if (forceList) return `ncbi_refseq_assembly:\n  - ''\n`;
-    return `ncbi_refseq_assembly: ''\n`;
+    if (forceList) return `ncbi_refseq_assembly:\n  - ""\n`;
+    return `ncbi_refseq_assembly: ""\n`;
   }
   if (lines.length === 1 && !forceList) {
-    return `ncbi_refseq_assembly: '${lines[0]}'\n`;
+    return `ncbi_refseq_assembly: "${lines[0]}"\n`;
   }
   // Multiple (or forceList) — emit as YAML list
   let s = `ncbi_refseq_assembly:\n`;
-  lines.forEach((acc) => { s += `  - '${acc}'\n`; });
+  lines.forEach((acc) => { s += `  - "${acc}"\n`; });
   return s;
 }
 

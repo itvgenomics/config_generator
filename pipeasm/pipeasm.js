@@ -211,7 +211,8 @@ function generateYAML() {
   const line  = (key, val) => `${key}: ${val ?? ''}\n`;
   const qline = (key, val) => `${key}: "${val ?? ''}"\n`;
   const iline = (indent, key, val) => `${indent}${key}: ${val ?? ''}\n`;
-  const iqline = (indent, key, val) => `${indent}${key}: '${val ?? ''}'\n`;
+  const iqline = (indent, key, val) => `${indent}${key}: "${val ?? ''}"\n`;
+
 
   let y = '';
 
