@@ -43,9 +43,10 @@ const state = {
   run_images: 'No',
 
   // Output format
-  format: 'yaml',      // 'yaml' | 'csv'
-  csvRows: [],         // manually added CSV rows (state snapshots)
-  importedRows: [],    // raw rows from an uploaded CSV file
+  format: 'yaml',        // 'yaml' | 'csv'
+  csvRows: [],           // manually added CSV rows (state snapshots)
+  importedRows: [],      // rows applied to the output (after Generate is clicked)
+  _rawImportRows: [],    // raw rows from uploaded file (before Generate)
 };
 
 // ----------------------------------------------------------------
@@ -223,6 +224,9 @@ function bindEvents() {
 
   const $clearImport = $('btn-clear-import');
   if ($clearImport) $clearImport.addEventListener('click', clearImport);
+
+  const $applyImport = $('btn-apply-import');
+  if ($applyImport) $applyImport.addEventListener('click', applyImport);
 }
 
 // ----------------------------------------------------------------
@@ -632,7 +636,10 @@ function handleImport(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
     const rows = parseCsvImport(e.target.result);
-    state.importedRows = rows;
+
+    // Store raw rows — do NOT merge yet (user clicks Generate Rows first)
+    state._rawImportRows = rows;
+    state.importedRows   = [];   // clear any previous applied rows
 
     // Switch UI: hide drop zone, show status
     const $dz = $('csv-drop-zone');
@@ -642,8 +649,13 @@ function handleImport(file) {
 
     const $label    = $('csv-import-label');
     const $filename = $('csv-import-filename');
-    if ($label)    $label.textContent    = `${rows.length} row${rows.length !== 1 ? 's' : ''} imported`;
+    const $applyBtn = $('btn-apply-import');
+    if ($label)    $label.textContent    = `${rows.length} row${rows.length !== 1 ? 's' : ''} loaded`;
     if ($filename) $filename.textContent = file.name;
+    // Reset button to initial state
+    if ($applyBtn) {
+      $applyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Generate Rows`;
+    }
 
     updateCSVCounter();
     updateYAML();
@@ -651,14 +663,37 @@ function handleImport(file) {
   reader.readAsText(file);
 }
 
+function applyImport() {
+  if (state._rawImportRows.length === 0) return;
+
+  // Merge raw imported rows with current form defaults
+  state.importedRows = [...state._rawImportRows];
+
+  // Update the button to show it has been applied
+  const $applyBtn = $('btn-apply-import');
+  if ($applyBtn) {
+    $applyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 2a4 4 0 110 8 4 4 0 010-8zM10 2l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Regenerate`;
+  }
+
+  updateCSVCounter();
+  updateYAML();
+}
+
 function clearImport() {
-  state.importedRows = [];
+  state.importedRows    = [];
+  state._rawImportRows  = [];
 
   // Switch UI: show drop zone, hide status
   const $dz = $('csv-drop-zone');
   const $ok = $('csv-import-ok');
   if ($dz) $dz.classList.remove('hidden');
   if ($ok) $ok.classList.add('hidden');
+
+  // Reset button label for next upload
+  const $applyBtn = $('btn-apply-import');
+  if ($applyBtn) {
+    $applyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Generate Rows`;
+  }
 
   // Clear the file input so the same file can be re-selected
   const $fi = $('f-csv-import');
@@ -729,9 +764,11 @@ function resetForm() {
   state.run_nhmmer  = 'No';
   state.nhmmer_db   = 'resources/rfam.hmm';
   state.run_images  = 'No';
-  state.format      = 'yaml';
-  state.csvRows     = [];
+  state.format       = 'yaml';
+  state.csvRows      = [];
   state.importedRows = [];
+  state._rawImportRows = [];
+
 
   // Reset all inputs
   document.querySelectorAll('.field-input, .field-select').forEach((el) => {

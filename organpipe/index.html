@@ -169,11 +169,21 @@
               <path d="M4.5 7.5l2 2 4-4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
                 stroke-linejoin="round" />
             </svg>
-            <span id="csv-import-label">0 rows imported</span>
+            <span id="csv-import-label">0 rows loaded</span>
             <span class="csv-import-sep">·</span>
             <span class="csv-import-filename" id="csv-import-filename"></span>
-            <button id="btn-clear-import" class="op-btn op-btn-ghost csv-remove-btn">Remove</button>
+            <div class="csv-import-actions">
+              <button id="btn-apply-import" class="op-btn op-btn-primary csv-apply-btn">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+                Generate Rows
+              </button>
+              <button id="btn-clear-import" class="op-btn op-btn-ghost csv-remove-btn">Remove</button>
+            </div>
           </div>
+
         </div>
 
         <!-- ─────────────────────────────────────────── -->
