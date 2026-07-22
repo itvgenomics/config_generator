@@ -28,10 +28,12 @@
   --organpipe-color: #0050b3;
   --pipeasm-color:   #005f5f;
   --procura-color:   #5b2a86;
+  --pimba-color:     #0d9488;
 
   --organpipe-bg: #e8f0fb;
   --pipeasm-bg:   #e6f4f4;
   --procura-bg:   #f0eaf8;
+  --pimba-bg:     #e6f7f6;
 
   --shadow-sm:  0 1px 3px rgba(13, 27, 46, 0.08), 0 1px 2px rgba(13, 27, 46, 0.04);
   --shadow-md:  0 4px 16px rgba(13, 27, 46, 0.10), 0 2px 6px rgba(13, 27, 46, 0.06);
@@ -250,6 +252,7 @@ a { text-decoration: none; color: inherit; }
 #card-organpipe .card-stripe { background: var(--organpipe-color); }
 #card-pipeasm   .card-stripe { background: var(--pipeasm-color); }
 #card-procura   .card-stripe { background: var(--procura-color); }
+#card-pimba     .card-stripe { background: var(--pimba-color); }
 
 /* Card inner layout */
 .card-inner {
@@ -274,6 +277,7 @@ a { text-decoration: none; color: inherit; }
 #card-organpipe .card-logo { background: var(--organpipe-bg); }
 #card-pipeasm   .card-logo { background: var(--pipeasm-bg); }
 #card-procura   .card-logo { background: var(--procura-bg); }
+#card-pimba     .card-logo { background: var(--pimba-bg); }
 
 .card-logo img {
   width: 100%;
@@ -293,6 +297,7 @@ a { text-decoration: none; color: inherit; }
 #card-organpipe .logo-fallback { color: var(--organpipe-color); }
 #card-pipeasm   .logo-fallback { color: var(--pipeasm-color); }
 #card-procura   .logo-fallback { color: var(--procura-color); }
+#card-pimba     .logo-fallback { color: var(--pimba-color); }
 
 /* Card content */
 .card-content { display: flex; flex-direction: column; gap: 6px; }
@@ -349,6 +354,7 @@ a { text-decoration: none; color: inherit; }
 #card-organpipe:hover .card-action-label { color: var(--organpipe-color); }
 #card-pipeasm:hover   .card-action-label { color: var(--pipeasm-color); }
 #card-procura:hover   .card-action-label { color: var(--procura-color); }
+#card-pimba:hover     .card-action-label { color: var(--pimba-color); }
 
 .card-action-label,
 .card-action-arrow {
@@ -362,6 +368,7 @@ a { text-decoration: none; color: inherit; }
 #card-organpipe:hover .card-action-arrow { color: var(--organpipe-color); transform: translateX(3px); }
 #card-pipeasm:hover   .card-action-arrow { color: var(--pipeasm-color);   transform: translateX(3px); }
 #card-procura:hover   .card-action-arrow { color: var(--procura-color);   transform: translateX(3px); }
+#card-pimba:hover     .card-action-arrow { color: var(--pimba-color);     transform: translateX(3px); }
 
 /* ============================================================
    FOOTER
@@ -426,3 +433,4 @@ a { text-decoration: none; color: inherit; }
 .pipeline-card:nth-child(1) { animation: fade-in-up 0.45s ease both 0.28s; }
 .pipeline-card:nth-child(2) { animation: fade-in-up 0.45s ease both 0.36s; }
 .pipeline-card:nth-child(3) { animation: fade-in-up 0.45s ease both 0.44s; }
+.pipeline-card:nth-child(4) { animation: fade-in-up 0.45s ease both 0.52s; }

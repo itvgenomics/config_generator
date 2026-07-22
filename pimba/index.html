@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="PIMBA YAML configuration generator — Main Config, PIMBA Place, and PIMBA Tax modes." />
+  <title>PIMBA — Pipeline Config Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="pimba.css" />
+</head>
+
+<body>
+
+  <!-- Top Nav -->
+  <nav class="top-bar" role="navigation" aria-label="Site header">
+    <div class="top-bar-inner">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="1" y="5" width="4" height="12" rx="2" fill="white" />
+          <rect x="7" y="2" width="4" height="15" rx="2" fill="white" opacity="0.8" />
+          <rect x="13" y="6" width="4" height="10" rx="2" fill="white" opacity="0.6" />
+          <rect x="19" y="3" width="3" height="14" rx="1.5" fill="white" opacity="0.4" />
+        </svg>
+      </div>
+      <span class="brand-name">ITVGenomics</span>
+      <div class="brand-divider" aria-hidden="true"></div>
+      <span class="brand-module">Pipeline Config Generator</span>
+      <div class="nav-spacer"></div>
+      <div class="nav-badge">YAML</div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper pc-page-wrapper">
+
+    <!-- Breadcrumb -->
+    <nav class="pc-breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html" class="pc-breadcrumb-link">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1.5L1.5 6.5V12.5H5.5V9.5H8.5V12.5H12.5V6.5L7 1.5Z" stroke="currentColor" stroke-width="1.25"
+            stroke-linejoin="round" />
+        </svg>
+        Home
+      </a>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+      <span class="pc-breadcrumb-current">PIMBA</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="pc-page-header">
+      <div class="pc-pipeline-logo">
+        <img src="../assets/pimba.png" alt="PIMBA logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="pc-logo-fallback" style="display:none" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="7" cy="14" r="4" fill="currentColor" opacity="0.9" />
+            <circle cx="14" cy="7" r="3" fill="currentColor" opacity="0.7" />
+            <circle cx="21" cy="14" r="4" fill="currentColor" opacity="0.5" />
+            <path d="M11 14h6M14 10v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="pc-header-text">
+        <h1>PIMBA Configuration</h1>
+        <p>Generate a <code>config.yaml</code> file for the PIpeline for MetaBarcoding Analysis</p>
+      </div>
+      <div class="pc-header-actions">
+        <button id="btn-reset" class="pc-btn pc-btn-ghost" title="Reset all fields">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7a5 5 0 105-5H5M5 2L2.5 4.5 5 7" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Reset
+        </button>
+        <button id="btn-copy" class="pc-btn pc-btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" />
+          </svg>
+          Copy YAML
+        </button>
+        <button id="btn-download" class="pc-btn pc-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v8M4 6l3 3 3-3M1 10v1.5A1.5 1.5 0 002.5 13h9a1.5 1.5 0 001.5-1.5V10" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Download .yaml
+        </button>
+      </div>
+    </div>
+
+    <!-- Editor Layout -->
+    <div class="pc-editor-layout" id="editor-layout">
+
+      <!-- ======= FORM PANEL ======= -->
+      <div class="pc-form-panel" id="form-panel">
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- MODE SELECTOR                              -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-mode-section" id="section-mode">
+          <div class="pc-mode-label">Select a pipeline mode</div>
+          <div class="pc-mode-cards" role="radiogroup" aria-label="Pipeline mode">
+
+            <label class="pc-mode-card" id="mc-main">
+              <input type="radio" name="pimba_mode" value="main" />
+              <div class="pc-mode-card-inner">
+                <div class="pc-mode-icon">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <rect x="2" y="4" width="18" height="3" rx="1.5" fill="currentColor" opacity="0.9" />
+                    <rect x="2" y="9.5" width="18" height="3" rx="1.5" fill="currentColor" opacity="0.65" />
+                    <rect x="2" y="15" width="12" height="3" rx="1.5" fill="currentColor" opacity="0.4" />
+                  </svg>
+                </div>
+                <div class="pc-mode-card-body">
+                  <span class="pc-mode-title">Main Config</span>
+                  <span class="pc-mode-desc">Prepare, Run, Curate &amp; Plot</span>
+                </div>
+                <div class="pc-mode-check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7l2 2 3-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+            <label class="pc-mode-card" id="mc-place">
+              <input type="radio" name="pimba_mode" value="place" />
+              <div class="pc-mode-card-inner">
+                <div class="pc-mode-icon">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <circle cx="6" cy="11" r="3" stroke="currentColor" stroke-width="1.5" />
+                    <circle cx="16" cy="6" r="2" stroke="currentColor" stroke-width="1.5" />
+                    <circle cx="16" cy="16" r="2" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M9 11h3M14 6.5l-2 3M14 15.5l-2-3" stroke="currentColor" stroke-width="1.25"
+                      stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="pc-mode-card-body">
+                  <span class="pc-mode-title">PIMBA Place</span>
+                  <span class="pc-mode-desc">Phylogenetic placement of OTUs/ASVs</span>
+                </div>
+                <div class="pc-mode-check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7l2 2 3-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+            <label class="pc-mode-card" id="mc-tax">
+              <input type="radio" name="pimba_mode" value="tax" />
+              <div class="pc-mode-card-inner">
+                <div class="pc-mode-icon">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <path d="M11 3v16M3 8l8 3M19 8l-8 3M3 14l8-3M19 14l-8-3" stroke="currentColor" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <div class="pc-mode-card-body">
+                  <span class="pc-mode-title">PIMBA Tax</span>
+                  <span class="pc-mode-desc">Taxonomy reassignment with new database</span>
+                </div>
+                <div class="pc-mode-check" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7l2 2 3-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+          </div>
+          <!-- Mode hint (hidden after selection) -->
+          <p class="pc-mode-hint" id="mode-hint">Select a mode above to configure the pipeline</p>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: Singularity Storage               -->
+        <!-- (main + tax modes)                         -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-singularity" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step" id="step-singularity">1</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Singularity Storage</h2>
+              <p class="pc-section-desc">Directories for container images, cache, and temp files</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-sif-dir">
+              <label class="pc-field-label" for="f-sif-dir">
+                SIF Directory <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Directory for Singularity Image Format (<code>.sif</code>) files. Use an
+                absolute path.</p>
+              <input class="pc-field-input" type="text" id="f-sif-dir"
+                placeholder="/path/to/pimba/sif_files/" autocomplete="off" />
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-cache-dir">
+                <label class="pc-field-label" for="f-cache-dir">Cache Directory</label>
+                <p class="pc-field-hint">Singularity layer cache. Can grow large during image downloads.</p>
+                <input class="pc-field-input" type="text" id="f-cache-dir"
+                  placeholder="/path/to/pimba/singularity/" autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-temp-dir">
+                <label class="pc-field-label" for="f-temp-dir">Temp Directory</label>
+                <p class="pc-field-hint">Temporary files during container operations. Prefer a fast local
+                  filesystem.</p>
+                <input class="pc-field-input" type="text" id="f-temp-dir"
+                  placeholder="/path/to/pimba/tmp/" autocomplete="off" />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: Computational Resources           -->
+        <!-- (main + tax modes)                         -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-resources" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step" id="step-resources">2</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Computational Resources</h2>
+              <p class="pc-section-desc">CPU thread allocation for parallel tasks</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-num-threads" style="max-width: 200px;">
+              <label class="pc-field-label" for="f-num-threads">
+                CPU Threads <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Must match the <code>-t</code> value passed to the launcher.</p>
+              <input class="pc-field-input" type="number" id="f-num-threads" min="1" max="256" placeholder="8" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: PIMBA Tax — Existing Dataset       -->
+        <!-- (tax mode only)                            -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-tax-inputs" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">3</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Existing Dataset Inputs</h2>
+              <p class="pc-section-desc">OTU/ASV table, representative sequences, and processed reads from original
+                PIMBA run</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-fasta-file">
+              <label class="pc-field-label" for="f-fasta-file">
+                Representative FASTA <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">FASTA file of representative OTU/ASV sequences from the original run.</p>
+              <input class="pc-field-input" type="text" id="f-fasta-file"
+                placeholder="/path/to/AllSamples_97clust90assign/AllSamples_asvs.fasta" autocomplete="off" />
+            </div>
+
+            <div class="pc-field-group" id="fg-txt-table">
+              <label class="pc-field-label" for="f-txt-table">
+                OTU/ASV Abundance Table <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Tab-delimited abundance table from the original PIMBA Run (<code>results/01-run/&lt;outputrun&gt;/</code>).</p>
+              <input class="pc-field-input" type="text" id="f-txt-table"
+                placeholder="/path/to/AllSamples_97clust90assign/AllSamples_asv_table.txt" autocomplete="off" />
+            </div>
+
+            <div class="pc-field-group" id="fg-raw-reads">
+              <label class="pc-field-label" for="f-raw-reads">
+                Processed Reads FASTA (<code>raw_reads</code>) <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Processed reads from the original PIMBA Prepare step (<code>results/00-prepare/&lt;outputprepare&gt;.fasta</code>).</p>
+              <input class="pc-field-input" type="text" id="f-raw-reads"
+                placeholder="/path/to/results/00-prepare/AllSamples.fasta" autocomplete="off" />
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-tax-outputprepare">
+                <label class="pc-field-label" for="f-tax-outputprepare">Prepare Base Name (<code>outputprepare</code>)</label>
+                <p class="pc-field-hint">Base name of the processed-read FASTA — without <code>.fasta</code>.</p>
+                <input class="pc-field-input" type="text" id="f-tax-outputprepare"
+                  placeholder="AllSamples" autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-tax-outputrun">
+                <label class="pc-field-label" for="f-tax-outputrun">Output Folder Name (<code>outputrun</code>)</label>
+                <p class="pc-field-hint">Name for the Tax output directory, e.g. <code>AllSamples_97clust90assign_RDP</code>.</p>
+                <input class="pc-field-input" type="text" id="f-tax-outputrun"
+                  placeholder="AllSamples_97clust90assign_RDP" autocomplete="off" />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: Prepare — General                 -->
+        <!-- (main mode only)                           -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-prepare-general" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">3</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Prepare — General</h2>
+              <p class="pc-section-desc">Read-quality filtering and output naming</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-minlength">
+                <label class="pc-field-label" for="f-minlength">Min Read Length (nt)</label>
+                <p class="pc-field-hint">Reads shorter than this are discarded after quality filtering.</p>
+                <input class="pc-field-input" type="number" id="f-minlength" min="1" placeholder="100" />
+              </div>
+              <div class="pc-field-group" id="fg-minphred">
+                <label class="pc-field-label" for="f-minphred">Min PHRED Quality</label>
+                <p class="pc-field-hint">20 = 1% base-call error probability. Higher is stricter.</p>
+                <input class="pc-field-input" type="number" id="f-minphred" min="1" max="40" placeholder="20" />
+              </div>
+            </div>
+
+            <div class="pc-field-group" id="fg-outputprepare">
+              <label class="pc-field-label" for="f-outputprepare">Output FASTA Base Name</label>
+              <p class="pc-field-hint">Base name without extension. PIMBA appends <code>.fasta</code>
+                automatically.</p>
+              <input class="pc-field-input" type="text" id="f-outputprepare" placeholder="AllSamples"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: Prepare — Input Mode              -->
+        <!-- (main mode only)                           -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-prepare-mode" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">4</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Prepare — Input Strategy</h2>
+              <p class="pc-section-desc">Raw read type and mode-specific preprocessing options</p>
+            </div>
+            <span class="pc-section-badge" id="prepare-mode-badge">—</span>
+          </div>
+          <div class="pc-section-body">
+
+            <!-- Sub-mode selector -->
+            <div>
+              <div class="pc-mode-label" style="margin-bottom: 10px;">Prepare mode (matches <code style="font-family: 'JetBrains Mono',monospace;font-size:11px;">-p</code> flag)</div>
+              <div class="pc-toggle-group" role="radiogroup" aria-label="Prepare mode">
+                <button class="pc-toggle-btn active" id="ptoggle-paired" data-prepare="paired_end" type="button">
+                  Paired-end
+                </button>
+                <button class="pc-toggle-btn" id="ptoggle-single" data-prepare="single_index" type="button">
+                  Single Index
+                </button>
+                <button class="pc-toggle-btn" id="ptoggle-dual" data-prepare="dual_index" type="button">
+                  Dual Index
+                </button>
+              </div>
+            </div>
+
+            <!-- Paired-end fields -->
+            <div id="group-paired" class="pc-conditional-group">
+
+              <div class="pc-field-group" id="fg-rawdatadir">
+                <label class="pc-field-label" for="f-rawdatadir">
+                  Raw Data Directory <span class="pc-field-req" title="Required">*</span>
+                </label>
+                <p class="pc-field-hint">Directory containing the paired-end FASTQ files (R1 &amp; R2).</p>
+                <input class="pc-field-input" type="text" id="f-rawdatadir"
+                  placeholder="/path/to/rawdata/" autocomplete="off" />
+              </div>
+
+              <div class="pc-field-group" id="fg-adapters">
+                <label class="pc-field-label" for="f-adapters">Adapters File</label>
+                <p class="pc-field-hint">Path to the adapter-definition file (e.g.
+                  <code>resources/adapters.txt</code>).</p>
+                <input class="pc-field-input" type="text" id="f-adapters"
+                  placeholder="/path/to/resources/adapters.txt" autocomplete="off" />
+              </div>
+
+              <div class="pc-field-row">
+                <div class="pc-field-group" id="fg-minoverlap">
+                  <label class="pc-field-label" for="f-minoverlap">Min Overlap (bp)</label>
+                  <p class="pc-field-hint">Minimum overlapping nucleotides to merge paired reads.</p>
+                  <input class="pc-field-input" type="number" id="f-minoverlap" min="1" placeholder="10" />
+                </div>
+                <div class="pc-field-group" id="fg-minsim">
+                  <label class="pc-field-label" for="f-minsim">Min Similarity (fraction)</label>
+                  <p class="pc-field-hint">Overlap identity for OverlapPER (e.g. <code>0.9</code> = 90%).</p>
+                  <input class="pc-field-input" type="number" id="f-minsim" min="0" max="1" step="0.01"
+                    placeholder="0.9" />
+                </div>
+              </div>
+
+              <div class="pc-field-group" id="fg-merger">
+                <label class="pc-field-label" for="f-merger">Merger Program</label>
+                <p class="pc-field-hint">Tool for merging paired reads.</p>
+                <select class="pc-field-select" id="f-merger">
+                  <option value="pear">pear</option>
+                  <option value="overlapper">overlapper</option>
+                </select>
+              </div>
+
+            </div>
+
+            <!-- Single Index fields -->
+            <div id="group-single" class="pc-conditional-group hidden">
+
+              <div class="pc-field-group" id="fg-raw-fastq-single">
+                <label class="pc-field-label" for="f-raw-fastq-single">
+                  Raw FASTQ File <span class="pc-field-req" title="Required">*</span>
+                </label>
+                <p class="pc-field-hint">Path to the single raw FASTQ file.</p>
+                <input class="pc-field-input" type="text" id="f-raw-fastq-single"
+                  placeholder="/path/to/reads.fastq.gz" autocomplete="off" />
+              </div>
+
+              <div class="pc-field-row">
+                <div class="pc-field-group" id="fg-prefix">
+                  <label class="pc-field-label" for="f-prefix">Prefix</label>
+                  <p class="pc-field-hint">Dataset identifier for demultiplexed output files.</p>
+                  <input class="pc-field-input" type="text" id="f-prefix" placeholder="MySample"
+                    autocomplete="off" />
+                </div>
+                <div class="pc-field-group" id="fg-singleadapter">
+                  <label class="pc-field-label" for="f-singleadapter">Adapter Sequence</label>
+                  <p class="pc-field-hint">Nucleotide sequence of the adapter (not a file path).</p>
+                  <input class="pc-field-input" type="text" id="f-singleadapter" placeholder="AGATCGGAAGAGC"
+                    autocomplete="off" />
+                </div>
+              </div>
+
+              <div class="pc-field-group" id="fg-barcodes-5end-txt">
+                <label class="pc-field-label" for="f-barcodes-5end-txt">5′ Barcodes TXT</label>
+                <p class="pc-field-hint">Text file describing 5′-end barcodes.</p>
+                <input class="pc-field-input" type="text" id="f-barcodes-5end-txt"
+                  placeholder="/path/to/barcodes_5end.txt" autocomplete="off" />
+              </div>
+
+              <div class="pc-field-group" id="fg-barcodes-5end-fasta">
+                <label class="pc-field-label" for="f-barcodes-5end-fasta">5′ Barcodes FASTA</label>
+                <p class="pc-field-hint">FASTA representation corresponding to the 5′ barcodes TXT.</p>
+                <input class="pc-field-input" type="text" id="f-barcodes-5end-fasta"
+                  placeholder="/path/to/barcodes_5end.fasta" autocomplete="off" />
+              </div>
+
+            </div>
+
+            <!-- Dual Index fields -->
+            <div id="group-dual" class="pc-conditional-group hidden">
+
+              <div class="pc-field-group" id="fg-raw-fastq-dual">
+                <label class="pc-field-label" for="f-raw-fastq-dual">
+                  Raw FASTQ File <span class="pc-field-req" title="Required">*</span>
+                </label>
+                <p class="pc-field-hint">Path to the single raw FASTQ file (dual-index mode).</p>
+                <input class="pc-field-input" type="text" id="f-raw-fastq-dual"
+                  placeholder="/path/to/reads.fastq.gz" autocomplete="off" />
+              </div>
+
+              <div class="pc-field-row">
+                <div class="pc-field-group" id="fg-forward-adapter">
+                  <label class="pc-field-label" for="f-forward-adapter">Forward Primer/Adapter</label>
+                  <p class="pc-field-hint">Forward primer or adapter nucleotide sequence.</p>
+                  <input class="pc-field-input" type="text" id="f-forward-adapter" placeholder="GGWACWGGWTGAACWGTWTAYCCYCC"
+                    autocomplete="off" />
+                </div>
+                <div class="pc-field-group" id="fg-reverse-adapter">
+                  <label class="pc-field-label" for="f-reverse-adapter">Reverse Primer/Adapter</label>
+                  <p class="pc-field-hint">Reverse primer or adapter nucleotide sequence.</p>
+                  <input class="pc-field-input" type="text" id="f-reverse-adapter" placeholder="TANACYTCNGGRTGNCCRAARAAYCA"
+                    autocomplete="off" />
+                </div>
+              </div>
+
+              <div class="pc-subsection-divider"><span>5′ Barcodes</span></div>
+              <div class="pc-field-row">
+                <div class="pc-field-group" id="fg-dual-barcodes-5end-txt">
+                  <label class="pc-field-label" for="f-dual-barcodes-5end-txt">5′ Barcodes TXT</label>
+                  <input class="pc-field-input" type="text" id="f-dual-barcodes-5end-txt"
+                    placeholder="/path/to/barcodes_5end.txt" autocomplete="off" />
+                </div>
+                <div class="pc-field-group" id="fg-dual-barcodes-5end-dir">
+                  <label class="pc-field-label" for="f-dual-barcodes-5end-dir">5′ Barcodes Directory</label>
+                  <p class="pc-field-hint">Directory with 5′ barcode FASTA and TXT files.</p>
+                  <input class="pc-field-input" type="text" id="f-dual-barcodes-5end-dir"
+                    placeholder="/path/to/barcodes_5end_dir/" autocomplete="off" />
+                </div>
+              </div>
+
+              <div class="pc-subsection-divider"><span>3′ Barcodes</span></div>
+              <div class="pc-field-row">
+                <div class="pc-field-group" id="fg-barcodes-3end-txt">
+                  <label class="pc-field-label" for="f-barcodes-3end-txt">3′ Barcodes TXT</label>
+                  <input class="pc-field-input" type="text" id="f-barcodes-3end-txt"
+                    placeholder="/path/to/barcodes_3end.txt" autocomplete="off" />
+                </div>
+                <div class="pc-field-group" id="fg-barcodes-3end-rev">
+                  <label class="pc-field-label" for="f-barcodes-3end-rev">3′ Barcodes Rev-Comp</label>
+                  <input class="pc-field-input" type="text" id="f-barcodes-3end-rev"
+                    placeholder="/path/to/barcodes_3end_rev.txt" autocomplete="off" />
+                </div>
+              </div>
+              <div class="pc-field-group" id="fg-barcodes-3end-fasta">
+                <label class="pc-field-label" for="f-barcodes-3end-fasta">3′ Barcodes FASTA</label>
+                <input class="pc-field-input" type="text" id="f-barcodes-3end-fasta"
+                  placeholder="/path/to/barcodes_3end.fasta" autocomplete="off" />
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: Run — OTU/ASV Inference           -->
+        <!-- (main + tax modes)                         -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-run" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step" id="step-run">5</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Run — OTU/ASV Inference</h2>
+              <p class="pc-section-desc">Clustering strategy, similarity thresholds, and taxonomic assignment</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <!-- Output name (main only) -->
+            <div id="group-outputrun" class="pc-conditional-group">
+              <div class="pc-field-group">
+                <label class="pc-field-label" for="f-outputrun">Output Folder Name</label>
+                <p class="pc-field-hint">Descriptive name for the Run output directory, e.g.
+                  <code>AllSamples_97clust90assign</code>.</p>
+                <input class="pc-field-input" type="text" id="f-outputrun"
+                  placeholder="AllSamples_97clust90assign" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-strategy">
+                <label class="pc-field-label" for="f-strategy">Sequence Strategy</label>
+                <p class="pc-field-hint"><code>otu</code> = VSEARCH clustering; <code>asv</code> = Swarm
+                  variants.</p>
+                <select class="pc-field-select" id="f-strategy">
+                  <option value="otu">otu — OTU clustering (VSEARCH)</option>
+                  <option value="asv">asv — ASV inference (Swarm)</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-marker-gene">
+                <label class="pc-field-label" for="f-marker-gene">Marker Gene / Database</label>
+                <p class="pc-field-hint">Built-in DB or path to custom database directory.</p>
+                <select class="pc-field-select" id="f-marker-gene">
+                  <option value="COI-BOLD">COI-BOLD</option>
+                  <option value="COI-NCBI">COI-NCBI</option>
+                  <option value="16S-SILVA">16S-SILVA</option>
+                  <option value="16S-GREENGENES">16S-GREENGENES</option>
+                  <option value="16S-RDP">16S-RDP</option>
+                  <option value="16S-NCBI">16S-NCBI</option>
+                  <option value="ITS-PLANTS-NCBI">ITS-PLANTS-NCBI</option>
+                  <option value="ITS-FUNGI-UNITE">ITS-FUNGI-UNITE</option>
+                  <option value="ITS-FUNGI-NCBI">ITS-FUNGI-NCBI</option>
+                  <option value="ALL-NCBI">ALL-NCBI</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pc-field-row-3">
+              <div class="pc-field-group" id="fg-otu-similarity">
+                <label class="pc-field-label" for="f-otu-similarity">OTU Similarity</label>
+                <p class="pc-field-hint">Clustering identity (fraction). 0.97 = 97%.</p>
+                <input class="pc-field-input" type="number" id="f-otu-similarity" min="0" max="1" step="0.01"
+                  placeholder="0.97" />
+              </div>
+              <div class="pc-field-group" id="fg-assign-similarity">
+                <label class="pc-field-label" for="f-assign-similarity">Assignment Similarity</label>
+                <p class="pc-field-hint">Min identity for taxonomic assignment (fraction).</p>
+                <input class="pc-field-input" type="number" id="f-assign-similarity" min="0" max="1" step="0.01"
+                  placeholder="0.9" />
+              </div>
+              <div class="pc-field-group" id="fg-mincoverage">
+                <label class="pc-field-label" for="f-mincoverage">Min Query Coverage</label>
+                <p class="pc-field-hint">Min fraction of query covered by alignment.</p>
+                <input class="pc-field-input" type="number" id="f-mincoverage" min="0" max="1" step="0.01"
+                  placeholder="0.9" />
+              </div>
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-otu-length">
+                <label class="pc-field-label" for="f-otu-length">Target Sequence Length (nt)</label>
+                <p class="pc-field-hint">0 = disable trimming. Otherwise sequences are trimmed to this
+                  length.</p>
+                <input class="pc-field-input" type="number" id="f-otu-length" min="0" placeholder="200" />
+              </div>
+              <div class="pc-field-group" id="fg-hits-per-subject">
+                <label class="pc-field-label" for="f-hits-per-subject">Hits per Subject</label>
+                <p class="pc-field-hint">1 = best hit. >1 enables multi-hit curation (requires
+                  <code>mode: multi</code>).</p>
+                <input class="pc-field-input" type="number" id="f-hits-per-subject" min="1" placeholder="1" />
+              </div>
+            </div>
+
+            <div class="pc-field-row-3">
+              <div class="pc-field-group" id="fg-e-value">
+                <label class="pc-field-label" for="f-e-value">BLAST E-value</label>
+                <p class="pc-field-hint">Expectation-value threshold (e.g. <code>0.001</code>).</p>
+                <input class="pc-field-input" type="text" id="f-e-value" placeholder="0.001" autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-blast-type">
+                <label class="pc-field-label" for="f-blast-type">BLAST Task</label>
+                <select class="pc-field-select" id="f-blast-type">
+                  <option value="megablast">megablast</option>
+                  <option value="blastn-short">blastn-short</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-db-type">
+                <label class="pc-field-label" for="f-db-type">NCBI DB Type</label>
+                <p class="pc-field-hint">e.g. <code>nt</code> or <code>core_nt</code>.</p>
+                <input class="pc-field-input" type="text" id="f-db-type" placeholder="nt" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="pc-subsection-divider"><span>Flags</span></div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-lulu">
+                <label class="pc-field-label" for="f-lulu">LULU Curation</label>
+                <p class="pc-field-hint">Run LULU post-clustering curation to remove erroneous OTUs/ASVs.</p>
+                <select class="pc-field-select" id="f-lulu">
+                  <option value="no">no</option>
+                  <option value="yes">yes</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-ITS">
+                <label class="pc-field-label" for="f-ITS">ITS Marker</label>
+                <p class="pc-field-hint">Enable ITS-specific processing (yes/no).</p>
+                <select class="pc-field-select" id="f-ITS">
+                  <option value="no">no</option>
+                  <option value="yes">yes</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-remote">
+                <label class="pc-field-label" for="f-remote">Remote BLAST</label>
+                <p class="pc-field-hint">Use NCBI remote BLAST instead of a local database.</p>
+                <select class="pc-field-select" id="f-remote">
+                  <option value="yes">yes — remote NCBI</option>
+                  <option value="no">no — local database</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: Reference Databases               -->
+        <!-- (main + tax modes)                         -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-databases" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step" id="step-databases">6</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Reference Databases</h2>
+              <p class="pc-section-desc">Absolute paths to downloaded reference database directories</p>
+            </div>
+            <span class="pc-section-badge" id="db-badge">—</span>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-coi-bold-db">
+              <label class="pc-field-label" for="f-coi-bold-db">COI-BOLD Database</label>
+              <p class="pc-field-hint">Required when <code>marker_gene: COI-BOLD</code>.</p>
+              <input class="pc-field-input" type="text" id="f-coi-bold-db" placeholder="/path/to/COI_BOLD/"
+                autocomplete="off" />
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-silva-db">
+                <label class="pc-field-label" for="f-silva-db">16S-SILVA Database</label>
+                <input class="pc-field-input" type="text" id="f-silva-db" placeholder="/path/to/SILVA/"
+                  autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-greengenes-db">
+                <label class="pc-field-label" for="f-greengenes-db">16S-GREENGENES Database</label>
+                <input class="pc-field-input" type="text" id="f-greengenes-db" placeholder="/path/to/GREENGENES/"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-rdp-db">
+                <label class="pc-field-label" for="f-rdp-db">16S-RDP Database</label>
+                <input class="pc-field-input" type="text" id="f-rdp-db" placeholder="/path/to/RDP/"
+                  autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-ncbi-db">
+                <label class="pc-field-label" for="f-ncbi-db">NCBI Local BLAST Database</label>
+                <p class="pc-field-hint">Required for local NCBI analyses.</p>
+                <input class="pc-field-input" type="text" id="f-ncbi-db" placeholder="/path/to/NCBI_DB/"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-its-fungi-unite-db">
+                <label class="pc-field-label" for="f-its-fungi-unite-db">ITS-FUNGI-UNITE Database</label>
+                <input class="pc-field-input" type="text" id="f-its-fungi-unite-db"
+                  placeholder="/path/to/UNITE/" autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-taxdump">
+                <label class="pc-field-label" for="f-taxdump">NCBI Taxdump Directory</label>
+                <p class="pc-field-hint">Extracted <code>new_taxdump.tar.gz</code>. Required for NCBI-based
+                  taxonomy.</p>
+                <input class="pc-field-input" type="text" id="f-taxdump" placeholder="/path/to/taxdump/"
+                  autocomplete="off" />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: Curate                            -->
+        <!-- (main + tax modes)                         -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-curate" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step" id="step-curate">7</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Curate</h2>
+              <p class="pc-section-desc">Taxonomic standardization and BLAST-hit import mode</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-ncbi-taxizedb">
+              <label class="pc-field-label" for="f-ncbi-taxizedb">
+                NCBI Taxizedb Directory <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Directory containing the <code>taxizedb</code> SQLite database for
+                species-name validation.</p>
+              <input class="pc-field-input" type="text" id="f-ncbi-taxizedb" placeholder="/path/to/ncbi_taxizedb/"
+                autocomplete="off" />
+            </div>
+
+            <div class="pc-field-group" id="fg-curate-mode" style="max-width: 280px;">
+              <label class="pc-field-label" for="f-curate-mode">BLAST-hit Import Mode</label>
+              <p class="pc-field-hint"><code>single</code> = top hit only. <code>multi</code> requires
+                <code>hits_per_subject > 1</code>.</p>
+              <select class="pc-field-select" id="f-curate-mode">
+                <option value="single">single — best hit only</option>
+                <option value="multi">multi — all hits</option>
+              </select>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: Plot                              -->
+        <!-- (main mode only)                           -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-plot" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">8</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Plot — Metadata &amp; Grouping</h2>
+              <p class="pc-section-desc">Metadata file for downstream abundance and diversity visualizations</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-metadata">
+              <label class="pc-field-label" for="f-metadata">Metadata File</label>
+              <p class="pc-field-hint">CSV/TSV file with sample identifiers matching the abundance table.</p>
+              <input class="pc-field-input" type="text" id="f-metadata"
+                placeholder="/path/to/mapping_file.csv" autocomplete="off" />
+            </div>
+
+            <div class="pc-field-group" id="fg-group-by" style="max-width: 300px;">
+              <label class="pc-field-label" for="f-group-by">Group-by Column</label>
+              <p class="pc-field-hint">Column header used to group samples. Use <code>False</code> to disable
+                grouping.</p>
+              <input class="pc-field-input" type="text" id="f-group-by" placeholder="Species"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: PIMBA Place — Input Data          -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-place-input" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">1</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Input Data</h2>
+              <p class="pc-section-desc">Query sequences and reference phylogenetic framework</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-samples">
+              <label class="pc-field-label" for="f-samples">Query FASTA Files</label>
+              <p class="pc-field-hint">One absolute path per line. Each file is treated as a separate sample or
+                placement dataset.</p>
+              <textarea class="pc-field-input pc-field-textarea" id="f-samples" rows="3"
+                placeholder="/path/to/AllSamples_unassigned_otus.fasta" spellcheck="false"></textarea>
+            </div>
+
+            <div class="pc-field-group" id="fg-reference-tree">
+              <label class="pc-field-label" for="f-reference-tree">
+                Reference Phylogenetic Tree <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Newick format. Leaf names must exactly match the reference
+                alignment.</p>
+              <input class="pc-field-input" type="text" id="f-reference-tree"
+                placeholder="/path/to/RAxML_bipartitions.newick" autocomplete="off" />
+            </div>
+
+            <div class="pc-field-group" id="fg-reference-alignment">
+              <label class="pc-field-label" for="f-reference-alignment">
+                Reference Alignment <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Existing multiple-sequence alignment in FASTA format. Sequence identifiers
+                must match the tree.</p>
+              <input class="pc-field-input" type="text" id="f-reference-alignment"
+                placeholder="/path/to/reference_aligned.fasta" autocomplete="off" />
+            </div>
+
+            <div class="pc-field-group" id="fg-taxonomy-file">
+              <label class="pc-field-label" for="f-taxonomy-file">
+                Taxonomy File <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Tab-delimited file mapping each reference taxon to its full taxonomic
+                path.</p>
+              <input class="pc-field-input" type="text" id="f-taxonomy-file"
+                placeholder="/path/to/taxonpath_final.tsv" autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: PIMBA Place — Pipeline Settings   -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-place-settings" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">2</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Pipeline Settings</h2>
+              <p class="pc-section-desc">Sequence type, clustering, alignment, and placement tools</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-datatype">
+                <label class="pc-field-label" for="f-datatype">Sequence Data Type</label>
+                <select class="pc-field-select" id="f-datatype">
+                  <option value="nt">nt — nucleotide (DNA amplicons)</option>
+                  <option value="aa">aa — amino acid</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-use-chunkify">
+                <label class="pc-field-label" for="f-use-chunkify">Use Chunkify</label>
+                <p class="pc-field-hint">Recommended for large datasets. De-duplicates and balances query
+                  chunks.</p>
+                <select class="pc-field-select" id="f-use-chunkify">
+                  <option value="True">True — enable chunkify</option>
+                  <option value="False">False — disable chunkify</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pc-field-group" id="fg-clustering-tool">
+              <label class="pc-field-label">Clustering Tool</label>
+              <p class="pc-field-hint">One or more strategies applied before placement. Select all that
+                apply.</p>
+              <div class="pc-toggle-group">
+                <button class="pc-toggle-btn active" id="ctoggle-no-clustering" data-cluster="no_clustering"
+                  type="button">
+                  no_clustering
+                </button>
+                <button class="pc-toggle-btn" id="ctoggle-swarm" data-cluster="swarm" type="button">
+                  swarm
+                </button>
+              </div>
+            </div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-alignment-tool">
+                <label class="pc-field-label" for="f-alignment-tool">Alignment Tool</label>
+                <select class="pc-field-select" id="f-alignment-tool">
+                  <option value="hmmer">hmmer</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-placement-tool">
+                <label class="pc-field-label" for="f-placement-tool">Placement Tool</label>
+                <select class="pc-field-select" id="f-placement-tool">
+                  <option value="epa-ng">epa-ng</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pc-field-group" id="fg-outdir">
+              <label class="pc-field-label" for="f-outdir">Output Directory</label>
+              <p class="pc-field-hint">Root directory for PIMBA Place results (relative to workflow working
+                directory).</p>
+              <input class="pc-field-input" type="text" id="f-outdir" placeholder="results/04-place/"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION: PIMBA Place — Tool Parameters     -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="pc-form-section pc-section-hidden" id="section-place-params" aria-hidden="true">
+          <div class="pc-section-header">
+            <div class="pc-section-step">3</div>
+            <div class="pc-section-header-text">
+              <h2 class="pc-section-title">Tool Parameters</h2>
+              <p class="pc-section-desc">Fine-grained settings for Swarm, Chunkify, HMMER, RAxML-NG, EPA-ng, and
+                GAPPA</p>
+            </div>
+          </div>
+          <div class="pc-section-body">
+
+            <div class="pc-field-group" id="fg-place-threads" style="max-width: 200px;">
+              <label class="pc-field-label" for="f-place-threads">Global Threads</label>
+              <input class="pc-field-input" type="number" id="f-place-threads" min="1" placeholder="8" />
+            </div>
+
+            <div class="pc-subsection-divider"><span>Swarm</span></div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-swarm-differences">
+                <label class="pc-field-label" for="f-swarm-differences">Differences</label>
+                <p class="pc-field-hint">Max nucleotide differences for local clustering (classic = 1).</p>
+                <input class="pc-field-input" type="number" id="f-swarm-differences" min="1" placeholder="1" />
+              </div>
+              <div class="pc-field-group" id="fg-swarm-fastidious">
+                <label class="pc-field-label" for="f-swarm-fastidious">Fastidious Mode</label>
+                <p class="pc-field-hint">Connect small clusters to larger ones (reduces isolated
+                  clusters).</p>
+                <select class="pc-field-select" id="f-swarm-fastidious">
+                  <option value="True">True — enable</option>
+                  <option value="False">False — disable</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pc-subsection-divider"><span>Chunkify</span></div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-hash-function">
+                <label class="pc-field-label" for="f-hash-function">Hash Function</label>
+                <select class="pc-field-select" id="f-hash-function">
+                  <option value="SHA1">SHA1</option>
+                  <option value="SHA256">SHA256</option>
+                  <option value="MD5">MD5</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-min-abundance">
+                <label class="pc-field-label" for="f-min-abundance">Min Abundance</label>
+                <p class="pc-field-hint">Sequences below this threshold are excluded. 1 = keep all.</p>
+                <input class="pc-field-input" type="number" id="f-min-abundance" min="1" placeholder="1" />
+              </div>
+            </div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-chunk-size">
+                <label class="pc-field-label" for="f-chunk-size">Chunk Size</label>
+                <p class="pc-field-hint">Max sequences per chunk file.</p>
+                <input class="pc-field-input" type="number" id="f-chunk-size" min="1" placeholder="50000" />
+              </div>
+              <div class="pc-field-group" id="fg-jplace-cache-size">
+                <label class="pc-field-label" for="f-jplace-cache-size">JPlace Cache Size</label>
+                <p class="pc-field-hint">0 = no limit. Set a positive value if unchunkify runs out of
+                  memory.</p>
+                <input class="pc-field-input" type="number" id="f-jplace-cache-size" min="0" placeholder="0" />
+              </div>
+            </div>
+
+            <div class="pc-subsection-divider"><span>HMMER</span></div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-hmmbuild-extra">
+                <label class="pc-field-label" for="f-hmmbuild-extra">hmmbuild Extra Args</label>
+                <p class="pc-field-hint">Additional flags for <code>hmmbuild</code>. Leave empty for
+                  defaults.</p>
+                <input class="pc-field-input" type="text" id="f-hmmbuild-extra" placeholder=""
+                  autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-hmmsearch-e">
+                <label class="pc-field-label" for="f-hmmsearch-e">hmmsearch E-value</label>
+                <p class="pc-field-hint">Threshold to retain query sequences before alignment.</p>
+                <input class="pc-field-input" type="text" id="f-hmmsearch-e" placeholder="0.01"
+                  autocomplete="off" />
+              </div>
+            </div>
+            <div class="pc-field-group" id="fg-hmmalign-trim">
+              <label class="pc-field-label" for="f-hmmalign-trim">hmmalign Trim</label>
+              <p class="pc-field-hint">Whether hmmalign trims output to consensus profile columns.</p>
+              <select class="pc-field-select" id="f-hmmalign-trim" style="max-width:200px;">
+                <option value="False">False — preserve full alignment</option>
+                <option value="True">True — trim to consensus</option>
+              </select>
+            </div>
+
+            <div class="pc-subsection-divider"><span>RAxML-NG</span></div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-raxml-threads">
+                <label class="pc-field-label" for="f-raxml-threads">RAxML-NG Threads</label>
+                <input class="pc-field-input" type="number" id="f-raxml-threads" min="1" placeholder="2" />
+              </div>
+              <div class="pc-field-group" id="fg-raxml-extra">
+                <label class="pc-field-label" for="f-raxml-extra">RAxML-NG Extra Args</label>
+                <input class="pc-field-input" type="text" id="f-raxml-extra" placeholder=""
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="pc-subsection-divider"><span>EPA-ng</span></div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-epa-model">
+                <label class="pc-field-label" for="f-epa-model">Evolutionary Model</label>
+                <p class="pc-field-hint">Used when <code>model-params</code> is empty.</p>
+                <input class="pc-field-input" type="text" id="f-epa-model" placeholder="GTR+G"
+                  autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-epa-model-params">
+                <label class="pc-field-label" for="f-epa-model-params">Model Params File / String</label>
+                <p class="pc-field-hint">RAxML-NG model string or <code>.bestModel</code> file path. Leave
+                  empty to auto-estimate.</p>
+                <input class="pc-field-input" type="text" id="f-epa-model-params" placeholder=""
+                  autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="pc-subsection-divider"><span>GAPPA</span></div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-sample-trees">
+                <label class="pc-field-label" for="f-sample-trees">Per-sample Heat Trees</label>
+                <select class="pc-field-select" id="f-sample-trees">
+                  <option value="False">False — combined overview only</option>
+                  <option value="True">True — also generate per-sample trees</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-svg-ladderize">
+                <label class="pc-field-label" for="f-svg-ladderize">Ladderize SVG Tree</label>
+                <select class="pc-field-select" id="f-svg-ladderize">
+                  <option value="True">True — ladderize branches</option>
+                  <option value="False">False — keep original order</option>
+                </select>
+              </div>
+            </div>
+            <div class="pc-field-row-3">
+              <div class="pc-field-group" id="fg-min-value">
+                <label class="pc-field-label" for="f-min-value">Heat Tree Min Value</label>
+                <input class="pc-field-input" type="number" id="f-min-value" min="0" step="0.1"
+                  placeholder="1.0" />
+              </div>
+              <div class="pc-field-group" id="fg-under-color">
+                <label class="pc-field-label" for="f-under-color">Under-threshold Color</label>
+                <p class="pc-field-hint">Hex color for values below min (e.g. <code>#808080</code>).</p>
+                <input class="pc-field-input" type="text" id="f-under-color" placeholder="#808080"
+                  autocomplete="off" />
+              </div>
+              <div class="pc-field-group" id="fg-gappa-krona">
+                <label class="pc-field-label" for="f-gappa-krona">Krona Output</label>
+                <select class="pc-field-select" id="f-gappa-krona">
+                  <option value="True">True — generate Krona</option>
+                  <option value="False">False — skip Krona</option>
+                </select>
+              </div>
+            </div>
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-distant-label">
+                <label class="pc-field-label" for="f-distant-label">Distant Label</label>
+                <select class="pc-field-select" id="f-distant-label">
+                  <option value="False">False — conservative</option>
+                  <option value="True">True — allow distant labels</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-resolve-missing">
+                <label class="pc-field-label" for="f-resolve-missing">Resolve Missing Paths</label>
+                <select class="pc-field-select" id="f-resolve-missing">
+                  <option value="True">True — resolve incomplete taxonomy</option>
+                  <option value="False">False — strict</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pc-subsection-divider"><span>Guppy</span></div>
+            <div class="pc-field-group" id="fg-include-pendant">
+              <label class="pc-field-label" for="f-include-pendant">FPD Include Pendant</label>
+              <p class="pc-field-hint">Include pendant-edge lengths in Faith's phylogenetic diversity
+                calculations.</p>
+              <select class="pc-field-select" id="f-include-pendant" style="max-width:260px;">
+                <option value="False">False — exclude pendant</option>
+                <option value="True">True — include pendant</option>
+              </select>
+            </div>
+
+          </div>
+        </section>
+
+      </div><!-- /form-panel -->
+
+
+      <!-- ======= YAML PREVIEW PANEL ======= -->
+      <aside class="pc-yaml-panel" id="yaml-panel" aria-label="YAML preview">
+        <div class="pc-yaml-header">
+          <div class="pc-yaml-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
+              <path d="M4 4.5h6M4 7h4M4 9.5h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            <span class="pc-yaml-filename" id="yaml-filename">config.yaml</span>
+          </div>
+          <button id="btn-copy-yaml" class="pc-yaml-copy-btn" title="Copy to clipboard">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.25" />
+              <path d="M9.5 3.5V2.5A1 1 0 008.5 1.5H2.5a1 1 0 00-1 1V8.5a1 1 0 001 1H3.5" stroke="currentColor"
+                stroke-width="1.25" stroke-linecap="round" />
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div class="pc-yaml-body">
+          <pre class="pc-yaml-pre" id="yaml-output" aria-live="polite"
+            aria-label="Generated YAML output"><code id="yaml-code"><span class="pc-yaml-placeholder">← Select a mode to generate YAML</span></code></pre>
+        </div>
+        <div class="pc-yaml-footer">
+          <span id="yaml-line-count">— lines</span>
+          <span id="yaml-copy-toast" class="pc-copy-toast hidden">Copied!</span>
+        </div>
+      </aside>
+
+    </div><!-- /editor-layout -->
+  </div><!-- /page-wrapper -->
+
+  <script src="pimba.js"></script>
+</body>
+
+</html>

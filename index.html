@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="Pipeline Config Generator — generate YAML configurations for OrganPipe, Pipeasm and ProCura pipelines." />
+    content="Pipeline Config Generator — generate YAML configurations for OrganPipe, Pipeasm, ProCura and PIMBA pipelines." />
   <title>Pipeline Config Generator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -153,6 +153,42 @@
               <div class="card-tags">
                 <span class="tag">Procurement</span>
                 <span class="tag">Validation</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-action">
+            <span class="card-action-label">Open configuration</span>
+            <svg class="card-action-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M3.75 9h10.5M9.75 5.25 13.5 9l-3.75 3.75" stroke="currentColor" stroke-width="1.75"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+        </a>
+
+        <!-- PIMBA -->
+        <a href="pimba/index.html" class="pipeline-card" id="card-pimba" role="listitem"
+          aria-label="Configure PIMBA pipeline">
+          <div class="card-stripe" aria-hidden="true"></div>
+          <div class="card-inner">
+            <div class="card-logo" id="logo-pimba">
+              <img src="assets/pimba.png" alt="PIMBA logo"
+                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+              <div class="logo-fallback">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                  <circle cx="7" cy="14" r="4" fill="currentColor" opacity="0.9" />
+                  <circle cx="14" cy="7" r="3" fill="currentColor" opacity="0.7" />
+                  <circle cx="21" cy="14" r="4" fill="currentColor" opacity="0.5" />
+                  <path d="M11 14h6M14 10v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-content">
+              <h2 class="card-title">PIMBA</h2>
+              <p class="card-description">PIpeline for MetaBarcoding Analysis — end-to-end metabarcoding
+                data processing and taxonomic classification workflows.</p>
+              <div class="card-tags">
+                <span class="tag">Metabarcoding</span>
+                <span class="tag">Taxonomy</span>
               </div>
             </div>
           </div>
