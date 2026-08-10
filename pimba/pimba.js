@@ -58,6 +58,7 @@ const state = {
   otu_length:       '200',
   hits_per_subject: '1',
   marker_gene:      'COI-BOLD',
+  custom_db_path:   '',
   e_value:          '0.001',
   lulu:             'no',
   ITS:              'no',
@@ -194,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setVal('f-otu-length',       state.otu_length);
   setVal('f-hits-per-subject', state.hits_per_subject);
   setVal('f-marker-gene',      state.marker_gene);
+  setVal('f-custom-db-path',   state.custom_db_path);
   setVal('f-e-value',          state.e_value);
   setVal('f-lulu',             state.lulu);
   setVal('f-ITS',              state.ITS);
@@ -231,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setVal('f-include-pendant',  state.include_pendant);
 
   bindEvents();
+  updateDBConditionals();
   updateYAML();
 });
 
@@ -311,6 +314,7 @@ function bindEvents() {
     ['f-otu-length',        'otu_length'],
     ['f-hits-per-subject',  'hits_per_subject'],
     ['f-marker-gene',       'marker_gene'],
+    ['f-custom-db-path',    'custom_db_path'],
     ['f-e-value',           'e_value'],
     ['f-lulu',              'lulu'],
     ['f-ITS',               'ITS'],
@@ -369,8 +373,16 @@ function bindEvents() {
   fieldMap.forEach(([id, key]) => {
     const el = $(id);
     if (!el) return;
-    el.addEventListener('input', (e) => { state[key] = e.target.value; updateYAML(); });
-    el.addEventListener('change', (e) => { state[key] = e.target.value; updateYAML(); });
+    el.addEventListener('input', (e) => { 
+      state[key] = e.target.value; 
+      updateYAML(); 
+      if (key === 'marker_gene') { updateDBConditionals(); updateDBBadge(); } 
+    });
+    el.addEventListener('change', (e) => { 
+      state[key] = e.target.value; 
+      updateYAML(); 
+      if (key === 'marker_gene') { updateDBConditionals(); updateDBBadge(); } 
+    });
   });
 
   // Action buttons
@@ -425,6 +437,7 @@ function onModeChange() {
 
   updatePrepareConditionals();
   updatePrepareBadge();
+  updateDBConditionals();
   updateDBBadge();
   updateYAML();
 }
@@ -446,6 +459,30 @@ function updatePrepareBadge() {
   badge.textContent = labels[state.prepare_mode] || '—';
 }
 
+function updateDBConditionals() {
+  const mg = state.marker_gene;
+  
+  mg === 'Custom' ? show('fg-custom-db-path') : hide('fg-custom-db-path');
+
+  hide('fg-coi-bold-db');
+  hide('fg-silva-db');
+  hide('fg-greengenes-db');
+  hide('fg-rdp-db');
+  hide('fg-ncbi-db');
+  hide('fg-its-fungi-unite-db');
+  hide('fg-taxdump');
+
+  if (mg === 'COI-BOLD') show('fg-coi-bold-db');
+  else if (mg === '16S-SILVA') show('fg-silva-db');
+  else if (mg === '16S-GREENGENES') show('fg-greengenes-db');
+  else if (mg === '16S-RDP') show('fg-rdp-db');
+  else if (mg === 'ITS-FUNGI-UNITE') show('fg-its-fungi-unite-db');
+  else if (mg.includes('NCBI')) {
+    show('fg-ncbi-db');
+    show('fg-taxdump');
+  }
+}
+
 function updateDBBadge() {
   const badge = $('db-badge');
   if (!badge) return;
@@ -453,7 +490,7 @@ function updateDBBadge() {
     'COI-BOLD': 'COI-BOLD', 'COI-NCBI': 'COI-NCBI', '16S-SILVA': '16S-SILVA',
     '16S-GREENGENES': '16S-GREENGENES', '16S-RDP': '16S-RDP', '16S-NCBI': '16S-NCBI',
     'ITS-PLANTS-NCBI': 'ITS-PLANTS', 'ITS-FUNGI-UNITE': 'ITS-UNITE',
-    'ITS-FUNGI-NCBI': 'ITS-NCBI', 'ALL-NCBI': 'ALL-NCBI',
+    'ITS-FUNGI-NCBI': 'ITS-NCBI', 'ALL-NCBI': 'ALL-NCBI', 'Custom': 'Custom'
   };
   badge.textContent = labels[state.marker_gene] || '—';
 }
@@ -557,7 +594,11 @@ function generateMain() {
   y += nl('mincoverage',     s.mincoverage      || 0.9);
   y += nl('otu_length',      s.otu_length       || 200);
   y += nl('hits_per_subject', s.hits_per_subject || 1);
-  y += q('marker_gene',     s.marker_gene);
+  if (s.marker_gene === 'Custom') {
+    y += q('marker_gene', s.custom_db_path);
+  } else {
+    y += q('marker_gene', s.marker_gene);
+  }
   y += nl('e_value',         s.e_value          || 0.001);
   y += q('lulu',             s.lulu);
   y += q('ITS',              s.ITS);
@@ -566,14 +607,23 @@ function generateMain() {
   y += q('blast_type',       s.blast_type);
 
   // --- Databases ---
-  y += sectionHeader('REFERENCE DATABASE PATHS');
-  y += nl('16S-SILVA-DB',     `'${s.silva_db}'`);
-  y += nl('COI-BOLD-DB',      `'${s.coi_bold_db}'`);
-  y += nl('16S-GREENGENES-DB', `'${s.greengenes_db}'`);
-  y += nl('16S-RDP-DB',       `'${s.rdp_db}'`);
-  y += nl('NCBI-DB',          `'${s.ncbi_db}'`);
-  y += nl('ITS-FUNGI-UNITE-DB', `'${s.its_fungi_unite_db}'`);
-  y += nl('taxdump',          `'${s.taxdump}'`);
+  if (s.marker_gene !== 'Custom') {
+    y += sectionHeader('REFERENCE DATABASE PATHS');
+    if (s.marker_gene === 'COI-BOLD') {
+      y += nl('COI-BOLD-DB', `'${s.coi_bold_db}'`);
+    } else if (s.marker_gene === '16S-SILVA') {
+      y += nl('16S-SILVA-DB', `'${s.silva_db}'`);
+    } else if (s.marker_gene === '16S-GREENGENES') {
+      y += nl('16S-GREENGENES-DB', `'${s.greengenes_db}'`);
+    } else if (s.marker_gene === '16S-RDP') {
+      y += nl('16S-RDP-DB', `'${s.rdp_db}'`);
+    } else if (s.marker_gene === 'ITS-FUNGI-UNITE') {
+      y += nl('ITS-FUNGI-UNITE-DB', `'${s.its_fungi_unite_db}'`);
+    } else if (s.marker_gene.includes('NCBI')) {
+      y += nl('NCBI-DB', `'${s.ncbi_db}'`);
+      y += nl('taxdump', `'${s.taxdump}'`);
+    }
+  }
 
   // --- Curate ---
   y += sectionHeader('PIMBA CURATE \u2014 TAXONOMIC STANDARDIZATION AND VALIDATION');

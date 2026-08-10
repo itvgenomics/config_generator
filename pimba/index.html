@@ -33,10 +33,11 @@
         </svg>
       </div>
       <span class="brand-name">ITV Genomics</span>
-      <div class="brand-divider" aria-hidden="true"></div>
-      <span class="brand-module">Pipeline Config Hub</span>
       <div class="nav-spacer"></div>
-      <div class="nav-badge">YAML</div>
+      <div class="nav-links">
+        <a href="../index.html" class="nav-btn active">Create Config</a>
+        <a href="../submission.html" class="nav-btn">Create Submission File</a>
+      </div>
     </div>
   </nav>
 
@@ -599,8 +600,10 @@
                   <option value="ITS-FUNGI-UNITE">ITS-FUNGI-UNITE</option>
                   <option value="ITS-FUNGI-NCBI">ITS-FUNGI-NCBI</option>
                   <option value="ALL-NCBI">ALL-NCBI</option>
+                  <option value="Custom">Custom</option>
                 </select>
               </div>
+
             </div>
 
             <div class="pc-field-row-3">
@@ -705,6 +708,12 @@
             <span class="pc-section-badge" id="db-badge">—</span>
           </div>
           <div class="pc-section-body">
+
+            <div class="pc-field-group hidden" id="fg-custom-db-path">
+              <label class="pc-field-label" for="f-custom-db-path">Custom Database Path <span class="pc-field-req" title="Required">*</span></label>
+              <p class="pc-field-hint">Absolute path to your custom reference database.</p>
+              <input class="pc-field-input" type="text" id="f-custom-db-path" placeholder="/path/to/custom_db/" autocomplete="off" />
+            </div>
 
             <div class="pc-field-group" id="fg-coi-bold-db">
               <label class="pc-field-label" for="f-coi-bold-db">COI-BOLD Database</label>

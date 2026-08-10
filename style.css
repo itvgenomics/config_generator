@@ -102,33 +102,32 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: -0.01em;
 }
 
-.brand-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255,255,255,0.15);
-  margin: 0 4px;
+.nav-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.brand-module {
+.nav-btn {
   font-size: 13px;
-  font-weight: 400;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: all var(--transition);
+}
+
+.nav-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .nav-spacer { flex: 1; }
-
-.nav-badge {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--blue-300);
-  background: rgba(74, 144, 217, 0.15);
-  border: 1px solid rgba(74, 144, 217, 0.3);
-  border-radius: 4px;
-  padding: 4px 10px;
-}
 
 /* ============================================================
    PAGE LAYOUT
@@ -312,6 +311,7 @@ a { text-decoration: none; color: inherit; }
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--text-secondary);
+  text-align: justify;
 }
 
 /* Tags */

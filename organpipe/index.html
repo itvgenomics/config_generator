@@ -32,10 +32,11 @@
         </svg>
       </div>
       <span class="brand-name">ITV Genomics</span>
-      <div class="brand-divider" aria-hidden="true"></div>
-      <span class="brand-module">Pipeline Config Hub</span>
       <div class="nav-spacer"></div>
-      <div class="nav-badge">YAML</div>
+      <div class="nav-links">
+        <a href="../index.html" class="nav-btn active">Create Config</a>
+        <a href="../submission.html" class="nav-btn">Create Submission File</a>
+      </div>
     </div>
   </nav>
 
@@ -374,12 +375,12 @@
 
               <div class="field-row">
                 <div class="field-group" id="fg-minlength">
-                  <label class="field-label" for="f-minlength">Min Read Length</label>
+                  <label class="field-label" for="f-minlength">Minimum Read Length</label>
                   <p class="field-hint">Reads shorter than this length (in bp) after trimming will be discarded. Typical values: 50–100 bp.</p>
                   <input class="field-input" type="number" id="f-minlength" min="1" placeholder="e.g. 50" />
                 </div>
                 <div class="field-group" id="fg-minquality">
-                  <label class="field-label" for="f-minquality">Min Base Quality</label>
+                  <label class="field-label" for="f-minquality">Minimum Base Quality</label>
                   <p class="field-hint">Minimum Phred quality score (Q-score) for base trimming. Bases below this threshold are trimmed. Common value: 20 (Q20 = 99% accuracy).</p>
                   <input class="field-input" type="number" id="f-minquality" min="1" max="40" placeholder="e.g. 20" />
                 </div>
@@ -426,7 +427,7 @@
                 </label>
                 <p class="field-hint">
                   Run the annotation pipeline for the assembled organelle genome. Uses
-                  <strong>MITOS</strong> for mitochondria and <strong>GeSeq / PGA</strong> for chloroplast.
+                  <strong>MITOS</strong> for mitochondria and <strong>CPGAVAS2 and Chloe</strong> for chloroplast.
                   For long-read mitochondrial data, annotation is handled automatically by MitoHifi.
                 </p>
                 <div class="yn-control" role="radiogroup" aria-label="Run annotation">
