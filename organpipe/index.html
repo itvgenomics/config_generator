@@ -187,6 +187,71 @@
               <button id="btn-clear-import" class="op-btn op-btn-ghost csv-remove-btn">Remove</button>
             </div>
           </div>
+          
+          <details class="csv-columns-info" style="margin-top: 4px; margin-bottom: 8px; text-align: center;">
+            <summary style="cursor:pointer; font-size:13px; font-weight:500; color:var(--blue-500); display:inline-flex; justify-content:center; align-items:center; gap:4px;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7 4.5v1M7 6.5v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              View available columns &amp; descriptions
+            </summary>
+            <div class="csv-columns-list" style="margin-top:8px; padding:0; background:var(--bg-section); border:1px solid var(--border); border-radius:6px; max-height:300px; overflow-y:auto; font-size:12.5px; line-height:1.5; text-align: left;">
+              <style>
+                .csv-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+                .csv-table th { background: var(--bg-section); padding: 8px 12px; border-bottom: 2px solid var(--border); font-weight: 600; color: var(--text-primary); position: sticky; top: 0; z-index: 10; }
+                .csv-table td { padding: 6px 12px; border-bottom: 1px solid var(--border); }
+                .csv-table tr:last-child td { border-bottom: none; }
+                .csv-table tr:hover td { background: rgba(0, 0, 0, 0.03); }
+                .csv-table code { font-size: 11.5px; background: rgba(0, 0, 0, 0.05); padding: 2px 4px; border-radius: 4px; border: 1px solid var(--border); }
+              </style>
+              <table class="csv-table">
+                <thead>
+                  <tr>
+                    <th style="width: 35%;">Column Name</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>sample</code></td><td>Sample name or identifier</td></tr>
+                  <tr><td><code>reads_path</code></td><td>Absolute path to the FASTQ/FASTA file(s) or directory</td></tr>
+                  <tr><td><code>organelle</code></td><td>Target organelle (e.g., mitochondria, chloroplast)</td></tr>
+                  <tr><td><code>genetic_code</code></td><td>Translation table number (e.g., 2, 5, 11)</td></tr>
+                  <tr><td><code>sequencing_type</code></td><td>Read technology (short-reads, pacbio, ont)</td></tr>
+                  <tr><td><code>run_trimming</code></td><td>Enable adapter trimming (Yes/No)</td></tr>
+                  <tr><td><code>annotation</code></td><td>Run genome annotation (Yes/No)</td></tr>
+                  <tr><td><code>run_nhmmer</code></td><td>Use NHMMER to extract seed sequence (Yes/No)</td></tr>
+                  <tr><td><code>run_images</code></td><td>Generate circular genome plots (Yes/No)</td></tr>
+                  <tr><td><code>adapters</code></td><td>Path to short-read adapters file</td></tr>
+                  <tr><td><code>minlength</code></td><td>Minimum read length post-trimming</td></tr>
+                  <tr><td><code>minquality</code></td><td>Minimum base quality for trimming</td></tr>
+                  <tr><td><code>pacbio_adapters</code></td><td>Cutadapt parameters for PacBio</td></tr>
+                  <tr><td><code>run_novoplasty</code></td><td>Run NOVOPlasty assembler (Yes/No)</td></tr>
+                  <tr><td><code>genome_range</code></td><td>Expected genome size range (e.g., 12000-22000)</td></tr>
+                  <tr><td><code>reference</code></td><td>Path to reference genome FASTA</td></tr>
+                  <tr><td><code>seed_format</code></td><td>Seed input format (fasta or gene_name)</td></tr>
+                  <tr><td><code>seed_file</code></td><td>Path to the seed FASTA file</td></tr>
+                  <tr><td><code>feature</code></td><td>Specific gene feature for NHMMER search</td></tr>
+                  <tr><td><code>search_ncbi</code></td><td>Fetch reference sequences from NCBI (Yes/No)</td></tr>
+                  <tr><td><code>search_genes</code></td><td>Comma-separated genes to search on NCBI</td></tr>
+                  <tr><td><code>search_term</code></td><td>Custom Entrez search term for NCBI</td></tr>
+                  <tr><td><code>max_references</code></td><td>Maximum number of NCBI references to download</td></tr>
+                  <tr><td><code>kmers</code></td><td>K-mer sizes for NOVOPlasty (e.g., 19,23,33)</td></tr>
+                  <tr><td><code>max_memory</code></td><td>Maximum RAM allocation (GB)</td></tr>
+                  <tr><td><code>reads_length</code></td><td>Expected read length (bp)</td></tr>
+                  <tr><td><code>insert_size</code></td><td>Expected insert size for paired-end</td></tr>
+                  <tr><td><code>run_getorganelle</code></td><td>Run GetOrganelle assembler (Yes/No)</td></tr>
+                  <tr><td><code>database</code></td><td>GetOrganelle database (e.g., animal_mt, embplant_pt)</td></tr>
+                  <tr><td><code>n_rounds</code></td><td>Number of extension rounds for GetOrganelle</td></tr>
+                  <tr><td><code>target_size</code></td><td>Expected target genome size (bp)</td></tr>
+                  <tr><td><code>spades_kmers</code></td><td>K-mer sizes for SPAdes assembly</td></tr>
+                  <tr><td><code>extra_flags</code></td><td>Extra command-line arguments for GetOrganelle</td></tr>
+                  <tr><td><code>search_species</code></td><td>Taxon name to query for reference databases</td></tr>
+                  <tr><td><code>n_references</code></td><td>Maximum references for MitoHifi processing</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
 
         </div>
 
