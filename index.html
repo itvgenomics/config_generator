@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="Pipeline Config Generator — generate YAML configurations for OrganPipe, Pipeasm, ProCura and PIMBA pipelines." />
-  <title>Pipeline Config Generator</title>
+    content="ITV Genomics — interactive configuration generators for OrganPipe, Pipeasm, ProCura and PIMBA bioinformatics pipelines." />
+  <title>ITV Genomics — Pipeline Config Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -20,16 +20,19 @@
   <nav class="top-bar" role="navigation" aria-label="Site header">
     <div class="top-bar-inner">
       <div class="brand-icon" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="5" width="4" height="12" rx="2" fill="white" opacity="1" />
+        <img src="assets/itvgenomics.png" alt="ITV Genomics logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+          style="width:38px;height:38px;object-fit:contain;border-radius:6px;" />
+        <svg style="display:none" width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="1" y="5" width="4" height="12" rx="2" fill="white" />
           <rect x="7" y="2" width="4" height="15" rx="2" fill="white" opacity="0.8" />
           <rect x="13" y="6" width="4" height="10" rx="2" fill="white" opacity="0.6" />
           <rect x="19" y="3" width="3" height="14" rx="1.5" fill="white" opacity="0.4" />
         </svg>
       </div>
-      <span class="brand-name">ITVGenomics</span>
+      <span class="brand-name">ITV Genomics</span>
       <div class="brand-divider" aria-hidden="true"></div>
-      <span class="brand-module">Pipeline Config Generator</span>
+      <span class="brand-module">Pipeline Config Hub</span>
       <div class="nav-spacer"></div>
       <div class="nav-badge">YAML</div>
     </div>
@@ -41,11 +44,13 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-eyebrow">
         <span class="eyebrow-line" aria-hidden="true"></span>
-        Pipeline Configuration
+        Bioinformatics · ITV Genomics
       </div>
-      <h1 class="hero-title" id="hero-title">Select a pipeline to configure</h1>
+      <h1 class="hero-title" id="hero-title">Create your pipeline configurations, instantly</h1>
       <p class="hero-subtitle">
-        Choose one of the available pipelines below to open the YAML configuration editor.
+        Interactive editors that build validated <code style="font-family:monospace;background:var(--bg-section);padding:1px 5px;border-radius:3px;font-size:0.9em">config.yaml</code>
+        files for ITV pipelines — no command-line required. Choose a pipeline below,
+        fill in the form, and download or copy your ready-to-use configuration.
       </p>
     </section>
 
@@ -77,11 +82,15 @@
             </div>
             <div class="card-content">
               <h2 class="card-title">OrganPipe</h2>
-              <p class="card-description">Orchestration pipeline for organ-level data processing and transformation
-                workflows.</p>
+              <p class="card-description">Iterative assembly and annotation of organellar genomes (plastomes and
+                mitogenomes) from Illumina short reads and PacBio/ONT long reads — using NOVOPlasty,
+                GetOrganelle, and MitoHifi with multiple seeds and k-mer combinations for high-accuracy
+                results.</p>
               <div class="card-tags">
-                <span class="tag">Orchestration</span>
-                <span class="tag">Data</span>
+                <span class="tag">Organelle</span>
+                <span class="tag">Assembly</span>
+                <span class="tag">Annotation</span>
+                <span class="tag">Short &amp; Long reads</span>
               </div>
             </div>
           </div>
@@ -113,11 +122,13 @@
             </div>
             <div class="card-content">
               <h2 class="card-title">Pipeasm</h2>
-              <p class="card-description">Assembly-level pipeline configuration for low-level build and compilation
-                sequences.</p>
+              <p class="card-description">Streamlined genome assembly following the VGP and DToL reference-quality
+                standards. Written in Snakemake with Docker and Singularity support, Pipeasm automates
+                the full assembly workflow from raw reads to polished, scaffolded assemblies.</p>
               <div class="card-tags">
-                <span class="tag">Assembly</span>
-                <span class="tag">Build</span>
+                <span class="tag">Genome Assembly</span>
+                <span class="tag">VGP / DToL</span>
+                <span class="tag">Snakemake</span>
               </div>
             </div>
           </div>
@@ -148,11 +159,13 @@
             </div>
             <div class="card-content">
               <h2 class="card-title">ProCura</h2>
-              <p class="card-description">Procurement and curation pipeline for resource management and validation
-                workflows.</p>
+              <p class="card-description">Modular genome curation and evaluation pipeline for diploid assemblies.
+                Runs in three modes — hapcuration, dualcuration, and finalgenome — using Snakemake and
+                Singularity to deliver reproducible, scalable quality control and validation.</p>
               <div class="card-tags">
-                <span class="tag">Procurement</span>
-                <span class="tag">Validation</span>
+                <span class="tag">Genome Curation</span>
+                <span class="tag">QC &amp; Evaluation</span>
+                <span class="tag">Diploid</span>
               </div>
             </div>
           </div>
@@ -184,11 +197,14 @@
             </div>
             <div class="card-content">
               <h2 class="card-title">PIMBA</h2>
-              <p class="card-description">PIpeline for MetaBarcoding Analysis — end-to-end metabarcoding
-                data processing and taxonomic classification workflows.</p>
+              <p class="card-description">PIpeline for MetaBarcoding Analysis — an open-source Snakemake workflow
+                supporting OTU- and ASV-based strategies, multiple reference databases, and automated
+                downstream analyses across three modules: Main Workflow, Tax reassignment, and Curate.</p>
               <div class="card-tags">
                 <span class="tag">Metabarcoding</span>
+                <span class="tag">OTU / ASV</span>
                 <span class="tag">Taxonomy</span>
+                <span class="tag">Snakemake</span>
               </div>
             </div>
           </div>
@@ -206,7 +222,7 @@
 
     <!-- Footer -->
     <footer class="site-footer">
-      <span class="footer-left">Pipeline Config Generator &mdash; ITVGenomics</span>
+      <span class="footer-left">Pipeline Config Hub &mdash; ITV Genomics</span>
       <span class="footer-right">v1.0.0</span>
     </footer>
 

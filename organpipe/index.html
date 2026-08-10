@@ -21,16 +21,19 @@
   <nav class="top-bar" role="navigation" aria-label="Site header">
     <div class="top-bar-inner">
       <div class="brand-icon" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <img src="../assets/itvgenomics.png" alt="ITV Genomics logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+          style="width:38px;height:38px;object-fit:contain;border-radius:6px;" />
+        <svg style="display:none" width="22" height="22" viewBox="0 0 22 22" fill="none">
           <rect x="1" y="5" width="4" height="12" rx="2" fill="white" />
           <rect x="7" y="2" width="4" height="15" rx="2" fill="white" opacity="0.8" />
           <rect x="13" y="6" width="4" height="10" rx="2" fill="white" opacity="0.6" />
           <rect x="19" y="3" width="3" height="14" rx="1.5" fill="white" opacity="0.4" />
         </svg>
       </div>
-      <span class="brand-name">ITVGenomics</span>
+      <span class="brand-name">ITV Genomics</span>
       <div class="brand-divider" aria-hidden="true"></div>
-      <span class="brand-module">Pipeline Config Generator</span>
+      <span class="brand-module">Pipeline Config Hub</span>
       <div class="nav-spacer"></div>
       <div class="nav-badge">YAML</div>
     </div>
@@ -70,7 +73,7 @@
       </div>
       <div class="op-header-text">
         <h1>OrganPipe Configuration</h1>
-        <p>Generate a <code>config.yaml</code> file for your organelle genome assembly pipeline</p>
+        <p>Generate a <code>config.yaml</code> or <code>config.csv</code> file for OrganPipe pipeline</p>
       </div>
       <div class="op-header-actions">
         <button id="btn-reset" class="op-btn op-btn-ghost" title="Reset all fields">
@@ -205,9 +208,11 @@
                 Sample Name <span class="field-required" title="Required">*</span>
               </label>
               <p class="field-hint">
-                Use <code>all</code> to process every sample in the reads directory.
-                Read filenames must include <code>_R1</code>/<code>_R2</code> or
-                <code>_pair1</code>/<code>_pair2</code>.
+                The name of the sample to process. Use <code>all</code> to process every sample found in the
+                <em>reads_path</em> directory automatically. Read filenames must include delimiters like
+                <code>_R1</code>/<code>_R2</code> or <code>_pair1</code>/<code>_pair2</code> to distinguish
+                paired-end reads. For short reads, ensure only <code>.fastq.gz</code> files are present in the
+                reads directory.
               </p>
               <input class="field-input" type="text" id="f-sample" placeholder="MySample  or  all" autocomplete="off" />
             </div>
@@ -217,9 +222,9 @@
                 Reads Path <span class="field-required" title="Required">*</span>
               </label>
               <p class="field-hint">
-                Directory containing your sequencing read files.
-                For short reads: only <code>.fastq.gz</code>. For long reads: <code>.fasta</code> or
-                <code>.fastq.gz</code>.
+                Directory path containing your sequencing read files. For short reads: only <code>.fastq.gz</code>
+                files should be present. For long reads: files can be <code>.fasta</code> or <code>.fastq.gz</code>.
+                The pipeline will scan this directory for all matching files.
               </p>
               <input class="field-input" type="text" id="f-reads-path" placeholder="/data/reads/MySample"
                 autocomplete="off" />
@@ -230,7 +235,10 @@
                 Organelle Type <span class="field-required" title="Required">*</span>
               </label>
               <p class="field-hint">
-                Type of organelle genome to assemble. Chloroplast only supports short reads.
+                Type of organelle genome to assemble. Choose <strong>Mitochondrial</strong> (<code>mito</code>) for
+                mitochondrial genome assembly — supports both short and long reads. Choose
+                <strong>Chloroplast</strong> (<code>chloro</code>) for plastome assembly — only Illumina short reads
+                are supported for chloroplast.
               </p>
               <div class="segmented-control" role="radiogroup" aria-label="Organelle type">
                 <label class="segment" id="seg-mito">
@@ -265,11 +273,31 @@
               </p>
             </div>
 
+            <div class="field-group" id="fg-genetic-code">
+              <label class="field-label" for="f-genetic-code">Genetic Code</label>
+              <p class="field-hint">
+                NCBI translation table number used for mitochondrial genome annotation. This defines which
+                codon table is applied when translating CDS features. Common values:
+                <code>1</code> = Standard (most eukaryotes, nuclear genomes),
+                <code>2</code> = Vertebrate Mitochondrial (fish, amphibians, reptiles, birds, mammals),
+                <code>5</code> = Invertebrate Mitochondrial (insects, worms, molluscs, most invertebrates),
+                <code>11</code> = Bacterial, Archaeal &amp; Plant Plastid (chloroplast annotation).
+                See <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank"
+                rel="noopener">NCBI Genetic Codes</a> for the full list.
+              </p>
+              <input class="field-input" type="number" id="f-genetic-code" min="1" max="33" placeholder="e.g. 1 (Standard)" />
+            </div>
+
             <div class="field-group" id="fg-seq-type">
               <label class="field-label">
                 Sequencing Type <span class="field-required" title="Required">*</span>
               </label>
-              <p class="field-hint">Illumina short reads or PacBio/ONT long reads.</p>
+              <p class="field-hint">
+                Type of sequencing technology used. Choose <strong>Short reads</strong> for Illumina data
+                (<code>.fastq.gz</code>). Choose <strong>Long reads</strong> for PacBio or ONT data
+                (<code>.fasta</code> or <code>.fastq.gz</code>). Note: chloroplast assembly only supports short
+                reads; long reads are only supported for mitochondrial assembly.
+              </p>
               <div class="segmented-control" role="radiogroup" aria-label="Sequencing type">
                 <label class="segment" id="seg-short">
                   <input type="radio" name="sequencing_type" value="Short" />
@@ -310,7 +338,7 @@
               <h2 class="section-title">Quality Control</h2>
               <p class="section-desc">Adapter trimming and read filtering</p>
             </div>
-            <span class="section-tool-badge">Fastp</span>
+            <span class="section-tool-badge">Fastp / Cutadapt</span>
           </div>
           <div class="section-body">
 
@@ -318,7 +346,12 @@
               <label class="field-label">
                 Run Trimming <span class="field-required" title="Required">*</span>
               </label>
-              <p class="field-hint">Use Fastp for adapter trimming and quality control.</p>
+              <p class="field-hint">
+                Run <strong>Fastp</strong> for adapter trimming and quality control on short reads. For long PacBio
+                reads, <strong>Cutadapt</strong> is used instead (only <code>.fastq.gz</code> is supported for
+                long-read trimming). Select <em>No</em> to skip this step and proceed directly to assembly with
+                raw reads.
+              </p>
               <div class="yn-control" role="radiogroup" aria-label="Run trimming">
                 <label class="yn-pill"><input type="radio" name="run_trimming" value="Yes"><span>Yes</span></label>
                 <label class="yn-pill"><input type="radio" name="run_trimming" value="No"><span>No</span></label>
@@ -331,7 +364,9 @@
               <div class="field-group" id="fg-adapters">
                 <label class="field-label" for="f-adapters">Adapters File</label>
                 <p class="field-hint">
-                  Path to a text file with adapter sequences. Leave blank for automatic detection by Fastp.
+                  Path to a plain-text file listing adapter sequences to be removed by Fastp, one per line.
+                  Leave blank to let Fastp auto-detect adapters from the reads — this works well for most
+                  standard Illumina libraries. Only applicable for short reads.
                 </p>
                 <input class="field-input" type="text" id="f-adapters" placeholder="/path/to/adapters.txt  (optional)"
                   autocomplete="off" />
@@ -340,12 +375,12 @@
               <div class="field-row">
                 <div class="field-group" id="fg-minlength">
                   <label class="field-label" for="f-minlength">Min Read Length</label>
-                  <p class="field-hint">Reads shorter than this length will be discarded.</p>
+                  <p class="field-hint">Reads shorter than this length (in bp) after trimming will be discarded. Typical values: 50–100 bp.</p>
                   <input class="field-input" type="number" id="f-minlength" min="1" placeholder="e.g. 50" />
                 </div>
                 <div class="field-group" id="fg-minquality">
                   <label class="field-label" for="f-minquality">Min Base Quality</label>
-                  <p class="field-hint">Minimum Phred quality score for base trimming.</p>
+                  <p class="field-hint">Minimum Phred quality score (Q-score) for base trimming. Bases below this threshold are trimmed. Common value: 20 (Q20 = 99% accuracy).</p>
                   <input class="field-input" type="number" id="f-minquality" min="1" max="40" placeholder="e.g. 20" />
                 </div>
               </div>
@@ -357,7 +392,9 @@
               <div class="field-group" id="fg-pacbio-adapters">
                 <label class="field-label" for="f-pacbio-adapters">PacBio Adapter Sequences</label>
                 <p class="field-hint">
-                  Cutadapt adapter arguments. Files must be <code>.fastq.gz</code>. Modify if you need custom adapters.
+                  Cutadapt adapter arguments for PacBio long-read trimming. The default values are the standard
+                  PacBio SMRTbell adapter sequences. Files must be in <code>.fastq.gz</code> format for this
+                  step. Modify only if you are using custom or non-standard adapters.
                 </p>
                 <textarea class="field-input field-textarea" id="f-pacbio-adapters" rows="3"
                   spellcheck="false">-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT</textarea>
@@ -369,157 +406,11 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 3: Assembly — Short reads only     -->
-        <!-- ─────────────────────────────────────────── -->
-        <section class="form-section reveal-section" id="section-assembly" aria-hidden="true">
-          <div class="section-header">
-            <div class="section-step">3</div>
-            <div class="section-header-text">
-              <h2 class="section-title">Assembly Configuration</h2>
-              <p class="section-desc">Seed files, NCBI search, and assembly parameters</p>
-            </div>
-            <span class="section-tool-badge">NOVOPlasty</span>
-          </div>
-          <div class="section-body">
-
-            <div class="field-group" id="fg-reference">
-              <label class="field-label" for="f-reference">Reference Genome</label>
-              <p class="field-hint">
-                Optional. Path to a reference FASTA file to guide assembly and resolve duplicated regions (mitochondria)
-                or inverted repeats (chloroplast).
-              </p>
-              <input class="field-input" type="text" id="f-reference" placeholder="/path/to/reference.fasta  (optional)"
-                autocomplete="off" />
-            </div>
-
-            <!-- Subsection: Seed -->
-            <div class="subsection-divider">
-              <span>Seed Configuration</span>s
-            </div>
-
-            <div class="field-group" id="fg-seed-format">
-              <label class="field-label" for="f-seed-format">Seed Format</label>
-              <p class="field-hint">Format of the seed file used to initialize assembly. Leave as "None" if using NCBI
-                search.</p>
-              <select class="field-select" id="f-seed-format">
-                <option value="">— None (Search NCBI must be set to Yes) —</option>
-                <option value="fasta">FASTA</option>
-                <option value="genbank">GenBank</option>
-              </select>
-            </div>
-
-            <div id="group-seed-file" class="conditional-group hidden">
-              <div class="field-group" id="fg-seed-file">
-                <label class="field-label" for="f-seed-file">Seed File Path</label>
-                <p class="field-hint">Path to the seed file in the format selected above.</p>
-                <input class="field-input" type="text" id="f-seed-file" placeholder="/path/to/seed.fasta"
-                  autocomplete="off" />
-              </div>
-            </div>
-
-            <div id="group-feature" class="conditional-group hidden">
-              <div class="field-group" id="fg-feature">
-                <label class="field-label" for="f-feature">GenBank Feature</label>
-                <p class="field-hint">Feature type from the GenBank seed file to use for assembly.</p>
-                <select class="field-select" id="f-feature">
-                  <option value="">— Select feature —</option>
-                  <option value="CDS">CDS</option>
-                  <option value="rRNA">rRNA</option>
-                  <option value="tRNA">tRNA</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Subsection: NCBI -->
-            <div class="subsection-divider">
-              <span>NCBI Search</span>
-              <span class="subsection-note">Use when no seed file is available — set Seed Format to None</span>
-            </div>
-
-            <div class="field-group" id="fg-search-ncbi">
-              <label class="field-label">
-                Search NCBI <span class="field-required" title="Required">*</span>
-              </label>
-              <p class="field-hint">Automatically fetch reference sequences from NCBI to use as seeds.</p>
-              <div class="yn-control" role="radiogroup" aria-label="Search NCBI">
-                <label class="yn-pill"><input type="radio" name="search_ncbi" value="Yes"><span>Yes</span></label>
-                <label class="yn-pill"><input type="radio" name="search_ncbi" value="No"><span>No</span></label>
-              </div>
-            </div>
-
-            <div id="group-ncbi-fields" class="conditional-group hidden">
-
-              <div class="field-group" id="fg-search-genes">
-                <label class="field-label" for="f-search-genes">Genes to Search</label>
-                <p class="field-hint">Comma-separated gene names to query on NCBI (e.g., <code>COI,16S,ATP6</code>).</p>
-                <input class="field-input" type="text" id="f-search-genes" placeholder="COI,16S,ATP6"
-                  autocomplete="off" />
-              </div>
-
-              <div class="field-row">
-                <div class="field-group" id="fg-search-term">
-                  <label class="field-label" for="f-search-term">Taxon Name</label>
-                  <p class="field-hint">Taxon for NCBI query (e.g., <code>Amphisbaena</code>).</p>
-                  <input class="field-input" type="text" id="f-search-term" placeholder="e.g. Amphisbaena"
-                    autocomplete="off" />
-                </div>
-                <div class="field-group" id="fg-max-refs">
-                  <label class="field-label" for="f-max-refs">Max References</label>
-                  <p class="field-hint">Max sequences to download per gene.</p>
-                  <input class="field-input" type="number" id="f-max-refs" min="1" placeholder="e.g. 5" />
-                </div>
-              </div>
-
-            </div><!-- /group-ncbi-fields -->
-
-            <!-- Subsection: Assembly Parameters -->
-            <div class="subsection-divider">
-              <span>Assembly Parameters</span>
-            </div>
-
-            <div class="field-group" id="fg-genome-range">
-              <label class="field-label" for="f-genome-range">Genome Size Range (bp)</label>
-              <p class="field-hint">Expected genome size in base pairs (e.g., <code>15000-18000</code> for mitochondria,
-                <code>130000-160000</code> for chloroplast).
-              </p>
-              <input class="field-input" type="text" id="f-genome-range" placeholder="15000-18000" autocomplete="off" />
-            </div>
-
-            <div class="field-group" id="fg-kmers">
-              <label class="field-label" for="f-kmers">K-mer Sizes</label>
-              <p class="field-hint">Comma-separated k-mer sizes for assembly (e.g., <code>19,23,28,33,39</code>).</p>
-              <input class="field-input" type="text" id="f-kmers" placeholder="19,23,28,33,39" autocomplete="off" />
-            </div>
-
-            <div class="field-row">
-              <div class="field-group" id="fg-max-memory">
-                <label class="field-label" for="f-max-memory">Max Memory (GB)</label>
-                <p class="field-hint">RAM limit for assembly.</p>
-                <input class="field-input" type="number" id="f-max-memory" min="1" placeholder="e.g. 16" />
-              </div>
-              <div class="field-group" id="fg-reads-length">
-                <label class="field-label" for="f-reads-length">Read Length (bp)</label>
-                <p class="field-hint">Sequencing read length.</p>
-                <input class="field-input" type="number" id="f-reads-length" min="1" placeholder="e.g. 150" />
-              </div>
-            </div>
-
-            <div class="field-group" id="fg-insert-size">
-              <label class="field-label" for="f-insert-size">Insert Size (bp)</label>
-              <p class="field-hint">Average insert size of the sequencing library.</p>
-              <input class="field-input" type="number" id="f-insert-size" min="1" placeholder="e.g. 300" />
-            </div>
-
-          </div>
-        </section>
-
-
-        <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 4: Pipeline Steps                  -->
+        <!-- SECTION 3: Pipeline Steps                  -->
         <!-- ─────────────────────────────────────────── -->
         <section class="form-section reveal-section" id="section-steps" aria-hidden="true">
           <div class="section-header">
-            <div class="section-step" id="steps-step-number">4</div>
+            <div class="section-step" id="steps-step-number">3</div>
             <div class="section-header-text">
               <h2 class="section-title">Pipeline Steps</h2>
               <p class="section-desc">Configure annotation, nhmmer search, and visualization</p>
@@ -527,14 +418,17 @@
           </div>
           <div class="section-body">
 
-            <!-- annotation — Short reads + Long mito -->
+            <!-- annotation — Short reads only -->
             <div id="group-annotation" class="conditional-group hidden">
               <div class="field-group" id="fg-annotation">
                 <label class="field-label">
                   Run Annotation <span class="field-required" title="Required">*</span>
                 </label>
-                <p class="field-hint">Run the annotation pipeline for the assembled organelle genome. Not supported for
-                  chloroplast long reads.</p>
+                <p class="field-hint">
+                  Run the annotation pipeline for the assembled organelle genome. Uses
+                  <strong>MITOS</strong> for mitochondria and <strong>GeSeq / PGA</strong> for chloroplast.
+                  For long-read mitochondrial data, annotation is handled automatically by MitoHifi.
+                </p>
                 <div class="yn-control" role="radiogroup" aria-label="Run annotation">
                   <label class="yn-pill"><input type="radio" name="annotation" value="Yes"
                       checked><span>Yes</span></label>
@@ -543,60 +437,394 @@
               </div>
             </div>
 
-            <!-- Fields that only appear when annotation = Yes -->
-            <div id="group-annotation-fields" class="conditional-group hidden">
-
-              <div class="field-group" id="fg-genetic-code">
-                <label class="field-label" for="f-genetic-code">Genetic Code</label>
-                <p class="field-hint">
-                  NCBI translation table number for annotation (e.g., <code>1</code> = Standard, <code>4</code> =
-                  Mold/Protozoa, <code>5</code> = Invertebrate Mitochondrial). See <a
-                    href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank" rel="noopener">NCBI
-                    genetic codes</a>.
-                </p>
-                <input class="field-input" type="number" id="f-genetic-code" min="1" max="33" placeholder="e.g. 1" />
-              </div>
-
+            <!-- nhmmer — Short(annYes) OR Long mito -->
+            <div id="group-nhmmer" class="conditional-group hidden">
               <div class="field-group" id="fg-run-nhmmer">
                 <label class="field-label">
-                  Run nhmmer <span class="field-required" title="Required">*</span>
+                  Run NHMMER <span class="field-required" title="Required">*</span>
                 </label>
-                <p class="field-hint">Identify non-coding RNA and intergenic regions using nhmmer.</p>
+                <p class="field-hint">
+                  Run <strong>nhmmer</strong> to identify non-coding RNA (ncRNA) features and intergenic regions
+                  in the assembled genome using profile Hidden Markov Models (HMMs) against the Rfam database.
+                  Useful for annotating tRNAs, rRNAs, and other structural RNAs missed by standard annotation.
+                  The HMM database is provided with the <code>-nhmmer_db</code> flag when executing the pipeline.
+                </p>
                 <div class="yn-control" role="radiogroup" aria-label="Run nhmmer">
                   <label class="yn-pill"><input type="radio" name="run_nhmmer" value="Yes"><span>Yes</span></label>
                   <label class="yn-pill"><input type="radio" name="run_nhmmer" value="No"
                       checked><span>No</span></label>
                 </div>
               </div>
+            </div>
 
-              <div id="group-nhmmer-db" class="conditional-group hidden">
-                <div class="field-group" id="fg-nhmmer-db">
-                  <label class="field-label" for="f-nhmmer-db">nhmmer Database Path</label>
-                  <p class="field-hint">Path to the HMM database file for nhmmer.</p>
-                  <input class="field-input" type="text" id="f-nhmmer-db" value="resources/rfam.hmm"
+            <!-- run_images — Short reads + annotation=Yes only -->
+            <div id="group-run-images" class="conditional-group hidden">
+              <div class="field-group" id="fg-run-images">
+                <label class="field-label">
+                  Generate Images <span class="field-required" title="Required">*</span>
+                </label>
+                <p class="field-hint">
+                  Generate visualizations for the assembled genome, including <strong>OGDraw</strong> circular
+                  genome diagrams, read depth coverage plots, and recruitment plots. Only supported for short-read
+                  assemblies. Not available for long-read data.
+                </p>
+                <div class="yn-control" role="radiogroup" aria-label="Generate images">
+                  <label class="yn-pill"><input type="radio" name="run_images" value="Yes"><span>Yes</span></label>
+                  <label class="yn-pill"><input type="radio" name="run_images" value="No"
+                      checked><span>No</span></label>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 4: NOVOPlasty Assembly             -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section reveal-section" id="section-novoplasty" aria-hidden="true">
+          <div class="section-header">
+            <div class="section-step" id="novo-step-number">4</div>
+            <div class="section-header-text">
+              <h2 class="section-title">NOVOPlasty Assembly</h2>
+              <p class="section-desc">Seed-based organelle genome assembler — short reads only</p>
+            </div>
+            <span class="section-tool-badge">NOVOPlasty</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-run-novoplasty">
+              <label class="field-label">
+                Run NOVOPlasty <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">
+                Run <strong>NOVOPlasty</strong> for organelle genome assembly. NOVOPlasty is a seed-and-extend
+                assembler designed specifically for organelle genomes that works directly on raw Illumina reads.
+                At least one of NOVOPlasty or GetOrganelle should be enabled.
+              </p>
+              <div class="yn-control" role="radiogroup" aria-label="Run NOVOPlasty">
+                <label class="yn-pill"><input type="radio" name="run_novoplasty" value="Yes" checked><span>Yes</span></label>
+                <label class="yn-pill"><input type="radio" name="run_novoplasty" value="No"><span>No</span></label>
+              </div>
+            </div>
+
+            <!-- NOVOPlasty parameters — hidden when run_novoplasty = No -->
+            <div id="group-novo-params" class="conditional-group">
+
+              <div class="field-group" id="fg-reference">
+                <label class="field-label" for="f-reference">Reference Genome</label>
+                <p class="field-hint">
+                  Optional. Path to a reference genome in FASTA format. NOVOPlasty uses this as a guide to
+                  resolve duplicated regions in plant mitochondria or the inverted repeat (IR) in chloroplasts.
+                  If not available, leave blank and use a seed file or NCBI search instead.
+                </p>
+                <input class="field-input" type="text" id="f-reference" placeholder="/path/to/reference.fasta  (optional)"
+                  autocomplete="off" />
+              </div>
+
+              <!-- Subsection: Seed -->
+              <div class="subsection-divider">
+                <span>Seed Configuration</span>
+              </div>
+
+              <div class="field-group" id="fg-seed-format">
+                <label class="field-label" for="f-seed-format">Seed Format</label>
+                <p class="field-hint">
+                  Format of the seed file used to initialize NOVOPlasty assembly. The seed should contain a
+                  known gene or sequence from the target organelle. Choose <em>FASTA</em> for a plain sequence
+                  file, or <em>GenBank</em> to use a GenBank-annotated file (you will then specify which feature
+                  type to use). Leave as <em>None</em> if you want to fetch seeds automatically from NCBI.
+                  For long-read sequencing, leave this blank and use Search NCBI.
+                </p>
+                <select class="field-select" id="f-seed-format">
+                  <option value="">— None (Search NCBI must be set to Yes) —</option>
+                  <option value="fasta">FASTA</option>
+                  <option value="genbank">GenBank</option>
+                </select>
+              </div>
+
+              <div id="group-seed-file" class="conditional-group hidden">
+                <div class="field-group" id="fg-seed-file">
+                  <label class="field-label" for="f-seed-file">Seed File Path</label>
+                  <p class="field-hint">Path to the seed file in the format selected above. The seed should be a short sequence (e.g., a mitochondrial gene) from a closely related organism.</p>
+                  <input class="field-input" type="text" id="f-seed-file" placeholder="/path/to/seed.fasta"
                     autocomplete="off" />
                 </div>
               </div>
 
-              <!-- run_images — Short reads only -->
-              <div id="group-run-images" class="conditional-group hidden">
-                <div class="field-group" id="fg-run-images">
-                  <label class="field-label">
-                    Generate Images <span class="field-required" title="Required">*</span>
-                  </label>
-                  <p class="field-hint">Generate OGDraw diagrams, read depth plots.</p>
-                  <div class="yn-control" role="radiogroup" aria-label="Generate images">
-                    <label class="yn-pill"><input type="radio" name="run_images" value="Yes"><span>Yes</span></label>
-                    <label class="yn-pill"><input type="radio" name="run_images" value="No"
-                        checked><span>No</span></label>
-                  </div>
+              <div id="group-feature" class="conditional-group hidden">
+                <div class="field-group" id="fg-feature">
+                  <label class="field-label" for="f-feature">GenBank Feature</label>
+                  <p class="field-hint">
+                    Feature type to extract from the GenBank seed file for assembly initialization.
+                    <strong>CDS</strong> = protein-coding sequences, <strong>rRNA</strong> = ribosomal RNA genes,
+                    <strong>tRNA</strong> = transfer RNA genes.
+                  </p>
+                  <select class="field-select" id="f-feature">
+                    <option value="">— Select feature —</option>
+                    <option value="CDS">CDS</option>
+                    <option value="rRNA">rRNA</option>
+                    <option value="tRNA">tRNA</option>
+                  </select>
                 </div>
               </div>
 
-            </div><!-- /group-annotation-fields -->
+              <!-- Subsection: NCBI -->
+              <div class="subsection-divider">
+                <span>NCBI Search</span>
+                <span class="subsection-note">Use when no seed file is available — set Seed Format to None</span>
+              </div>
+
+              <div class="field-group" id="fg-search-ncbi">
+                <label class="field-label">
+                  Search NCBI <span class="field-required" title="Required">*</span>
+                </label>
+                <p class="field-hint">
+                  Automatically search and download reference sequences from NCBI to use as seeds for assembly.
+                  Requires internet access. Set <em>Seed Format</em> to None when this is enabled. For long
+                  reads, this must be set to <em>Yes</em>. Set to <em>No</em> if you are providing a local seed
+                  file above.
+                </p>
+                <div class="yn-control" role="radiogroup" aria-label="Search NCBI">
+                  <label class="yn-pill"><input type="radio" name="search_ncbi" value="Yes"><span>Yes</span></label>
+                  <label class="yn-pill"><input type="radio" name="search_ncbi" value="No"><span>No</span></label>
+                </div>
+              </div>
+
+              <div id="group-ncbi-fields" class="conditional-group hidden">
+
+                <div class="field-group" id="fg-search-genes">
+                  <label class="field-label" for="f-search-genes">Genes to Search</label>
+                  <p class="field-hint">
+                    Comma-separated list of gene names to query on NCBI. These genes will be used as seeds for
+                    assembly. Examples for mitochondria: <code>COI,16S,ATP6</code>. Examples for chloroplast:
+                    <code>rbcL,matK,trnL</code>. At least one gene is required when NCBI search is enabled.
+                  </p>
+                  <input class="field-input" type="text" id="f-search-genes" placeholder="COI,16S,ATP6"
+                    autocomplete="off" />
+                </div>
+
+                <div class="field-row">
+                  <div class="field-group" id="fg-search-term">
+                    <label class="field-label" for="f-search-term">Taxon Name</label>
+                    <p class="field-hint">Taxonomic name used as the NCBI query (e.g., <code>Amphisbaena</code>, <code>Homo sapiens</code>). Narrows the search to sequences from related species.</p>
+                    <input class="field-input" type="text" id="f-search-term" placeholder="e.g. Amphisbaena"
+                      autocomplete="off" />
+                  </div>
+                  <div class="field-group" id="fg-max-refs">
+                    <label class="field-label" for="f-max-refs">Max References</label>
+                    <p class="field-hint">Maximum number of reference sequences to download from NCBI per gene. Higher values increase coverage but slow download. Typical: 3–10.</p>
+                    <input class="field-input" type="number" id="f-max-refs" min="1" placeholder="e.g. 5" />
+                  </div>
+                </div>
+
+              </div><!-- /group-ncbi-fields -->
+
+              <!-- Subsection: Assembly Parameters -->
+              <div class="subsection-divider">
+                <span>Assembly Parameters</span>
+              </div>
+
+              <div class="field-group" id="fg-genome-range">
+                <label class="field-label" for="f-genome-range">Genome Size Range (bp)</label>
+                <p class="field-hint">
+                  Expected genome size range in base pairs. NOVOPlasty uses this to determine when assembly
+                  is complete. Typical ranges: <code>15000–18000</code> for animal mitochondria,
+                  <code>200000–650000</code> for plant mitochondria, <code>130000–160000</code> for chloroplast.
+                  Format: <code>min-max</code>.
+                </p>
+                <input class="field-input" type="text" id="f-genome-range" placeholder="15000-18000" autocomplete="off" />
+              </div>
+
+              <div class="field-group" id="fg-kmers">
+                <label class="field-label" for="f-kmers">K-mer Sizes</label>
+                <p class="field-hint">
+                  Comma-separated list of k-mer sizes for the assembly graph. NOVOPlasty will try each k-mer
+                  size. Smaller k-mers improve sensitivity for low-coverage regions; larger k-mers improve
+                  specificity. Recommended: <code>19,23,33</code> for standard Illumina libraries.
+                </p>
+                <input class="field-input" type="text" id="f-kmers" placeholder="19,23,28,33,39" autocomplete="off" />
+              </div>
+
+              <div class="field-row">
+                <div class="field-group" id="fg-max-memory">
+                  <label class="field-label" for="f-max-memory">Max Memory (GB)</label>
+                  <p class="field-hint">Maximum RAM (in GB) allowed during assembly. Set this to the available memory on your system to prevent out-of-memory errors.</p>
+                  <input class="field-input" type="number" id="f-max-memory" min="1" placeholder="e.g. 16" />
+                </div>
+                <div class="field-group" id="fg-reads-length">
+                  <label class="field-label" for="f-reads-length">Read Length (bp)</label>
+                  <p class="field-hint">Sequencing read length in base pairs. For Illumina: typically 100, 150, or 250 bp. Check your sequencing report if unsure.</p>
+                  <input class="field-input" type="number" id="f-reads-length" min="1" placeholder="e.g. 150" />
+                </div>
+              </div>
+
+              <div class="field-group" id="fg-insert-size">
+                <label class="field-label" for="f-insert-size">Insert Size (bp)</label>
+                <p class="field-hint">
+                  Average insert size of the sequencing library in base pairs — the distance between the two
+                  paired-end read adapters. Typical values: 300–500 bp for standard paired-end libraries.
+                  Check your library preparation protocol or sequencing QC report.
+                </p>
+                <input class="field-input" type="number" id="f-insert-size" min="1" placeholder="e.g. 300" />
+              </div>
+
+            </div><!-- /group-novo-params -->
 
           </div>
         </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 5: GetOrganelle — short reads only -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section reveal-section" id="section-getorganelle" aria-hidden="true">
+          <div class="section-header">
+            <div class="section-step" id="go-step-number">5</div>
+            <div class="section-header-text">
+              <h2 class="section-title">GetOrganelle Assembly</h2>
+              <p class="section-desc">Graph-based organelle assembler — short reads only</p>
+            </div>
+            <span class="section-tool-badge">GetOrganelle</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-run-getorganelle">
+              <label class="field-label">
+                Run GetOrganelle <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">
+                Run <strong>GetOrganelle</strong> for organelle genome assembly. GetOrganelle uses an iterative
+                read-enrichment and graph-based approach to assemble organelle genomes from Illumina short reads.
+                It can handle multi-organelle assembly and complex repeat structures. Can be run alongside
+                NOVOPlasty for cross-validation.
+              </p>
+              <div class="yn-control" role="radiogroup" aria-label="Run GetOrganelle">
+                <label class="yn-pill"><input type="radio" name="run_getorganelle" value="Yes"><span>Yes</span></label>
+                <label class="yn-pill"><input type="radio" name="run_getorganelle" value="No" checked><span>No</span></label>
+              </div>
+            </div>
+
+            <!-- GetOrganelle fields — shown when run_getorganelle = Yes -->
+            <div id="group-go-fields" class="conditional-group hidden">
+
+              <div class="field-group" id="fg-database">
+                <label class="field-label" for="f-database">Organelle Database</label>
+                <p class="field-hint">
+                  The organelle-type database flag used by GetOrganelle (<code>-F</code> option). Select the
+                  type that matches your target organelle:
+                  <code>embplant_pt</code> (land plant plastome),
+                  <code>other_pt</code> (non-land plant plastome),
+                  <code>embplant_mt</code> (plant mitogenome),
+                  <code>embplant_nr</code> (plant nuclear rDNA),
+                  <code>animal_mt</code> (animal mitogenome),
+                  <code>fungus_mt</code> (fungal mitogenome),
+                  <code>fungus_nr</code> (fungal nuclear rDNA).
+                  Multiple types can be combined with commas (e.g., <code>embplant_mt,other_pt</code>).
+                </p>
+                <select class="field-select" id="f-database">
+                  <option value="">— Select database —</option>
+                  <option value="embplant_pt">embplant_pt — Land plant plastome</option>
+                  <option value="other_pt">other_pt — Non-land plant plastome</option>
+                  <option value="embplant_mt">embplant_mt — Plant mitogenome</option>
+                  <option value="embplant_nr">embplant_nr — Plant nuclear rDNA</option>
+                  <option value="animal_mt">animal_mt — Animal mitogenome</option>
+                  <option value="fungus_mt">fungus_mt — Fungal mitogenome</option>
+                  <option value="fungus_nr">fungus_nr — Fungal nuclear rDNA</option>
+                </select>
+              </div>
+
+              <div class="field-row">
+                <div class="field-group" id="fg-n-rounds">
+                  <label class="field-label" for="f-n-rounds">Max Extending Rounds</label>
+                  <p class="field-hint">
+                    Maximum number of read-enrichment rounds (<code>-R</code>). Higher values assemble more of
+                    the genome but take longer. Defaults: <code>15</code> (embplant_pt), <code>30</code>
+                    (embplant_mt / other_pt), <code>10</code> (animal/fungus/nr). Minimum recommended: 2.
+                  </p>
+                  <input class="field-input" type="number" id="f-n-rounds" min="2" placeholder="e.g. 15" />
+                </div>
+                <div class="field-group" id="fg-target-size">
+                  <label class="field-label" for="f-target-size">Target Genome Size (bp)</label>
+                  <p class="field-hint">
+                    Hypothetical target genome size used to estimate word size (<code>-t</code>). Defaults:
+                    <code>130000</code> (embplant_pt), <code>390000</code> (embplant_mt), <code>13000</code>
+                    (animal_mt), <code>65000</code> (fungus_mt). For multi-organelle mode, provide a
+                    comma-separated list matching each database type.
+                  </p>
+                  <input class="field-input" type="text" id="f-target-size" placeholder="e.g. 130000" />
+                </div>
+              </div>
+
+              <div class="field-group" id="fg-spades-kmers">
+                <label class="field-label" for="f-spades-kmers">SPAdes K-mer Sizes</label>
+                <p class="field-hint">
+                  K-mer sizes for the internal SPAdes assembler, in the same format as SPAdes (<code>-k</code>).
+                  Comma-separated list, e.g., <code>21,55,85,115</code>. Using a range of k-mer sizes improves
+                  assembly quality across varying coverage regions.
+                </p>
+                <input class="field-input" type="text" id="f-spades-kmers" placeholder="e.g. 21,55,85,115"
+                  autocomplete="off" />
+              </div>
+
+              <div class="field-group" id="fg-extra-flags">
+                <label class="field-label" for="f-extra-flags">Extra Flags</label>
+                <p class="field-hint">
+                  Any additional command-line flags to pass directly to the GetOrganelle command. Use this for
+                  advanced tuning not covered by the options above. Refer to the
+                  <a href="https://github.com/Kinggerm/GetOrganelle" target="_blank" rel="noopener">GetOrganelle
+                  documentation</a> for available flags.
+                </p>
+                <input class="field-input" type="text" id="f-extra-flags" placeholder="e.g. --reduce-reads-for-coverage inf"
+                  autocomplete="off" />
+              </div>
+
+            </div><!-- /group-go-fields -->
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 6: MitoHifi — long mito only       -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section reveal-section" id="section-mitohifi" aria-hidden="true">
+          <div class="section-header">
+            <div class="section-step" id="mh-step-number">4</div>
+            <div class="section-header-text">
+              <h2 class="section-title">MitoHifi Assembly</h2>
+              <p class="section-desc">Long-read mitogenome assembler — long reads + mito only</p>
+            </div>
+            <span class="section-tool-badge">MitoHifi</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-group" id="fg-search-species">
+              <label class="field-label" for="f-search-species">Search Species</label>
+              <p class="field-hint">
+                Taxon name used to search NCBI for complete mitogenome reference sequences for MitoHifi
+                assembly (e.g., <code>Amphisbaena</code>, <code>Homo sapiens</code>). MitoHifi requires a
+                closely related complete mitochondrial genome as a reference to guide assembly from long reads.
+                This should be a genus or species name present in NCBI.
+              </p>
+              <input class="field-input" type="text" id="f-search-species" placeholder="e.g. Amphisbaena"
+                autocomplete="off" />
+            </div>
+
+            <div class="field-group" id="fg-n-references">
+              <label class="field-label" for="f-n-references">Number of References</label>
+              <p class="field-hint">
+                Maximum number of complete mitogenome reference sequences to download from NCBI per search.
+                More references improve the probability of finding a suitable guide genome, but increase
+                download and processing time. Typical value: 3–10.
+              </p>
+              <input class="field-input" type="number" id="f-n-references" min="1" placeholder="e.g. 5" />
+            </div>
+
+          </div>
+        </section>
+
 
       </div><!-- /form-panel -->
 

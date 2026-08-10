@@ -11,6 +11,7 @@ const state = {
   sample: '',
   reads_path: '',
   organelle: '',
+  genetic_code: '',
   sequencing_type: '',
 
   // Section 2: Quality Control
@@ -20,7 +21,14 @@ const state = {
   minquality: '',
   pacbio_adapters: '-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT',
 
-  // Section 3: Assembly (NOVOPlasty)
+  // Section 3: Pipeline Steps
+  annotation: 'Yes',
+  run_nhmmer: 'No',
+  run_images: 'No',
+
+  // Section 4: NOVOPlasty Assembly
+  run_novoplasty: 'Yes',
+  genome_range: '',
   reference: '',
   seed_format: '',
   seed_file: '',
@@ -29,18 +37,22 @@ const state = {
   search_genes: '',
   search_term: '',
   max_references: '',
-  genome_range: '',
   kmers: '',
   max_memory: '',
   reads_length: '',
   insert_size: '',
 
-  // Section 4: Pipeline Steps
-  annotation: 'Yes',
-  genetic_code: '',
-  run_nhmmer: 'No',
-  nhmmer_db: 'resources/rfam.hmm',
-  run_images: 'No',
+  // Section 5: GetOrganelle
+  run_getorganelle: 'No',
+  database: '',
+  n_rounds: '',
+  target_size: '',
+  spades_kmers: '',
+  extra_flags: '',
+
+  // Section 6: MitoHifi
+  search_species: '',
+  n_references: '',
 
   // Output format
   format: 'yaml',        // 'yaml' | 'csv'
@@ -72,12 +84,6 @@ function hideSection(id) {
   if (!el) return;
   el.setAttribute('aria-hidden', 'true');
   el.classList.remove('visible', 'revealed');
-  // After transition, hide so it doesn't take up space
-  setTimeout(() => {
-    if (!el.classList.contains('visible')) {
-      // Still hidden — ok
-    }
-  }, 400);
 }
 
 function setFieldValue(id, value) {
@@ -95,9 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setRadio('annotation', state.annotation);
   setRadio('run_nhmmer', state.run_nhmmer);
   setRadio('run_images', state.run_images);
+  setRadio('run_novoplasty', state.run_novoplasty);
+  setRadio('run_getorganelle', state.run_getorganelle);
   setRadio('output_format', 'yaml');
   setFieldValue('f-pacbio-adapters', state.pacbio_adapters);
-  setFieldValue('f-nhmmer-db', state.nhmmer_db);
 
   updateConditionals();
   updateYAML();
@@ -110,24 +117,31 @@ function bindEvents() {
 
   // ---- Text inputs / textareas / number inputs ----
   const textFields = [
-    ['f-sample', 'sample'],
-    ['f-reads-path', 'reads_path'],
-    ['f-adapters', 'adapters'],
-    ['f-minlength', 'minlength'],
-    ['f-minquality', 'minquality'],
+    ['f-sample',          'sample'],
+    ['f-reads-path',      'reads_path'],
+    ['f-genetic-code',    'genetic_code'],
+    ['f-adapters',        'adapters'],
+    ['f-minlength',       'minlength'],
+    ['f-minquality',      'minquality'],
     ['f-pacbio-adapters', 'pacbio_adapters'],
-    ['f-reference', 'reference'],
-    ['f-seed-file', 'seed_file'],
-    ['f-search-genes', 'search_genes'],
-    ['f-search-term', 'search_term'],
-    ['f-max-refs', 'max_references'],
-    ['f-genome-range', 'genome_range'],
-    ['f-kmers', 'kmers'],
-    ['f-max-memory', 'max_memory'],
-    ['f-reads-length', 'reads_length'],
-    ['f-insert-size', 'insert_size'],
-    ['f-genetic-code', 'genetic_code'],
-    ['f-nhmmer-db', 'nhmmer_db'],
+    ['f-reference',       'reference'],
+    ['f-seed-file',       'seed_file'],
+    ['f-search-genes',    'search_genes'],
+    ['f-search-term',     'search_term'],
+    ['f-max-refs',        'max_references'],
+    ['f-genome-range',    'genome_range'],
+    ['f-kmers',           'kmers'],
+    ['f-max-memory',      'max_memory'],
+    ['f-reads-length',    'reads_length'],
+    ['f-insert-size',     'insert_size'],
+    // GetOrganelle
+    ['f-n-rounds',        'n_rounds'],
+    ['f-target-size',     'target_size'],
+    ['f-spades-kmers',    'spades_kmers'],
+    ['f-extra-flags',     'extra_flags'],
+    // MitoHifi
+    ['f-search-species',  'search_species'],
+    ['f-n-references',    'n_references'],
   ];
 
   textFields.forEach(([id, key]) => {
@@ -143,7 +157,8 @@ function bindEvents() {
   // ---- Select inputs ----
   const selectFields = [
     ['f-seed-format', 'seed_format'],
-    ['f-feature', 'feature'],
+    ['f-feature',     'feature'],
+    ['f-database',    'database'],
   ];
 
   selectFields.forEach(([id, key]) => {
@@ -165,6 +180,8 @@ function bindEvents() {
     'annotation',
     'run_nhmmer',
     'run_images',
+    'run_novoplasty',
+    'run_getorganelle',
   ];
 
   radioGroups.forEach((name) => {
@@ -242,84 +259,116 @@ function setRadio(name, value) {
 // ----------------------------------------------------------------
 function updateConditionals() {
   const { organelle, sequencing_type, run_trimming, seed_format,
-    search_ncbi, run_nhmmer, annotation } = state;
+    search_ncbi, run_nhmmer, annotation, run_novoplasty, run_getorganelle } = state;
 
   const isShort = sequencing_type === 'Short';
-  const isLong = sequencing_type === 'Long';
-  const trimYes = run_trimming === 'Yes';
-  const ncbiYes = search_ncbi === 'Yes';
-  const nhmmerYes = run_nhmmer === 'Yes';
-  const annotationYes = annotation === 'Yes';
+  const isLong  = sequencing_type === 'Long';
+  const trimYes          = run_trimming    === 'Yes';
+  const ncbiYes          = search_ncbi     === 'Yes';
+  const nhmmerYes        = run_nhmmer      === 'Yes';
+  const annotationYes    = annotation      === 'Yes';
+  const novoYes          = run_novoplasty  === 'Yes';
+  const getOrganelleYes  = run_getorganelle === 'Yes';
 
   // --- Chloro forces Short reads ---
   const longRadio = document.querySelector('input[name="sequencing_type"][value="Long"]');
-  const segLong = $('seg-long');
+  const segLong   = $('seg-long');
   if (organelle === 'chloro') {
     if (longRadio) longRadio.disabled = true;
-    if (segLong) segLong.classList.add('disabled');
+    if (segLong)   segLong.classList.add('disabled');
     show('note-chloro');
-    // If Long was selected, switch to Short
     if (isLong) {
       const shortRadio = document.querySelector('input[name="sequencing_type"][value="Short"]');
       if (shortRadio) { shortRadio.checked = true; state.sequencing_type = 'Short'; }
     }
   } else {
     if (longRadio) longRadio.disabled = false;
-    if (segLong) segLong.classList.remove('disabled');
+    if (segLong)   segLong.classList.remove('disabled');
     hide('note-chloro');
   }
 
   const effectivelyShort = state.sequencing_type === 'Short';
+  const isMitoLong       = isLong && organelle === 'mito';
 
   // --- Section reveal ---
   const projectComplete = organelle && state.sequencing_type;
   if (projectComplete) {
     revealSection('section-qc', 0);
+    revealSection('section-steps', 80);
+
+    // NOVOPlasty: short reads only
     if (effectivelyShort) {
-      revealSection('section-assembly', 120);
+      revealSection('section-novoplasty', 160);
     } else {
-      hideSection('section-assembly');
+      hideSection('section-novoplasty');
     }
-    revealSection('section-steps', effectivelyShort ? 240 : 120);
+
+    // GetOrganelle: short reads only
+    if (effectivelyShort) {
+      revealSection('section-getorganelle', 240);
+    } else {
+      hideSection('section-getorganelle');
+    }
+
+    // MitoHifi: long mito only
+    if (isMitoLong) {
+      revealSection('section-mitohifi', 160);
+    } else {
+      hideSection('section-mitohifi');
+    }
   }
 
   // --- QC conditionals ---
   const $shortTrim = $('group-short-trim');
-  const $longTrim = $('group-long-trim');
-
+  const $longTrim  = $('group-long-trim');
   if ($shortTrim) $shortTrim.classList.toggle('hidden', !(effectivelyShort && trimYes));
-  if ($longTrim) $longTrim.classList.toggle('hidden', !(isLong && trimYes));
+  if ($longTrim)  $longTrim.classList.toggle('hidden',  !(isLong && trimYes));
 
-  // --- Assembly conditionals ---
-  const hasSeed = !!seed_format;
-  const isGenbank = seed_format === 'genbank';
+  // --- NOVOPlasty conditionals ---
+  const $novoParams = $('group-novo-params');
+  if ($novoParams) $novoParams.classList.toggle('hidden', !novoYes);
 
-  const $seedFile = $('group-seed-file');
-  const $feature = $('group-feature');
-  const $ncbi = $('group-ncbi-fields');
-
+  // --- Seed / NCBI conditionals (inside NOVOPlasty) ---
+  const hasSeed    = !!seed_format;
+  const isGenbank  = seed_format === 'genbank';
+  const $seedFile  = $('group-seed-file');
+  const $feature   = $('group-feature');
+  const $ncbi      = $('group-ncbi-fields');
   if ($seedFile) $seedFile.classList.toggle('hidden', !hasSeed);
-  if ($feature) $feature.classList.toggle('hidden', !isGenbank);
-  if ($ncbi) $ncbi.classList.toggle('hidden', !ncbiYes);
+  if ($feature)  $feature.classList.toggle('hidden',  !isGenbank);
+  if ($ncbi)     $ncbi.classList.toggle('hidden',     !ncbiYes);
+
+  // --- GetOrganelle conditionals ---
+  const $goFields = $('group-go-fields');
+  if ($goFields) $goFields.classList.toggle('hidden', !getOrganelleYes);
 
   // --- Steps conditionals ---
-  const isMitoLong = isLong && organelle === 'mito';
-  const showAnnotation = effectivelyShort || isMitoLong;
+  // annotation: short reads only
+  const showAnnotation = effectivelyShort;
+  // nhmmer: short+annYes OR long mito
+  const showNhmmer = (effectivelyShort && annotationYes) || isMitoLong;
+  // images: short + annYes only
+  const showImages = effectivelyShort && annotationYes;
 
-  const $annGroup = $('group-annotation');
-  const $annFields = $('group-annotation-fields');
-  const $nhmmerDb = $('group-nhmmer-db');
+  const $annGroup    = $('group-annotation');
+  const $nhmmerGroup = $('group-nhmmer');
   const $imagesGroup = $('group-run-images');
+  if ($annGroup)    $annGroup.classList.toggle('hidden',    !showAnnotation);
+  if ($nhmmerGroup) $nhmmerGroup.classList.toggle('hidden', !showNhmmer);
+  if ($imagesGroup) $imagesGroup.classList.toggle('hidden', !showImages);
 
-  if ($annGroup) $annGroup.classList.toggle('hidden', !showAnnotation);
-  // annotation-dependent fields: only show when annotation=Yes (and supported reads)
-  if ($annFields) $annFields.classList.toggle('hidden', !(showAnnotation && annotationYes));
-  if ($nhmmerDb) $nhmmerDb.classList.toggle('hidden', !nhmmerYes);
-  if ($imagesGroup) $imagesGroup.classList.toggle('hidden', !effectivelyShort);
+  // --- Update step number badges ---
+  const $stepsNum = $('steps-step-number');
+  if ($stepsNum) $stepsNum.textContent = '3';
 
-  // --- Update step number badge ---
-  const $stepNum = $('steps-step-number');
-  if ($stepNum) $stepNum.textContent = effectivelyShort ? '4' : '3';
+  const $novoNum = $('novo-step-number');
+  if ($novoNum) $novoNum.textContent = effectivelyShort ? '4' : '—';
+
+  const $goNum = $('go-step-number');
+  if ($goNum) $goNum.textContent = effectivelyShort ? '5' : '—';
+
+  const $mhNum = $('mh-step-number');
+  if ($mhNum) $mhNum.textContent = isMitoLong ? '4' : '—';
 }
 
 // ----------------------------------------------------------------
@@ -328,17 +377,14 @@ function updateConditionals() {
 function updateFormatUI() {
   const isCSV = state.format === 'csv';
 
-  // Show/hide CSV controls + import bar
   const $csvCtrl   = $('csv-controls');
   const $importBar = $('csv-import-bar');
   if ($csvCtrl)   $csvCtrl.classList.toggle('hidden', !isCSV);
   if ($importBar) $importBar.classList.toggle('hidden', !isCSV);
 
-  // Update filenames and button labels
   const $filename  = $('yaml-filename');
   const $copyLabel = $('btn-copy-label');
   const $dlLabel   = $('btn-download-label');
-
   if ($filename)  $filename.textContent  = isCSV ? 'samples.csv' : 'config.yaml';
   if ($copyLabel) $copyLabel.textContent = isCSV ? 'Copy CSV'    : 'Copy YAML';
   if ($dlLabel)   $dlLabel.textContent   = isCSV ? 'Download .csv' : 'Download .yml';
@@ -349,49 +395,76 @@ function updateFormatUI() {
 // ----------------------------------------------------------------
 function generateYAML() {
   const s = state;
-  const isShort = s.sequencing_type === 'Short';
-  const isLong = s.sequencing_type === 'Long';
-  const isMitoLong = isLong && s.organelle === 'mito';
+  const isShort       = s.sequencing_type === 'Short';
+  const isLong        = s.sequencing_type === 'Long';
+  const isMitoLong    = isLong && s.organelle === 'mito';
   const supportsAnnotation = isShort || isMitoLong;
-  const annYes = (s.annotation || 'Yes') === 'Yes';
+  const annYes        = (s.annotation || 'Yes') === 'Yes';
+  const novoYes       = (s.run_novoplasty || 'Yes') === 'Yes';
+  const goYes         = s.run_getorganelle === 'Yes';
 
-  // Helper: format a value line
   const line  = (key, val) => `${key}: ${val ?? ''}\n`;
   const qline = (key, val) => `${key}: "${val ?? ''}"\n`;
+  // Emit a compact 3-line section header with no blank lines between the ### rows
+  const sectionHeader = (border, title) => `\n${border}\n${title}\n${border}\n`;
 
   let y = '';
 
+  // --- Project Info ---
+  y += sectionHeader('################################', '######### PROJECT INFO #########');
   y += qline('sample',          s.sample);
   y += qline('reads_path',      s.reads_path);
   y += qline('organelle',       s.organelle);
+  y += line( 'genetic_code',    isShort && annYes ? s.genetic_code : '');
   y += qline('sequencing_type', s.sequencing_type);
 
-  y += qline('run_trimming',    s.run_trimming);
+  // nhmmer: show when short+annYes OR long mito
+  const showNhmmerYaml = (isShort && annYes) || isMitoLong;
+
+  // --- Pipeline Steps ---
+  y += sectionHeader('##################################', '######## OrganPipe Steps #########');
+  y += qline('run_trimming',  s.run_trimming);
+  y += qline('annotation',    isShort ? (s.annotation || 'Yes') : 'No');
+  y += qline('run_nhmmer',    showNhmmerYaml ? (s.run_nhmmer || 'No') : 'No');
+  y += qline('run_images',    isShort && annYes ? (s.run_images || 'No') : 'No');
+
+  // --- Quality Control ---
+  y += sectionHeader('################################', '####### QUALITY CONTROL ########');
   y += qline('adapters',        s.adapters);
   y += line( 'minlength',       s.minlength);
   y += line( 'minquality',      s.minquality);
   y += qline('pacbio_adapters', s.pacbio_adapters);
 
-  y += qline('reference',       s.reference);
-  y += qline('seed_format',     s.seed_format);
-  y += qline('seed_file',       s.seed_file);
-  y += qline('feature',         s.feature);
-  y += qline('search_ncbi',     s.search_ncbi);
-  y += qline('search_genes',    s.search_genes);
-  y += qline('search_term',     s.search_term);
-  y += line( 'max_references',  s.max_references);
-  y += qline('genome_range',    s.genome_range);
-  y += qline('kmers',           s.kmers);
-  y += line( 'max_memory',      s.max_memory);
-  y += line( 'reads_length',    s.reads_length);
-  y += line( 'insert_size',     s.insert_size);
+  // --- NOVOPlasty ---
+  y += sectionHeader('################################', '####### NOVOPlasty INFO ########');
+  y += qline('run_novoplasty', isShort ? (s.run_novoplasty || 'Yes') : 'No');
+  y += qline('genome_range',   s.genome_range);
+  y += qline('reference',      s.reference);
+  y += qline('seed_format',    s.seed_format);
+  y += qline('seed_file',      s.seed_file);
+  y += qline('feature',        s.feature);
+  y += qline('search_ncbi',    s.search_ncbi);
+  y += qline('search_genes',   s.search_genes);
+  y += qline('search_term',    s.search_term);
+  y += line( 'max_references', s.max_references);
+  y += qline('kmers',          s.kmers);
+  y += line( 'max_memory',     s.max_memory);
+  y += line( 'reads_length',   s.reads_length);
+  y += line( 'insert_size',    s.insert_size);
 
-  y += qline('annotation',  supportsAnnotation ? (s.annotation || 'Yes') : 'No');
-  y += line( 'genetic_code', supportsAnnotation && annYes ? s.genetic_code : '');
+  // --- GetOrganelle ---
+  y += sectionHeader('################################', '###### GetOrganelle INFO #######');
+  y += qline('run_getorganelle', isShort ? (s.run_getorganelle || 'No') : 'No');
+  y += qline('database',         s.database);
+  y += line( 'n_rounds',         s.n_rounds);
+  y += line( 'target_size',      s.target_size);
+  y += qline('spades_kmers',     s.spades_kmers);
+  y += qline('extra_flags',      s.extra_flags);
 
-  y += qline('run_nhmmer', supportsAnnotation && annYes ? (s.run_nhmmer || 'No') : 'No');
-  y += qline('nhmmer_db',  s.nhmmer_db || 'resources/rfam.hmm');
-  y += qline('run_images', isShort && annYes ? (s.run_images || 'No') : 'No');
+  // --- MitoHifi ---
+  y += sectionHeader('################################', '######## MitoHifi INFO #########');
+  y += qline('search_species', s.search_species);
+  y += line( 'n_references',   s.n_references);
 
   return y;
 }
@@ -407,7 +480,7 @@ function highlightYAML(text) {
       return `<span class="y-comment">${esc(line)}</span>`;
     }
 
-    // Key: value  (but not inside quotes)
+    // Key: value
     const kv = line.match(/^(\s*)([\w_]+)(\s*:\s*)(.*)$/);
     if (kv) {
       const [, indent, key, sep, raw] = kv;
@@ -416,13 +489,10 @@ function highlightYAML(text) {
       if (!raw || raw === '') {
         valueHtml = '';
       } else if (/^".*"$/.test(raw)) {
-        // Quoted string
         valueHtml = `<span class="y-string">${esc(raw)}</span>`;
       } else if (/^\d+(\.\d+)?$/.test(raw)) {
-        // Number
         valueHtml = `<span class="y-number">${esc(raw)}</span>`;
       } else if (/^(Yes|No|true|false)$/.test(raw)) {
-        // Bool-like
         valueHtml = `<span class="y-bool">${esc(raw)}</span>`;
       } else {
         valueHtml = `<span class="y-string">${esc(raw)}</span>`;
@@ -466,38 +536,45 @@ function updateYAML() {
 // CSV — COLUMN DEFINITIONS
 // ----------------------------------------------------------------
 const CSV_COLUMNS = [
-  ['sample',          (s) => s.sample],
-  ['reads_path',      (s) => s.reads_path],
-  ['organelle',       (s) => s.organelle],
-  ['genetic_code',    (s) => s.genetic_code],
-  ['reference',       (s) => s.reference],
-  ['sequencing_type', (s) => s.sequencing_type],
-  ['genome_range',    (s) => s.genome_range],
-  ['annotation',      (s) => s.annotation || 'Yes'],
-  ['run_trimming',    (s) => s.run_trimming],
-  ['adapters',        (s) => s.adapters],
-  ['minlength',       (s) => s.minlength],
-  ['minquality',      (s) => s.minquality],
-  ['seed_format',     (s) => s.seed_format],
-  ['seed_file',       (s) => s.seed_file],
-  ['feature',         (s) => s.feature],
-  ['search_ncbi',     (s) => s.search_ncbi],
-  ['search_genes',    (s) => s.search_genes],
-  ['search_term',     (s) => s.search_term],
-  ['max_references',  (s) => s.max_references],
-  ['kmers',           (s) => s.kmers],
-  ['max_memory',      (s) => s.max_memory],
-  ['reads_length',    (s) => s.reads_length],
-  ['insert_size',     (s) => s.insert_size],
-  ['run_nhmmer',      (s) => s.run_nhmmer || 'No'],
-  ['nhmmer_db',       (s) => s.nhmmer_db],
-  ['run_images',      (s) => s.run_images || 'No'],
-  ['pacbio_adapters', (s) => s.pacbio_adapters],
+  ['sample',           (s) => s.sample],
+  ['reads_path',       (s) => s.reads_path],
+  ['organelle',        (s) => s.organelle],
+  ['genetic_code',     (s) => s.genetic_code],
+  ['sequencing_type',  (s) => s.sequencing_type],
+  ['run_trimming',     (s) => s.run_trimming],
+  ['annotation',       (s) => s.annotation || 'Yes'],
+  ['run_nhmmer',       (s) => s.run_nhmmer || 'No'],
+  ['run_images',       (s) => s.run_images || 'No'],
+  ['adapters',         (s) => s.adapters],
+  ['minlength',        (s) => s.minlength],
+  ['minquality',       (s) => s.minquality],
+  ['pacbio_adapters',  (s) => s.pacbio_adapters],
+  ['run_novoplasty',   (s) => s.run_novoplasty || 'Yes'],
+  ['genome_range',     (s) => s.genome_range],
+  ['reference',        (s) => s.reference],
+  ['seed_format',      (s) => s.seed_format],
+  ['seed_file',        (s) => s.seed_file],
+  ['feature',          (s) => s.feature],
+  ['search_ncbi',      (s) => s.search_ncbi],
+  ['search_genes',     (s) => s.search_genes],
+  ['search_term',      (s) => s.search_term],
+  ['max_references',   (s) => s.max_references],
+  ['kmers',            (s) => s.kmers],
+  ['max_memory',       (s) => s.max_memory],
+  ['reads_length',     (s) => s.reads_length],
+  ['insert_size',      (s) => s.insert_size],
+  ['run_getorganelle', (s) => s.run_getorganelle || 'No'],
+  ['database',         (s) => s.database],
+  ['n_rounds',         (s) => s.n_rounds],
+  ['target_size',      (s) => s.target_size],
+  ['spades_kmers',     (s) => s.spades_kmers],
+  ['extra_flags',      (s) => s.extra_flags],
+  ['search_species',   (s) => s.search_species],
+  ['n_references',     (s) => s.n_references],
 ];
 
 function csvVal(v) {
   const str = String(v ?? '');
-  // Quote values that contain commas
   return str.includes(',') ? `"${str}"` : str;
 }
 
@@ -509,12 +586,10 @@ function stateToCSVRow(s) {
 // CSV — MERGE IMPORTED ROW WITH FORM DEFAULTS
 // ----------------------------------------------------------------
 function mergeWithDefaults(importedRow) {
-  // Start with current state fields as defaults
   const merged = {};
   Object.keys(state).forEach((k) => {
     if (k !== 'format' && k !== 'csvRows' && k !== 'importedRows') merged[k] = state[k];
   });
-  // Override with non-empty values from the uploaded CSV row
   Object.keys(importedRow).forEach((col) => {
     const val = importedRow[col];
     if (val !== undefined && val !== '') merged[col] = val;
@@ -523,10 +598,10 @@ function mergeWithDefaults(importedRow) {
 }
 
 function buildCSVPreview() {
-  const header      = CSV_COLUMNS.map(([col]) => col).join(',');
+  const header       = CSV_COLUMNS.map(([col]) => col).join(',');
   const importedRows = state.importedRows.map((r) => stateToCSVRow(mergeWithDefaults(r)));
-  const savedRows   = state.csvRows.map(stateToCSVRow);
-  const pendingRow  = stateToCSVRow(state);
+  const savedRows    = state.csvRows.map(stateToCSVRow);
+  const pendingRow   = stateToCSVRow(state);
   return [header, ...importedRows, ...savedRows, pendingRow].join('\n');
 }
 
@@ -550,13 +625,10 @@ function highlightCSV(text) {
     if (i === 0) {
       return `<span class="csv-header">${esc(line)}</span>`;
     } else if (i <= importedCount) {
-      // Rows from the uploaded file — amber tint
       return `<span class="csv-imported">${esc(line)}</span>`;
     } else if (i <= importedCount + savedCount) {
-      // Manually added rows — normal colour
       return esc(line);
     } else {
-      // Pending (current form) row — muted
       return `<span class="csv-pending">${esc(line)}</span>`;
     }
   }).join('\n');
@@ -566,15 +638,13 @@ function highlightCSV(text) {
 // ADD / CLEAR CSV ROWS
 // ----------------------------------------------------------------
 function addCSVRow() {
-  // Snapshot current state (exclude format/csvRows)
   const snap = {};
   Object.keys(state).forEach((k) => {
     if (k !== 'format' && k !== 'csvRows') snap[k] = state[k];
   });
   state.csvRows.push(snap);
 
-  // Clear only sample + reads_path so user can enter the next sample
-  state.sample    = '';
+  state.sample     = '';
   state.reads_path = '';
   setFieldValue('f-sample', '');
   setFieldValue('f-reads-path', '');
@@ -602,7 +672,6 @@ function updateCSVCounter() {
 // CSV IMPORT (file upload + drag & drop)
 // ----------------------------------------------------------------
 function parseCsvLine(line) {
-  // Handles quoted values (e.g. "19,23,33")
   const result = [];
   let current = '', inQuotes = false;
   for (let i = 0; i < line.length; i++) {
@@ -637,11 +706,9 @@ function handleImport(file) {
   reader.onload = (e) => {
     const rows = parseCsvImport(e.target.result);
 
-    // Store raw rows — do NOT merge yet (user clicks Generate Rows first)
     state._rawImportRows = rows;
-    state.importedRows   = [];   // clear any previous applied rows
+    state.importedRows   = [];
 
-    // Switch UI: hide drop zone, show status
     const $dz = $('csv-drop-zone');
     const $ok = $('csv-import-ok');
     if ($dz) $dz.classList.add('hidden');
@@ -652,7 +719,6 @@ function handleImport(file) {
     const $applyBtn = $('btn-apply-import');
     if ($label)    $label.textContent    = `${rows.length} row${rows.length !== 1 ? 's' : ''} loaded`;
     if ($filename) $filename.textContent = file.name;
-    // Reset button to initial state
     if ($applyBtn) {
       $applyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Generate Rows`;
     }
@@ -666,10 +732,8 @@ function handleImport(file) {
 function applyImport() {
   if (state._rawImportRows.length === 0) return;
 
-  // Merge raw imported rows with current form defaults
   state.importedRows = [...state._rawImportRows];
 
-  // Update the button to show it has been applied
   const $applyBtn = $('btn-apply-import');
   if ($applyBtn) {
     $applyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 2a4 4 0 110 8 4 4 0 010-8zM10 2l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Regenerate`;
@@ -683,19 +747,16 @@ function clearImport() {
   state.importedRows    = [];
   state._rawImportRows  = [];
 
-  // Switch UI: show drop zone, hide status
   const $dz = $('csv-drop-zone');
   const $ok = $('csv-import-ok');
   if ($dz) $dz.classList.remove('hidden');
   if ($ok) $ok.classList.add('hidden');
 
-  // Reset button label for next upload
   const $applyBtn = $('btn-apply-import');
   if ($applyBtn) {
     $applyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Generate Rows`;
   }
 
-  // Clear the file input so the same file can be re-selected
   const $fi = $('f-csv-import');
   if ($fi) $fi.value = '';
 
@@ -736,7 +797,7 @@ function copyOutput(triggerId) {
 // DOWNLOAD OUTPUT
 // ----------------------------------------------------------------
 function downloadOutput() {
-  const isCSV = state.format === 'csv';
+  const isCSV    = state.format === 'csv';
   const text     = isCSV ? generateCSV()  : generateYAML();
   const mimeType = isCSV ? 'text/csv'     : 'text/yaml';
   const filename = isCSV ? 'samples.csv'  : 'config.yaml';
@@ -757,40 +818,42 @@ function downloadOutput() {
 function resetForm() {
   if (!confirm('Reset all fields to their defaults?')) return;
 
-  // Reset state
   Object.keys(state).forEach((k) => { state[k] = ''; });
-  state.pacbio_adapters = '-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT';
-  state.annotation  = 'Yes';
-  state.run_nhmmer  = 'No';
-  state.nhmmer_db   = 'resources/rfam.hmm';
-  state.run_images  = 'No';
-  state.format       = 'yaml';
-  state.csvRows      = [];
-  state.importedRows = [];
-  state._rawImportRows = [];
+  state.pacbio_adapters  = '-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT';
+  state.annotation       = 'Yes';
+  state.run_nhmmer       = 'No';
+  state.run_images       = 'No';
+  state.run_novoplasty   = 'Yes';
+  state.run_getorganelle = 'No';
+  state.format           = 'yaml';
+  state.csvRows          = [];
+  state.importedRows     = [];
+  state._rawImportRows   = [];
 
-
-  // Reset all inputs
   document.querySelectorAll('.field-input, .field-select').forEach((el) => {
     if (el.tagName === 'SELECT') el.selectedIndex = 0;
     else if (el.id === 'f-pacbio-adapters') el.value = state.pacbio_adapters;
-    else if (el.id === 'f-nhmmer-db') el.value = state.nhmmer_db;
     else el.value = '';
   });
 
-  // Reset radios
   document.querySelectorAll('input[type="radio"]').forEach((r) => { r.checked = false; });
-  setRadio('annotation', 'Yes');
-  setRadio('run_nhmmer', 'No');
-  setRadio('run_images', 'No');
-  setRadio('output_format', 'yaml');
+  setRadio('annotation',       'Yes');
+  setRadio('run_nhmmer',       'No');
+  setRadio('run_images',       'No');
+  setRadio('run_novoplasty',   'Yes');
+  setRadio('run_getorganelle', 'No');
+  setRadio('output_format',    'yaml');
 
-  // Reset CSV counter and import UI
   updateCSVCounter();
   clearImport();
 
-  // Hide revealed sections
-  ['section-qc', 'section-assembly', 'section-steps'].forEach(hideSection);
+  ['section-qc', 'section-steps', 'section-novoplasty',
+   'section-getorganelle', 'section-mitohifi'].forEach(hideSection);
+
+  // Hide pipeline step conditionals
+  ['group-annotation', 'group-nhmmer', 'group-run-images'].forEach((id) => {
+    const el = $(id); if (el) el.classList.add('hidden');
+  });
 
   updateFormatUI();
   updateConditionals();
