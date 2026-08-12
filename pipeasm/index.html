@@ -79,8 +79,8 @@
       <div class="op-header-actions">
         <button id="btn-reset" class="op-btn op-btn-ghost" title="Reset all fields">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 7a5 5 0 105-5H5M5 2L2.5 4.5 5 7" stroke="currentColor" stroke-width="1.5"
-              stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M2 7a5 5 0 105-5H5M5 2L2.5 4.5 5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              stroke-linejoin="round" />
           </svg>
           Reset
         </button>
@@ -213,8 +213,7 @@
                 phased only.</p>
               <div class="yn-control" role="radiogroup" aria-label="Solo assembly">
                 <label class="yn-pill"><input type="radio" name="solo_asm" value="Yes"><span>Yes</span></label>
-                <label class="yn-pill"><input type="radio" name="solo_asm" value="No"
-                    checked><span>No</span></label>
+                <label class="yn-pill"><input type="radio" name="solo_asm" value="No" checked><span>No</span></label>
               </div>
             </div>
 
@@ -370,8 +369,9 @@
             <div class="field-row">
               <div class="field-group" id="fg-cutadapt-filtering">
                 <label class="field-label" for="f-cutadapt-filtering">Filtering</label>
-                <p class="field-hint">Discard reads without adapter and require overlap, e.g.
-                  <code>--discard -O 35</code>.</p>
+                <p class="field-hint">Discard reads with adapter and require overlap, e.g.
+                  <code>--discard -O 35</code>.
+                </p>
                 <input class="field-input" type="text" id="f-cutadapt-filtering" placeholder="--discard -O 35"
                   autocomplete="off" />
               </div>
@@ -456,8 +456,7 @@
               <div class="field-group" id="fg-genescopefk-kmer">
                 <label class="field-label" for="f-genescopefk-kmer">K-mer Size</label>
                 <p class="field-hint">Should match FastK, e.g. <code>-k 31</code>.</p>
-                <input class="field-input" type="text" id="f-genescopefk-kmer" placeholder="-k 31"
-                  autocomplete="off" />
+                <input class="field-input" type="text" id="f-genescopefk-kmer" placeholder="-k 31" autocomplete="off" />
               </div>
               <div class="field-group" id="fg-genescopefk-ploidy">
                 <label class="field-label" for="f-genescopefk-ploidy">Ploidy</label>
@@ -472,8 +471,7 @@
             <div class="field-group" id="fg-smudgeplot-minsize">
               <label class="field-label" for="f-smudgeplot-minsize">Min K-mer Pair Size</label>
               <p class="field-hint">Minimum size of k-mer pairs to consider, e.g. <code>-L 12</code>.</p>
-              <input class="field-input" type="text" id="f-smudgeplot-minsize" placeholder="-L 12"
-                autocomplete="off" />
+              <input class="field-input" type="text" id="f-smudgeplot-minsize" placeholder="-L 12" autocomplete="off" />
             </div>
 
           </div>
@@ -525,8 +523,7 @@
             <div class="field-group" id="fg-bellerophon">
               <label class="field-label" for="f-bellerophon">Bellerophon Flags</label>
               <p class="field-hint">Filter mapped reads spanning junctions, e.g. <code>--quality 10</code>.</p>
-              <input class="field-input" type="text" id="f-bellerophon" placeholder="--quality 10"
-                autocomplete="off" />
+              <input class="field-input" type="text" id="f-bellerophon" placeholder="--quality 10" autocomplete="off" />
             </div>
 
           </div>
@@ -568,7 +565,8 @@
             <div class="field-group" id="fg-yahs">
               <label class="field-label" for="f-yahs">YAHS Flags</label>
               <p class="field-hint">Enzyme cut sites and scaffolding options, e.g.
-                <code>-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1</code>.</p>
+                <code>-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1</code>.
+              </p>
               <input class="field-input" type="text" id="f-yahs"
                 placeholder="-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1" autocomplete="off" />
             </div>

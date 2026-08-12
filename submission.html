@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="ITV Genomics — Generate SLURM or PBS submission scripts for HPC clusters to run bioinformatics pipelines." />
+  <title>HPC Submission Generator — ITV Genomics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="submission.css" />
+</head>
+
+<body>
+
+  <!-- Top Nav -->
+  <nav class="top-bar" role="navigation" aria-label="Site header">
+    <div class="top-bar-inner">
+      <div class="brand-icon" aria-hidden="true">
+        <img src="assets/itvgenomics.png" alt="ITV Genomics logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+          style="width:38px;height:38px;object-fit:contain;border-radius:6px;" />
+        <svg style="display:none" width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="1" y="5" width="4" height="12" rx="2" fill="white" />
+          <rect x="7" y="2" width="4" height="15" rx="2" fill="white" opacity="0.8" />
+          <rect x="13" y="6" width="4" height="10" rx="2" fill="white" opacity="0.6" />
+          <rect x="19" y="3" width="3" height="14" rx="1.5" fill="white" opacity="0.4" />
+        </svg>
+      </div>
+      <span class="brand-name">ITV Genomics</span>
+      <div class="nav-spacer"></div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-btn">Create Config</a>
+        <a href="submission.html" class="nav-btn active">Create Submission File</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper sub-page-wrapper">
+
+    <!-- Breadcrumb -->
+    <nav class="op-breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html" class="op-breadcrumb-link">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1.5L1.5 6.5V12.5H5.5V9.5H8.5V12.5H12.5V6.5L7 1.5Z" stroke="currentColor" stroke-width="1.25"
+            stroke-linejoin="round" />
+        </svg>
+        Home
+      </a>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+      <span class="op-breadcrumb-current">HPC Submission Generator</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="op-page-header">
+      <div class="sub-header-icon">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <rect x="2" y="4" width="22" height="18" rx="3" stroke="currentColor" stroke-width="1.75" fill="none" />
+          <path d="M2 9h22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          <circle cx="6" cy="6.5" r="1" fill="currentColor" />
+          <circle cx="9.5" cy="6.5" r="1" fill="currentColor" />
+          <circle cx="13" cy="6.5" r="1" fill="currentColor" />
+          <path d="M7 14l3 2.5-3 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <path d="M12 19h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="op-header-text">
+        <h1>HPC Submission File Generator</h1>
+        <p>Create a ready-to-run <code>submission.slurm</code> or <code>submission.pbs</code> script for your HPC
+          cluster</p>
+      </div>
+      <div class="op-header-actions">
+        <button id="btn-reset" class="op-btn op-btn-ghost" title="Reset all fields">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7a5 5 0 105-5H5M5 2L2.5 4.5 5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          Reset
+        </button>
+        <button id="btn-copy" class="op-btn op-btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" />
+          </svg>
+          Copy Script
+        </button>
+        <button id="btn-download" class="op-btn op-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v8M4 6l3 3 3-3M1 10v1.5A1.5 1.5 0 002.5 13h9a1.5 1.5 0 001.5-1.5V10" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span id="btn-download-label">Download .slurm</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mode selector -->
+    <div class="sub-mode-bar" id="sub-mode-bar">
+      <span class="sub-mode-label">What would you like to generate?</span>
+      <div class="sub-mode-btns" role="group" aria-label="Generator mode">
+        <button class="sub-mode-btn active" id="mode-submission" data-mode="submission">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="1.5" y="2.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.4" fill="none" />
+            <path d="M1.5 5.5h13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            <path d="M4.5 8.5l2 1.5-2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M8 11.5h3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+          Submission File
+          <span class="sub-mode-badge">.slurm / .pbs</span>
+        </button>
+        <button class="sub-mode-btn" id="mode-execution" data-mode="execution">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8l4-4v8L3 8z" fill="currentColor" opacity="0.8" />
+            <path d="M10 5l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          Execution Command
+          <span class="sub-mode-badge">bash</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Editor Layout -->
+    <div class="editor-layout" id="editor-layout">
+
+      <!-- ====== FORM PANEL ====== -->
+      <div class="form-panel" id="form-panel">
+
+        <!-- Scheduler type -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-step sub-step">1</div>
+            <div class="section-header-text">
+              <div class="section-title">Scheduler Type</div>
+              <div class="section-desc">Choose the HPC workload manager for your cluster</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="segmented-control sub-seg" role="radiogroup" aria-label="Scheduler type" id="scheduler-control">
+              <label class="segment" id="seg-slurm">
+                <input type="radio" name="scheduler" value="slurm" id="sched-slurm" checked />
+                <span class="segment-label">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                    <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
+                    <rect x="7" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.5" />
+                    <rect x="1" y="7" width="5" height="5" rx="1" fill="currentColor" opacity="0.5" />
+                    <rect x="7" y="7" width="5" height="5" rx="1" fill="currentColor" opacity="0.3" />
+                  </svg>
+                  SLURM
+                  <span class="seg-platform">#SBATCH</span>
+                </span>
+              </label>
+              <label class="segment" id="seg-pbs">
+                <input type="radio" name="scheduler" value="pbs" id="sched-pbs" />
+                <span class="segment-label">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                    <circle cx="3" cy="6.5" r="2" fill="currentColor" opacity="0.8" />
+                    <circle cx="10" cy="6.5" r="2" fill="currentColor" opacity="0.5" />
+                    <path d="M5 6.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                  </svg>
+                  PBS / Torque
+                  <span class="seg-platform">#PBS</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Settings -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-step sub-step">2</div>
+            <div class="section-header-text">
+              <div class="section-title">Job Settings</div>
+              <div class="section-desc">Configure the job name, output files and scheduler queue</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label" for="job-name">Job Name</label>
+                <input class="field-input" type="text" id="job-name" placeholder="e.g. organpipe" value="organpipe" />
+                <span class="field-hint">Identifies your job in the queue</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="partition">Partition / Queue</label>
+                <input class="field-input" type="text" id="partition" placeholder="e.g. op2_slurm" value="op2_slurm" />
+                <span class="field-hint">Ask your sysadmin for available partitions</span>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label" for="stdout-file">Standard Output File</label>
+                <input class="field-input" type="text" id="stdout-file" placeholder="output.txt" value="output.txt" />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="stderr-file">Standard Error File</label>
+                <input class="field-input" type="text" id="stderr-file" placeholder="error.txt" value="error.txt" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compute Resources -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-step sub-step">3</div>
+            <div class="section-header-text">
+              <div class="section-title">Compute Resources</div>
+              <div class="section-desc">Set the node, CPU, memory, and time requirements</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label" for="nodes">Nodes</label>
+                <input class="field-input" type="number" id="nodes" min="1" value="1" />
+                <span class="field-hint">Number of compute nodes to allocate</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="cpus">CPUs per Task</label>
+                <input class="field-input" type="number" id="cpus" min="1" value="4" />
+                <span class="field-hint">Threads / logical cores per task</span>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label" for="mem-value">Memory</label>
+                <div class="mem-input-group">
+                  <input class="field-input mem-num" type="number" id="mem-value" min="1" value="2" />
+                  <select class="field-select mem-unit" id="mem-unit">
+                    <option value="G" selected>GB</option>
+                    <option value="M">MB</option>
+                    <option value="T">TB</option>
+                  </select>
+                </div>
+                <span class="field-hint">Total RAM for the job</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="time-limit">Time Limit (hh:mm:ss)</label>
+                <input class="field-input" type="text" id="time-limit" placeholder="96:00:00" value="96:00:00" />
+                <span class="field-hint">Wall-clock limit. 0 = unlimited (if allowed)</span>
+              </div>
+            </div>
+            <!-- SLURM extra -->
+            <div id="slurm-extra-resources" class="conditional-group">
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label" for="ntasks">Tasks (--ntasks)</label>
+                  <input class="field-input" type="number" id="ntasks" min="1" value="1" />
+                  <span class="field-hint">Total MPI tasks (leave 1 for non-MPI jobs)</span>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="gpus">GPUs (--gres=gpu:N)</label>
+                  <input class="field-input" type="number" id="gpus" min="0" value="0" />
+                  <span class="field-hint">0 = no GPU allocation</span>
+                </div>
+              </div>
+            </div>
+            <!-- PBS extra -->
+            <div id="pbs-extra-resources" class="conditional-group hidden">
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label" for="pbs-queue">Queue Name</label>
+                  <input class="field-input" type="text" id="pbs-queue" placeholder="batch" value="batch" />
+                  <span class="field-hint">PBS queue (equivalent to SLURM partition)</span>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="pbs-ppn">Processors per Node (ppn)</label>
+                  <input class="field-input" type="number" id="pbs-ppn" min="1" value="4" />
+                  <span class="field-hint">Processors per node</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Environment Setup -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-step sub-step">4</div>
+            <div class="section-header-text">
+              <div class="section-title">Environment Setup</div>
+              <div class="section-desc">Choose how to activate your software environment</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="field-group">
+              <label class="field-label">Environment Manager</label>
+              <div class="env-pills" role="radiogroup" aria-label="Environment manager">
+                <label class="env-pill" id="pill-module">
+                  <input type="radio" name="env_type" value="module" id="env-module" checked />
+                  <span>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                      <rect x="1" y="4" width="11" height="2.5" rx="1.25" fill="currentColor" opacity="0.8" />
+                      <rect x="1" y="7.5" width="8" height="2.5" rx="1.25" fill="currentColor" opacity="0.5" />
+                    </svg>
+                    module load
+                  </span>
+                </label>
+                <label class="env-pill" id="pill-conda">
+                  <input type="radio" name="env_type" value="conda" id="env-conda" />
+                  <span>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                      <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3" fill="none" />
+                      <path d="M4 6.5h5M6.5 4v5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                    </svg>
+                    conda activate
+                  </span>
+                </label>
+                <label class="env-pill" id="pill-mamba">
+                  <input type="radio" name="env_type" value="mamba" id="env-mamba" />
+                  <span>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                      <path d="M2 10L6.5 3 11 10" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+                      <path d="M4 7.5h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                    </svg>
+                    mamba activate
+                  </span>
+                </label>
+                <label class="env-pill" id="pill-none">
+                  <input type="radio" name="env_type" value="none" id="env-none" />
+                  <span>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                      <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3" fill="none" />
+                      <path d="M4 4l5 5M9 4l-5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                    </svg>
+                    None
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- module fields -->
+            <div class="conditional-group" id="env-module-group">
+              <div class="field-group">
+                <label class="field-label" for="module-input">Modules to load</label>
+                <div class="env-tags-wrapper" id="module-tags-wrapper">
+                  <div class="env-tags" id="module-tags"></div>
+                  <input class="env-tag-input" id="module-input" type="text"
+                    placeholder="Type module name and press Enter..." />
+                </div>
+                <span class="field-hint">Press Enter or comma to add each module</span>
+              </div>
+            </div>
+
+            <!-- conda / mamba fields -->
+            <div class="conditional-group hidden" id="env-conda-group">
+              <div class="field-group">
+                <label class="field-label" for="conda-env-name">Environment Name</label>
+                <input class="field-input" type="text" id="conda-env-name" placeholder="e.g. snakemake_env" />
+                <span class="field-hint">Common environments:</span>
+                <div class="env-suggestions" id="conda-suggestions">
+                  <button class="env-sugg-chip" data-target="conda-env-name" data-val="snakemake"
+                    type="button">snakemake</button>
+                  <button class="env-sugg-chip" data-target="conda-env-name" data-val="base" type="button">base</button>
+                  <button class="env-sugg-chip" data-target="conda-env-name" data-val="organpipe"
+                    type="button">organpipe</button>
+                  <button class="env-sugg-chip" data-target="conda-env-name" data-val="pipeasm"
+                    type="button">pipeasm</button>
+                  <button class="env-sugg-chip" data-target="conda-env-name" data-val="pimba"
+                    type="button">pimba</button>
+                  <button class="env-sugg-chip" data-target="conda-env-name" data-val="prokka"
+                    type="button">prokka</button>
+                  <button class="env-sugg-chip" data-target="conda-env-name" data-val="genomics"
+                    type="button">genomics</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Directories -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-step sub-step">5</div>
+            <div class="section-header-text">
+              <div class="section-title">Directories</div>
+              <div class="section-desc">Configure working and temporary directories</div>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="field-group">
+              <label class="field-label">Working Directory</label>
+              <div class="yn-control">
+                <label class="yn-pill">
+                  <input type="radio" name="workdir_type" value="submit" id="wd-submit" checked />
+                  <span id="wd-submit-label">$SLURM_SUBMIT_DIR</span>
+                </label>
+                <label class="yn-pill">
+                  <input type="radio" name="workdir_type" value="custom" id="wd-custom" />
+                  <span>Custom path</span>
+                </label>
+              </div>
+              <span class="field-hint">Move to the submit dir before running the pipeline command</span>
+            </div>
+            <div class="conditional-group hidden" id="custom-workdir-group">
+              <div class="field-group">
+                <label class="field-label" for="custom-workdir">Custom Working Directory</label>
+                <input class="field-input" type="text" id="custom-workdir" placeholder="/scratch/user/project" />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Create temp directories on startup?</label>
+              <div class="yn-control">
+                <label class="yn-pill">
+                  <input type="radio" name="create_tmp" value="yes" id="tmp-yes" checked />
+                  <span>Yes</span>
+                </label>
+                <label class="yn-pill">
+                  <input type="radio" name="create_tmp" value="no" id="tmp-no" />
+                  <span>No</span>
+                </label>
+              </div>
+              <span class="field-hint">Creates <code>singularity/</code> and <code>tmp/</code> in the working dir —
+                recommended for Singularity-based pipelines</span>
+            </div>
+          </div>
+        </div>
+
+
+      </div><!-- end form-panel -->
+
+      <!-- ====== SCRIPT PANEL ====== -->
+      <div class="yaml-panel" id="script-panel" role="region" aria-label="Generated script preview">
+        <div class="yaml-header">
+          <div class="yaml-title">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+              <rect x="1" y="1" width="11" height="11" rx="2" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" />
+              <path d="M3.5 5l2 1.5-2 1.5" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M7 8h2.5" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-linecap="round" />
+            </svg>
+            <span id="script-filename">submission.slurm</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="yaml-copy-btn" id="panel-copy-btn" aria-label="Copy script">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                <path d="M8.5 3.5V2.5a1 1 0 00-1-1h-5a1 1 0 00-1 1v5a1 1 0 001 1h1" stroke="currentColor"
+                  stroke-width="1.2" stroke-linecap="round" />
+              </svg>
+              Copy
+            </button>
+          </div>
+        </div>
+        <div class="yaml-body" id="script-body">
+          <pre class="yaml-pre" id="script-pre"></pre>
+        </div>
+        <div class="yaml-footer">
+          <span id="script-line-count"
+            style="font-size:11px;color:rgba(255,255,255,0.3);font-family:'JetBrains Mono',monospace">0 lines</span>
+          <span class="copy-toast hidden" id="copy-toast">Copied!</span>
+        </div>
+      </div><!-- end script-panel -->
+
+    </div><!-- end sub-page-wrapper -->
+
+    <!-- ============================================================
+       EXECUTION COMMAND LAYOUT (hidden until tab is active)
+  ============================================================ -->
+    <div id="exec-layout" class="sub-page-wrapper exec-outer hidden">
+
+      <!-- Pipeline Selector -->
+      <div class="exec-pipeline-bar">
+        <span class="sub-mode-label">Select Pipeline</span>
+        <div class="exec-pipeline-selector" role="group" aria-label="Select pipeline">
+
+          <button class="exec-pipeline-card active" id="exec-pipe-organpipe" data-pipeline="organpipe">
+            <div class="exec-pipe-logo exec-pipe-logo-img" style="background:var(--organpipe-bg)">
+              <img src="assets/organpipe-logo.png" alt="OrganPipe logo" />
+            </div>
+            <div class="exec-pipe-info">
+              <span class="exec-pipe-name">OrganPipe</span>
+              <span class="exec-pipe-desc">Organellar genome assembly</span>
+            </div>
+          </button>
+
+          <button class="exec-pipeline-card" id="exec-pipe-pipeasm" data-pipeline="pipeasm">
+            <div class="exec-pipe-logo exec-pipe-logo-img" style="background:var(--pipeasm-bg)">
+              <img src="assets/pipeasm-logo.png" alt="Pipeasm logo" />
+            </div>
+            <div class="exec-pipe-info">
+              <span class="exec-pipe-name">Pipeasm</span>
+              <span class="exec-pipe-desc">Reference-quality genome assembly</span>
+            </div>
+            
+          </button>
+
+          <button class="exec-pipeline-card" id="exec-pipe-procura" data-pipeline="procura">
+            <div class="exec-pipe-logo exec-pipe-logo-img" style="background:var(--procura-bg)">
+              <img src="assets/procura-logo.jpg" alt="ProCura logo" />
+            </div>
+            <div class="exec-pipe-info">
+              <span class="exec-pipe-name">ProCura</span>
+              <span class="exec-pipe-desc">Genome curation &amp; evaluation</span>
+            </div>
+          </button>
+
+          <button class="exec-pipeline-card" id="exec-pipe-pimba" data-pipeline="pimba">
+            <div class="exec-pipe-logo exec-pipe-logo-img" style="background:var(--pimba-bg)">
+              <img src="assets/pimba.png" alt="PIMBA logo" />
+            </div>
+            <div class="exec-pipe-info">
+              <span class="exec-pipe-name">PIMBA</span>
+              <span class="exec-pipe-desc">Metabarcoding analysis</span>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ==================== ORGANPIPE VIEW ==================== -->
+      <div id="exec-organpipe-view" class="exec-pipeline-view">
+
+        <!-- OrganPipe command builder -->
+        <div id="exec-organpipe-form" class="editor-layout exec-editor-layout">
+
+        <!-- FORM PANEL -->
+        <div class="form-panel">
+
+          <!-- Step 1: Required Parameters -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">1</div>
+              <div class="section-header-text">
+                <div class="section-title">Required Parameters</div>
+                <div class="section-desc">Core paths — all are mandatory</div>
+              </div>
+              <span class="flag-badge flag-required">Required</span>
+            </div>
+            <div class="section-body">
+              <!-- Working directory with submit-dir toggle -->
+              <div class="field-group">
+                <label class="field-label">
+                  Working Directory
+                  <code class="flag-inline">-d</code>
+                </label>
+                <div class="yn-control" id="exec-wd-toggle">
+                  <label class="yn-pill">
+                    <input type="radio" name="exec-wd-type" value="submitdir" id="exec-wd-submitdir" checked />
+                    <span id="exec-wd-submit-label">$SLURM_SUBMIT_DIR</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="exec-wd-type" value="custom" id="exec-wd-custom" />
+                    <span>Custom path</span>
+                  </label>
+                </div>
+                <span class="field-hint">Use the SLURM submit directory, or specify a custom path</span>
+              </div>
+              <div class="conditional-group hidden" id="exec-workdir-group">
+                <div class="field-group">
+                  <label class="field-label" for="exec-workdir">Custom Directory Path</label>
+                  <input class="field-input" type="text" id="exec-workdir" placeholder="/path/to/work/dir" />
+                  <span class="field-hint">Directory where all workflow files are located (outputs will be created
+                    here)</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="exec-config">
+                  Config File
+                  <code class="flag-inline">-c</code>
+                </label>
+                <input class="field-input" type="text" id="exec-config" placeholder="/path/to/config.yaml" />
+                <span class="field-hint">YAML or CSV config file. <a href="organpipe/index.html"
+                    class="field-link">Generate one here &rarr;</a></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Execution Mode -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">2</div>
+              <div class="section-header-text">
+                <div class="section-title">Execution Mode</div>
+                <div class="section-desc">Run locally or submit jobs to a SLURM cluster</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="field-group">
+                <div class="segmented-control sub-seg" role="radiogroup" aria-label="Execution mode">
+                  <label class="segment">
+                    <input type="radio" name="exec-run-mode" value="local" id="exec-mode-local" checked />
+                    <span class="segment-label">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                        <rect x="1" y="3" width="11" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"
+                          fill="none" />
+                        <path d="M4 10v2M9 10v2M3 12h7" stroke="currentColor" stroke-width="1.2"
+                          stroke-linecap="round" />
+                      </svg>
+                      Local
+                      <span class="seg-platform">-t controls threads</span>
+                    </span>
+                  </label>
+                  <label class="segment">
+                    <input type="radio" name="exec-run-mode" value="slurm" id="exec-mode-slurm" />
+                    <span class="segment-label">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                        <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
+                        <rect x="7" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.5" />
+                        <rect x="1" y="7" width="5" height="5" rx="1" fill="currentColor" opacity="0.5" />
+                        <rect x="7" y="7" width="5" height="5" rx="1" fill="currentColor" opacity="0.3" />
+                      </svg>
+                      SLURM
+                      <span class="seg-platform">-slurm flag</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <!-- Local-only: threads -->
+              <div class="conditional-group" id="exec-local-fields">
+                <div class="field-group">
+                  <label class="field-label" for="exec-threads">
+                    Threads
+                    <code class="flag-inline">-t</code>
+                  </label>
+                  <input class="field-input" type="number" id="exec-threads" min="1" value="4"
+                    style="max-width:180px" />
+                  <span class="field-hint">Number of CPU threads to use locally</span>
+                </div>
+              </div>
+              <!-- SLURM-only fields -->
+              <div class="conditional-group hidden" id="exec-slurm-fields">
+                <div class="field-row">
+                  <div class="field-group">
+                    <label class="field-label" for="exec-slurm-jobs">
+                      Jobs in Queue
+                      <code class="flag-inline">-j</code>
+                    </label>
+                    <input class="field-input" type="number" id="exec-slurm-jobs" min="1" value="8" />
+                    <span class="field-hint">How many jobs to submit to SLURM at once</span>
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label" for="exec-partition">
+                      Partition
+                      <code class="flag-inline">-partition</code>
+                      <span class="flag-badge flag-required" style="font-size:10px;padding:1px 6px">Required</span>
+                    </label>
+                    <input class="field-input" type="text" id="exec-partition" placeholder="e.g. op2_slurm" />
+                    <span class="field-hint">SLURM queue name — must be set when using -slurm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Workflow Options -->
+            <div class="form-section">
+              <div class="section-header">
+                <div class="section-step sub-step">3</div>
+                <div class="section-header-text">
+                  <div class="section-title">Workflow Options</div>
+                  <div class="section-desc">Dry run and batch mode settings</div>
+                </div>
+              </div>
+              <div class="section-body">
+
+                <!-- Dry run -->
+                <div class="field-group">
+                  <label class="field-label">
+                    Dry Run First
+                    <code class="flag-inline">-np</code>
+                    <span class="flag-badge flag-recommended">Recommended</span>
+                  </label>
+                  <div class="yn-control">
+                    <label class="yn-pill">
+                      <input type="radio" name="exec-dry-run" value="yes" id="exec-dry-yes" checked />
+                      <span>Yes</span>
+                    </label>
+                    <label class="yn-pill">
+                      <input type="radio" name="exec-dry-run" value="no" id="exec-dry-no" />
+                      <span>No</span>
+                    </label>
+                  </div>
+                  <span class="field-hint">When enabled, the preview shows <strong>two commands</strong>: a safe dry run
+                    first, then the actual execution. The dry run validates all paths, builds Singularity images, and
+                    shows planned jobs &mdash; without running anything.</span>
+                </div>
+
+                <!-- Batch mode -->
+                <div class="field-group">
+                  <label class="field-label">
+                    Batch Mode
+                    <code class="flag-inline">-batch</code>
+                    <span class="flag-badge flag-optional">Optional</span>
+                  </label>
+                  <div class="yn-control">
+                    <label class="yn-pill">
+                      <input type="radio" name="exec-batch" value="yes" id="exec-batch-yes" />
+                      <span>Enabled</span>
+                    </label>
+                    <label class="yn-pill">
+                      <input type="radio" name="exec-batch" value="no" id="exec-batch-no" checked />
+                      <span>Disabled</span>
+                    </label>
+                  </div>
+                  <span class="field-hint">Improves DAG resolution for large rule counts (&gt; 3000 rules). Recommended
+                    when running many samples.</span>
+                </div>
+
+                <!-- Batch size (conditional) -->
+                <div class="conditional-group hidden" id="exec-nbatch-group">
+                  <div class="field-group">
+                    <label class="field-label" for="exec-nbatch">
+                      Batch Size
+                      <code class="flag-inline">-nbatch</code>
+                    </label>
+                    <input class="field-input" type="number" id="exec-nbatch" min="1" value="5"
+                      style="max-width:180px" />
+                    <span class="field-hint">Number of batches (default: 5)</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Step 4: Optional Resources -->
+            <div class="form-section">
+              <div class="section-header">
+                <div class="section-step sub-step">4</div>
+                <div class="section-header-text">
+                  <div class="section-title">Storage &amp; Databases</div>
+                  <div class="section-desc">Optional paths for containers and reference databases</div>
+                </div>
+                <span class="flag-badge flag-optional">Optional</span>
+              </div>
+              <div class="section-body">
+                <div class="field-group">
+                  <label class="field-label" for="exec-sifdir">
+                    Singularity Images Directory
+                    <code class="flag-inline">-sifdir</code>
+                  </label>
+                  <input class="field-input" type="text" id="exec-sifdir" placeholder="/scratch/sif_files/organpipe" />
+                  <span class="field-hint">Directory to build/cache Singularity images. If images already exist here,
+                    they won't be re-pulled. Tip: share one directory across all users on the cluster.</span>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="exec-nhmmer-db">
+                    HMM Database
+                    <code class="flag-inline">-nhmmer_db</code>
+                  </label>
+                  <input class="field-input" type="text" id="exec-nhmmer-db" placeholder="/path/to/rfam.hmm" />
+                  <span class="field-hint">Path to HMMER database used by nhmmer. Defaults to
+                    <code>resources/rfam.hmm</code>. Must be compatible with HMMER v3.4.</span>
+                </div>
+              </div>
+            </div>
+
+
+          </div><!-- end exec form-panel -->
+
+          <!-- COMMAND PREVIEW PANEL -->
+          <div class="yaml-panel" id="exec-cmd-panel" role="region" aria-label="Generated command preview">
+            <div class="yaml-header">
+              <div class="yaml-title">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                  <path d="M2.5 9.5l3-3-3-3" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path d="M7.5 9.5h3" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                OrganPipe Command
+              </div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <label class="cmd-wrap-toggle" title="Toggle line wrapping">
+                  <input type="checkbox" id="exec-wrap-toggle" />
+                  <span>Wrap</span>
+                </label>
+                <button class="yaml-copy-btn" id="exec-copy-btn" aria-label="Copy command">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M8.5 3.5V2.5a1 1 0 00-1-1h-5a1 1 0 00-1 1v5a1 1 0 001 1h1" stroke="currentColor"
+                      stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                  Copy
+                </button>
+              </div>
+            </div>
+            <div class="yaml-body" id="exec-cmd-body">
+              <pre class="yaml-pre" id="exec-cmd-pre"></pre>
+            </div>
+            <div class="yaml-footer">
+              <div class="exec-cmd-actions">
+                <button class="op-btn op-btn-secondary exec-dl-btn" id="exec-dl-btn"
+                  style="font-size:12px;padding:5px 12px">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 1v7M3.5 5.5 6 8l2.5-2.5M1 9v1.5A1.5 1.5 0 002.5 12h7A1.5 1.5 0 0011 10.5V9"
+                      stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  Save as .sh
+                </button>
+              </div>
+              <span class="copy-toast hidden" id="exec-copy-toast">Copied!</span>
+            </div>
+          </div><!-- end exec-cmd-panel -->
+
+        </div><!-- end exec-organpipe-form -->
+
+        <!-- ── Unlock warning banner ── -->
+        <div class="smart-hint smart-hint-warn exec-unlock-banner" style="margin-top:24px">
+          <div class="smart-hint-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 2L16.9 16H1.1L9 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"
+                fill="none" />
+              <path d="M9 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <circle cx="9" cy="13" r="0.9" fill="currentColor" />
+            </svg>
+          </div>
+          <div class="smart-hint-body">
+            <strong>Snakemake directory lock:</strong> If a job does not complete or Snakemake crashes, it may leave the
+            working directory locked. To recover:
+            <ol style="margin:8px 0 0 18px;line-height:1.9">
+              <li>Run your command once with the <code>-unlock</code> flag added</li>
+              <li>Remove the <code>-unlock</code> flag and run normally again</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- ── Flag Reference Table ── -->
+        <div class="flag-ref-section" style="margin-top:32px">
+          <div class="section-label" style="margin-bottom:16px">
+            <span class="section-label-text">OrganPipe — Flag Reference</span>
+            <span class="section-label-line"></span>
+          </div>
+          <div class="flag-ref-table-wrap">
+            <table class="flag-ref-table">
+              <thead>
+                <tr>
+                  <th>Flag</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>-d &lt;path&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Path to your working directory where all workflow files are</td>
+                </tr>
+                <tr>
+                  <td><code>-c &lt;path&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Config file path (YAML or CSV) with all needed parameters</td>
+                </tr>
+                <tr>
+                  <td><code>-t &lt;int&gt;</code> / <code>-j &lt;int&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Number of threads (local mode) or jobs submitted at once (SLURM mode). Use <code>-t</code> for
+                    local runs; when using <code>-slurm</code>, use <code>-j</code> to control SLURM job concurrency
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>-np</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Dry run — shows what jobs will be executed without running them. Also builds Singularity images
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>-unlock</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Unlock the working directory if Snakemake has locked it after a crash. Run once with this flag,
+                    then remove it and run normally</td>
+                </tr>
+                <tr>
+                  <td><code>-batch</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Enable batch mode for large runs (&gt; 3000 rules / many samples). Improves Snakemake DAG
+                    resolution time</td>
+                </tr>
+                <tr>
+                  <td><code>-nbatch &lt;int&gt;</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Number of batches when using <code>-batch</code> (default: 5)</td>
+                </tr>
+                <tr>
+                  <td><code>-sifdir &lt;path&gt;</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Directory to build/cache all Singularity image files. If images already exist, they won't be
+                    re-pulled. Default: <code>resources/sif_dir</code></td>
+                </tr>
+                <tr>
+                  <td><code>-rerun</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Delete previous results and temporary files for all samples in the config file to ensure a clean
+                    re-run with updated configurations. No arguments needed.</td>
+                </tr>
+                <tr>
+                  <td><code>-nhmmer_db &lt;path&gt;</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Path to HMMER database for nhmmer. Defaults to <code>resources/rfam.hmm</code>. Must be HMMER v3.4
+                    compatible</td>
+                </tr>
+                <tr class="flag-ref-slurm">
+                  <td><code>-slurm</code></td>
+                  <td><span class="flag-badge"
+                      style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM</span></td>
+                  <td>Enable SLURM job submission mode using Snakemake's profile system</td>
+                </tr>
+                <tr class="flag-ref-slurm">
+                  <td><code>-j &lt;int&gt;</code></td>
+                  <td><span class="flag-badge" style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM
+                      only</span></td>
+                  <td>Number of jobs to submit to the SLURM queue at once. Use alongside <code>-t</code> when running in
+                    SLURM mode</td>
+                </tr>
+                <tr class="flag-ref-slurm">
+                  <td><code>-partition &lt;name&gt;</code></td>
+                  <td><span class="flag-badge" style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM
+                      only</span></td>
+                  <td>SLURM partition (queue) to submit jobs to. Required when using <code>-slurm</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="flag-ref-note">To customize default thread counts and memory per rule, edit
+            <code>config/local_params.yaml</code>. Do not modify the <code>{WORKDIR}</code>, <code>{THREADS}</code>, or
+            <code>{PARTITION}</code> variables directly.</p>
+        </div>
+
+      </div><!-- end exec-organpipe-view -->
+
+      <!-- ==================== PIPEASM VIEW ==================== -->
+      <div id="exec-pipeasm-view" class="exec-pipeline-view hidden">
+
+        <!-- Pipeasm command builder -->
+        <div id="exec-pipeasm-form" class="editor-layout exec-editor-layout">
+
+        <!-- FORM PANEL -->
+        <div class="form-panel">
+
+          <!-- Step 1: Core Paths -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">1</div>
+              <div class="section-header-text">
+                <div class="section-title">Core Paths</div>
+                <div class="section-desc">Working directory and optional config/snakefile paths</div>
+              </div>
+            </div>
+            <div class="section-body">
+              
+              <!-- Working directory with submit-dir toggle -->
+              <div class="field-group">
+                <label class="field-label">
+                  Working Directory
+                  <code class="flag-inline">-d</code>
+                </label>
+                <div class="yn-control" id="pipeasm-wd-toggle">
+                  <label class="yn-pill">
+                    <input type="radio" name="pipeasm-wd-type" value="submitdir" id="pipeasm-wd-submitdir" checked />
+                    <span id="pipeasm-wd-submit-label">$SLURM_SUBMIT_DIR</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="pipeasm-wd-type" value="custom" id="pipeasm-wd-custom" />
+                    <span>Custom path</span>
+                  </label>
+                </div>
+                <span class="field-hint">Use the SLURM submit directory, or specify a custom path</span>
+              </div>
+              <div class="conditional-group hidden" id="pipeasm-workdir-group">
+                <div class="field-group">
+                  <label class="field-label" for="pipeasm-workdir">Custom Directory Path</label>
+                  <input class="field-input" type="text" id="pipeasm-workdir" placeholder="/path/to/work/dir" />
+                  <span class="field-hint">Directory where all workflow files are located (outputs will be created
+                    here)</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="pipeasm-config">
+                  Config File
+                  <code class="flag-inline">-c</code>
+                  <span class="flag-badge flag-optional" style="font-size:10px;padding:1px 6px">Optional</span>
+                </label>
+                <input class="field-input" type="text" id="pipeasm-config" placeholder="/path/to/config.yaml" />
+                <span class="field-hint">Overwrite the default configuration file (config/config.yaml).</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="pipeasm-snakefile">
+                  Snakefile
+                  <code class="flag-inline">-s</code>
+                  <span class="flag-badge flag-optional" style="font-size:10px;padding:1px 6px">Optional</span>
+                </label>
+                <input class="field-input" type="text" id="pipeasm-snakefile" value="workflow/Snakefile" placeholder="workflow/Snakefile" />
+                <span class="field-hint">Overwrite the default snakefile path (workflow/Snakefile).</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Step 2: Execution Mode -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">2</div>
+              <div class="section-header-text">
+                <div class="section-title">Execution Mode</div>
+                <div class="section-desc">Run locally or submit jobs to a SLURM cluster</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="field-group">
+                <div class="segmented-control sub-seg" role="radiogroup" aria-label="Execution mode">
+                  <label class="segment">
+                    <input type="radio" name="pipeasm-run-mode" value="local" id="pipeasm-mode-local" checked />
+                    <span class="segment-label">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                        <rect x="1" y="3" width="11" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"
+                          fill="none" />
+                        <path d="M4 10v2M9 10v2M3 12h7" stroke="currentColor" stroke-width="1.2"
+                          stroke-linecap="round" />
+                      </svg>
+                      Local
+                      <span class="seg-platform">-t controls threads</span>
+                    </span>
+                  </label>
+                  <label class="segment">
+                    <input type="radio" name="pipeasm-run-mode" value="slurm" id="pipeasm-mode-slurm" />
+                    <span class="segment-label">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                        <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
+                        <rect x="7" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.5" />
+                        <rect x="1" y="7" width="5" height="5" rx="1" fill="currentColor" opacity="0.5" />
+                        <rect x="7" y="7" width="5" height="5" rx="1" fill="currentColor" opacity="0.3" />
+                      </svg>
+                      SLURM
+                      <span class="seg-platform">-slurm flag</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <!-- Local-only: threads -->
+              <div class="conditional-group" id="pipeasm-local-fields">
+                <div class="field-group">
+                  <label class="field-label" for="pipeasm-threads">
+                    Threads
+                    <code class="flag-inline">-t</code>
+                  </label>
+                  <input class="field-input" type="number" id="pipeasm-threads" min="1" value="4"
+                    style="max-width:180px" />
+                  <span class="field-hint">Number of CPU threads to use locally</span>
+                </div>
+              </div>
+              <!-- SLURM-only fields -->
+              <div class="conditional-group hidden" id="pipeasm-slurm-fields">
+                <div class="field-row">
+                  <div class="field-group">
+                    <label class="field-label" for="pipeasm-slurm-jobs">
+                      Jobs in Queue
+                      <code class="flag-inline">-j</code>
+                    </label>
+                    <input class="field-input" type="number" id="pipeasm-slurm-jobs" min="1" value="8" />
+                    <span class="field-hint">How many jobs to submit to SLURM at once</span>
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label" for="pipeasm-partition">
+                      Partition
+                      <code class="flag-inline">-partition</code>
+                      <span class="flag-badge flag-required" style="font-size:10px;padding:1px 6px">Required</span>
+                    </label>
+                    <input class="field-input" type="text" id="pipeasm-partition" placeholder="e.g. op2_slurm" />
+                    <span class="field-hint">SLURM queue name — must be set when using -slurm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Workflow Options -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">3</div>
+              <div class="section-header-text">
+                <div class="section-title">Workflow Options</div>
+                <div class="section-desc">Pipeline step and dry run settings</div>
+              </div>
+            </div>
+              
+              <div class="section-body">
+
+                <!-- Pipeline Steps -->
+                <div class="field-group">
+                  <label class="field-label" for="pipeasm-step">
+                    Pipeline Step
+                    <span class="flag-badge flag-optional" style="font-size:10px;padding:1px 6px">Optional</span>
+                  </label>
+                  <select class="field-select" id="pipeasm-step">
+                    <option value="">Full Pipeline (Default)</option>
+                    <option value="-trimming_qc">Trimming and Quality Control (-trimming_qc)</option>
+                    <option value="-kmer_eval">k-mer Evaluation (-kmer_eval)</option>
+                    <option value="-assembly">Assembly &amp; Decontamination (-assembly)</option>
+                    <option value="-scaffolding">YAHS Auto-scaffolding &amp; Hi-C Maps (-scaffolding)</option>
+                  </select>
+                  <span class="field-hint">Run previous steps before running the next one.</span>
+                </div>
+
+                <!-- Dry run -->
+                <div class="field-group">
+                  <label class="field-label">
+                    Dry Run First
+                    <code class="flag-inline">-np</code>
+                    <span class="flag-badge flag-recommended">Recommended</span>
+                  </label>
+                  <div class="yn-control">
+                    <label class="yn-pill">
+                      <input type="radio" name="pipeasm-dry-run" value="yes" id="pipeasm-dry-yes" checked />
+                      <span>Yes</span>
+                    </label>
+                    <label class="yn-pill">
+                      <input type="radio" name="pipeasm-dry-run" value="no" id="pipeasm-dry-no" />
+                      <span>No</span>
+                    </label>
+                  </div>
+                  <span class="field-hint">When enabled, the preview shows <strong>two commands</strong>: a safe dry run
+                    first, then the actual execution.</span>
+                </div>
+
+              </div>
+            </div>
+
+            </div><!-- end exec form-panel -->
+
+          <!-- COMMAND PREVIEW PANEL -->
+          <div class="yaml-panel" id="pipeasm-cmd-panel" role="region" aria-label="Generated command preview">
+            <div class="yaml-header">
+              <div class="yaml-title">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                  <path d="M2.5 9.5l3-3-3-3" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path d="M7.5 9.5h3" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                Pipeasm Command
+              </div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <label class="cmd-wrap-toggle" title="Toggle line wrapping">
+                  <input type="checkbox" id="pipeasm-wrap-toggle" />
+                  <span>Wrap</span>
+                </label>
+                <button class="yaml-copy-btn" id="pipeasm-copy-btn" aria-label="Copy command">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M8.5 3.5V2.5a1 1 0 00-1-1h-5a1 1 0 00-1 1v5a1 1 0 001 1h1" stroke="currentColor"
+                      stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                  Copy
+                </button>
+              </div>
+            </div>
+            <div class="yaml-body" id="pipeasm-cmd-body">
+              <pre class="yaml-pre" id="pipeasm-cmd-pre"></pre>
+            </div>
+            <div class="yaml-footer">
+              <div class="exec-cmd-actions">
+                <button class="op-btn op-btn-secondary exec-dl-btn" id="pipeasm-dl-btn"
+                  style="font-size:12px;padding:5px 12px">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 1v7M3.5 5.5 6 8l2.5-2.5M1 9v1.5A1.5 1.5 0 002.5 12h7A1.5 1.5 0 0011 10.5V9"
+                      stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  Save as .sh
+                </button>
+              </div>
+              <span class="copy-toast hidden" id="pipeasm-copy-toast">Copied!</span>
+            </div>
+          </div><!-- end exec-cmd-panel -->
+
+        </div><!-- end exec-pipeasm-form -->
+
+        <!-- ── Unlock warning banner ── -->
+        <div class="smart-hint smart-hint-warn exec-unlock-banner" style="margin-top:24px">
+          <div class="smart-hint-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 2L16.9 16H1.1L9 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"
+                fill="none" />
+              <path d="M9 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <circle cx="9" cy="13" r="0.9" fill="currentColor" />
+            </svg>
+          </div>
+          <div class="smart-hint-body">
+            <strong>Snakemake directory lock:</strong> If a job does not complete or Snakemake crashes, it may leave the
+            working directory locked. To recover:
+            <ol style="margin:8px 0 0 18px;line-height:1.9">
+              <li>Run your command once with the <code>-unlock</code> flag added</li>
+              <li>Remove the <code>-unlock</code> flag and run normally again</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- ── Flag Reference Table ── -->
+        <div class="flag-ref-section" style="margin-top:32px">
+          <div class="section-label" style="margin-bottom:16px">
+            <span class="section-label-text">Pipeasm — Flag Reference</span>
+            <span class="section-label-line"></span>
+          </div>
+          <div class="flag-ref-table-wrap">
+            
+        <table class="flag-ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>-d &lt;path&gt;</code></td>
+              <td><span class="flag-badge flag-required">Required</span></td>
+              <td>Path to your working directory where all workflow files are</td>
+            </tr>
+            <tr>
+              <td><code>-c &lt;path&gt;</code></td>
+              <td><span class="flag-badge flag-optional">Optional</span></td>
+              <td>Overwrite the default configuration file with all needed parameters</td>
+            </tr>
+            <tr>
+              <td><code>-s &lt;path&gt;</code></td>
+              <td><span class="flag-badge flag-optional">Optional</span></td>
+              <td>Overwrite the default snakefile path (workflow/snakefile)</td>
+            </tr>
+            <tr>
+              <td><code>-t &lt;int&gt;</code> / <code>-j &lt;int&gt;</code></td>
+              <td><span class="flag-badge flag-required">Required</span></td>
+              <td>Number of threads (local mode) or jobs submitted at once (SLURM mode). Use <code>-t</code> for
+                local runs; when using <code>-slurm</code>, use <code>-j</code> to control SLURM job concurrency
+              </td>
+            </tr>
+            <tr>
+              <td><code>-np</code></td>
+              <td><span class="flag-badge flag-optional">Optional</span></td>
+              <td>Dry run — shows what jobs will be executed without running them.
+              </td>
+            </tr>
+            <tr>
+              <td><code>-unlock</code></td>
+              <td><span class="flag-badge flag-optional">Optional</span></td>
+              <td>Unlock the working directory if Snakemake has locked it after a crash. Run once with this flag,
+                then remove it and run normally</td>
+            </tr>
+            <tr>
+              <td><code>-trimming_qc</code></td>
+              <td><span class="flag-badge flag-optional">Optional</span></td>
+              <td>For Trimming and Quality Control</td>
+            </tr>
+            <tr>
+              <td><code>-kmer_eval</code></td>
+              <td><span class="flag-badge flag-optional">Optional</span></td>
+              <td>For k-mer Evaluation stats/plots</td>
+            </tr>
+            <tr>
+              <td><code>-assembly</code></td>
+              <td><span class="flag-badge flag-optional">Optional</span></td>
+              <td>For all Assembly and Decontamination steps</td>
+            </tr>
+            <tr>
+              <td><code>-scaffolding</code></td>
+              <td><span class="flag-badge flag-optional">Optional</span></td>
+              <td>To run YAHS auto-scaffolding and create the Hi-C Maps</td>
+            </tr>
+            <tr class="flag-ref-slurm">
+              <td><code>-slurm</code></td>
+              <td><span class="flag-badge"
+                  style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM</span></td>
+              <td>Enable SLURM job submission mode using Snakemake's profile system</td>
+            </tr>
+            <tr class="flag-ref-slurm">
+              <td><code>-j &lt;int&gt;</code></td>
+              <td><span class="flag-badge"
+                  style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM only</span></td>
+              <td>Number of jobs to submit to the SLURM queue at once. Use alongside <code>-t</code> when running in
+                SLURM mode</td>
+            </tr>
+            <tr class="flag-ref-slurm">
+              <td><code>-partition &lt;name&gt;</code></td>
+              <td><span class="flag-badge"
+                  style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM only</span></td>
+              <td>SLURM partition (queue) to submit jobs to. Required when using <code>-slurm</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+          </div>
+          <p class="flag-ref-note">To customize default thread counts and memory per rule, edit
+            <code>config/local_params.yaml</code>. Do not modify the <code>{WORKDIR}</code>, <code>{THREADS}</code>, or
+            <code>{PARTITION}</code> variables directly.</p>
+        </div>
+
+      </div><!-- end exec-pipeasm-view -->
+
+      <!-- ==================== PROCURA VIEW ==================== -->
+      <div id="exec-procura-view" class="exec-pipeline-view hidden">
+
+        <!-- ProCura command builder -->
+        <div id="exec-procura-form" class="editor-layout exec-editor-layout">
+
+        <!-- FORM PANEL -->
+        <div class="form-panel">
+
+          <!-- Step 1: Core Parameters -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">1</div>
+              <div class="section-header-text">
+                <div class="section-title">Core Parameters</div>
+                <div class="section-desc">Working directory, curation mode, and config file</div>
+              </div>
+              <span class="flag-badge flag-required">Required</span>
+            </div>
+            <div class="section-body">
+
+              <!-- Working directory with submit-dir toggle -->
+              <div class="field-group">
+                <label class="field-label">
+                  Working Directory
+                  <code class="flag-inline">-d</code>
+                </label>
+                <div class="yn-control" id="procura-wd-toggle">
+                  <label class="yn-pill">
+                    <input type="radio" name="procura-wd-type" value="submitdir" id="procura-wd-submitdir" checked />
+                    <span id="procura-wd-submit-label">$SLURM_SUBMIT_DIR</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="procura-wd-type" value="custom" id="procura-wd-custom" />
+                    <span>Custom path</span>
+                  </label>
+                </div>
+                <span class="field-hint">Use the SLURM submit directory, or specify a custom path (e.g. <code>.</code> or <code>/path/to/workdir</code>)</span>
+              </div>
+              <div class="conditional-group hidden" id="procura-workdir-group">
+                <div class="field-group">
+                  <label class="field-label" for="procura-workdir">Custom Directory Path</label>
+                  <input class="field-input" type="text" id="procura-workdir" placeholder="/path/to/work/dir" />
+                  <span class="field-hint">Directory where all workflow files are located (outputs will be created here)</span>
+                </div>
+              </div>
+
+              <!-- Curation Mode -->
+              <div class="field-group">
+                <label class="field-label">
+                  Curation Mode
+                  <span class="flag-badge flag-required" style="font-size:10px;padding:1px 6px">Required</span>
+                </label>
+                <div class="segmented-control sub-seg" role="radiogroup" aria-label="Curation mode" id="procura-mode-control">
+                  <label class="segment">
+                    <input type="radio" name="procura-mode" value="-hapcuration" id="procura-mode-hap" checked />
+                    <span class="segment-label">
+                      Hap Curation
+                      <span class="seg-platform">-hapcuration</span>
+                    </span>
+                  </label>
+                  <label class="segment">
+                    <input type="radio" name="procura-mode" value="-dualcuration" id="procura-mode-dual" />
+                    <span class="segment-label">
+                      Dual Curation
+                      <span class="seg-platform">-dualcuration</span>
+                    </span>
+                  </label>
+                  <label class="segment">
+                    <input type="radio" name="procura-mode" value="-finalgenome" id="procura-mode-final" />
+                    <span class="segment-label">
+                      Final Genome
+                      <span class="seg-platform">-finalgenome</span>
+                    </span>
+                  </label>
+                </div>
+                <span class="field-hint" id="procura-mode-hint">Adds annotation tracks and prepares pretext/ortholog/synteny data for haplotype curation.</span>
+              </div>
+
+              <!-- Config file -->
+              <div class="field-group">
+                <label class="field-label" for="procura-config">
+                  Config File
+                  <code class="flag-inline">-c</code>
+                  <span class="flag-badge flag-required" style="font-size:10px;padding:1px 6px">Required</span>
+                </label>
+                <input class="field-input" type="text" id="procura-config" value="config/config_hapcuration.yaml" placeholder="config/config_hapcuration.yaml" />
+                <span class="field-hint">YAML config file path. <a href="procura/index.html" class="field-link" target="_blank">Generate one here &rarr;</a></span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Step 2: Execution Mode -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">2</div>
+              <div class="section-header-text">
+                <div class="section-title">Execution Mode</div>
+                <div class="section-desc">Run locally or submit jobs to a SLURM cluster</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="field-group">
+                <div class="segmented-control sub-seg" role="radiogroup" aria-label="Execution mode">
+                  <label class="segment">
+                    <input type="radio" name="procura-run-mode" value="local" id="procura-mode-local" checked />
+                    <span class="segment-label">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                        <rect x="1" y="3" width="11" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"
+                          fill="none" />
+                        <path d="M4 10v2M9 10v2M3 12h7" stroke="currentColor" stroke-width="1.2"
+                          stroke-linecap="round" />
+                      </svg>
+                      Local
+                      <span class="seg-platform">-t controls threads</span>
+                    </span>
+                  </label>
+                  <label class="segment">
+                    <input type="radio" name="procura-run-mode" value="slurm" id="procura-mode-slurm" />
+                    <span class="segment-label">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                        <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
+                        <rect x="7" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.5" />
+                        <rect x="1" y="7" width="5" height="5" rx="1" fill="currentColor" opacity="0.5" />
+                        <rect x="7" y="7" width="5" height="5" rx="1" fill="currentColor" opacity="0.3" />
+                      </svg>
+                      SLURM
+                      <span class="seg-platform">-slurm flag</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <!-- Local-only: threads -->
+              <div class="conditional-group" id="procura-local-fields">
+                <div class="field-group">
+                  <label class="field-label" for="procura-threads">
+                    Threads
+                    <code class="flag-inline">-t</code>
+                  </label>
+                  <input class="field-input" type="number" id="procura-threads" min="1" value="32"
+                    style="max-width:180px" />
+                  <span class="field-hint">Number of CPU threads to use locally</span>
+                </div>
+              </div>
+              <!-- SLURM-only fields -->
+              <div class="conditional-group hidden" id="procura-slurm-fields">
+                <div class="field-row">
+                  <div class="field-group">
+                    <label class="field-label" for="procura-slurm-jobs">
+                      Jobs in Queue
+                      <code class="flag-inline">-j</code>
+                    </label>
+                    <input class="field-input" type="number" id="procura-slurm-jobs" min="1" value="8" />
+                    <span class="field-hint">How many jobs to submit to SLURM at once</span>
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label" for="procura-partition">
+                      Partition
+                      <code class="flag-inline">-partition</code>
+                      <span class="flag-badge flag-required" style="font-size:10px;padding:1px 6px">Required</span>
+                    </label>
+                    <input class="field-input" type="text" id="procura-partition" placeholder="e.g. op1_slurm" />
+                    <span class="field-hint">SLURM queue name — must be set when using -slurm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Containers & Workflow Options -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">3</div>
+              <div class="section-header-text">
+                <div class="section-title">Containers &amp; Workflow Options</div>
+                <div class="section-desc">Singularity images directory and run parameters</div>
+              </div>
+              <span class="flag-badge flag-optional">Optional</span>
+            </div>
+            <div class="section-body">
+
+              <!-- SIF Directory -->
+              <div class="field-group">
+                <label class="field-label" for="procura-sifdir">
+                  Singularity Images Directory
+                  <code class="flag-inline">-sifdir</code>
+                  <span class="flag-badge flag-optional" style="font-size:10px;padding:1px 6px">Optional</span>
+                </label>
+                <input class="field-input" type="text" id="procura-sifdir" placeholder="/scratch/sif_files/procura" />
+                <span class="field-hint">Path to directory containing pre-downloaded Singularity (.sif) containers</span>
+              </div>
+
+              <!-- Snakefile -->
+              <div class="field-group">
+                <label class="field-label" for="procura-snakefile">
+                  Snakefile
+                  <code class="flag-inline">-s</code>
+                  <span class="flag-badge flag-optional" style="font-size:10px;padding:1px 6px">Optional</span>
+                </label>
+                <input class="field-input" type="text" id="procura-snakefile" placeholder="workflow/Snakefile" />
+                <span class="field-hint">Overwrite the default snakefile path (workflow/Snakefile).</span>
+              </div>
+
+              <!-- Dry run -->
+              <div class="field-group">
+                <label class="field-label">
+                  Dry Run First
+                  <code class="flag-inline">-np</code>
+                  <span class="flag-badge flag-recommended">Recommended</span>
+                </label>
+                <div class="yn-control">
+                  <label class="yn-pill">
+                    <input type="radio" name="procura-dry-run" value="yes" id="procura-dry-yes" checked />
+                    <span>Yes</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="procura-dry-run" value="no" id="procura-dry-no" />
+                    <span>No</span>
+                  </label>
+                </div>
+                <span class="field-hint">When enabled, the preview shows <strong>two commands</strong>: a safe dry run
+                  first, then the actual execution.</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div><!-- end exec form-panel -->
+
+        <!-- COMMAND PREVIEW PANEL -->
+        <div class="yaml-panel" id="procura-cmd-panel" role="region" aria-label="Generated command preview">
+          <div class="yaml-header">
+            <div class="yaml-title">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                <path d="M2.5 9.5l3-3-3-3" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M7.5 9.5h3" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round" />
+              </svg>
+              ProCura Command
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <label class="cmd-wrap-toggle" title="Toggle line wrapping">
+                <input type="checkbox" id="procura-wrap-toggle" />
+                <span>Wrap</span>
+              </label>
+              <button class="yaml-copy-btn" id="procura-copy-btn" aria-label="Copy command">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M8.5 3.5V2.5a1 1 0 00-1-1h-5a1 1 0 00-1 1v5a1 1 0 001 1h1" stroke="currentColor"
+                    stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                Copy
+              </button>
+            </div>
+          </div>
+          <div class="yaml-body" id="procura-cmd-body">
+            <pre class="yaml-pre" id="procura-cmd-pre"></pre>
+          </div>
+          <div class="yaml-footer">
+            <div class="exec-cmd-actions">
+              <button class="op-btn op-btn-secondary exec-dl-btn" id="procura-dl-btn"
+                style="font-size:12px;padding:5px 12px">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M6 1v7M3.5 5.5 6 8l2.5-2.5M1 9v1.5A1.5 1.5 0 002.5 12h7A1.5 1.5 0 0011 10.5V9"
+                    stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Save as .sh
+              </button>
+            </div>
+            <span class="copy-toast hidden" id="procura-copy-toast">Copied!</span>
+          </div>
+        </div><!-- end exec-cmd-panel -->
+
+      </div><!-- end exec-procura-form -->
+
+      <!-- ── Unlock warning banner ── -->
+      <div class="smart-hint smart-hint-warn exec-unlock-banner" style="margin-top:24px">
+        <div class="smart-hint-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 2L16.9 16H1.1L9 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"
+              fill="none" />
+            <path d="M9 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <circle cx="9" cy="13" r="0.9" fill="currentColor" />
+          </svg>
+        </div>
+        <div class="smart-hint-body">
+          <strong>Snakemake directory lock:</strong> If a job does not complete or Snakemake crashes, it may leave the
+          working directory locked. To recover:
+          <ol style="margin:8px 0 0 18px;line-height:1.9">
+            <li>Run your command once with the <code>-unlock</code> flag added</li>
+            <li>Remove the <code>-unlock</code> flag and run normally again</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- ── Flag Reference Table ── -->
+      <div class="flag-ref-section" style="margin-top:32px">
+        <div class="section-label" style="margin-bottom:16px">
+          <span class="section-label-text">ProCura — Flag Reference</span>
+          <span class="section-label-line"></span>
+        </div>
+        <div class="flag-ref-table-wrap">
+          <table class="flag-ref-table">
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>-d &lt;path&gt;</code></td>
+                <td><span class="flag-badge flag-required">Required</span></td>
+                <td>Path to your working directory where all workflow files and outputs are located</td>
+              </tr>
+              <tr>
+                <td><code>-c &lt;path&gt;</code></td>
+                <td><span class="flag-badge flag-required">Required</span></td>
+                <td>Path to configuration YAML file (e.g. <code>config/config_hapcuration.yaml</code>)</td>
+              </tr>
+              <tr>
+                <td><code>-hapcuration</code></td>
+                <td><span class="flag-badge flag-required">Mode</span></td>
+                <td>Adds annotation tracks and prepares Pretext, ortholog, and synteny data for haplotype curation</td>
+              </tr>
+              <tr>
+                <td><code>-dualcuration</code></td>
+                <td><span class="flag-badge flag-required">Mode</span></td>
+                <td>Prepares inputs, AGP mappings, and Hi-C maps for dual diploid curation</td>
+              </tr>
+              <tr>
+                <td><code>-finalgenome</code></td>
+                <td><span class="flag-badge flag-required">Mode</span></td>
+                <td>Generates final curated hap1/hap2 FASTA assemblies and runs quality assessment reports (GFAstats, etc.)</td>
+              </tr>
+              <tr>
+                <td><code>-t &lt;int&gt;</code></td>
+                <td><span class="flag-badge flag-required">Required</span></td>
+                <td>Number of CPU threads (local mode) or thread allocation per rule</td>
+              </tr>
+              <tr>
+                <td><code>-sifdir &lt;path&gt;</code></td>
+                <td><span class="flag-badge flag-optional">Optional</span></td>
+                <td>Path to directory containing pre-downloaded Singularity (.sif) container images</td>
+              </tr>
+              <tr>
+                <td><code>-np</code></td>
+                <td><span class="flag-badge flag-optional">Optional</span></td>
+                <td>Dry run — shows what jobs will be executed without actually running them</td>
+              </tr>
+              <tr>
+                <td><code>-unlock</code></td>
+                <td><span class="flag-badge flag-optional">Optional</span></td>
+                <td>Unlock the working directory if Snakemake has locked it after a crash</td>
+              </tr>
+              <tr class="flag-ref-slurm">
+                <td><code>-slurm</code></td>
+                <td><span class="flag-badge"
+                    style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM</span></td>
+                <td>Enable SLURM job submission mode using Snakemake's profile system</td>
+              </tr>
+              <tr class="flag-ref-slurm">
+                <td><code>-j &lt;int&gt;</code></td>
+                <td><span class="flag-badge"
+                    style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM only</span></td>
+                <td>Number of jobs to submit to the SLURM queue at once</td>
+              </tr>
+              <tr class="flag-ref-slurm">
+                <td><code>-partition &lt;name&gt;</code></td>
+                <td><span class="flag-badge"
+                    style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM only</span></td>
+                <td>SLURM partition (queue) to submit jobs to. Required when using <code>-slurm</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="flag-ref-note">To customize default thread counts and memory per rule, edit
+          <code>config/local_params.yaml</code> or <code>config/slurm_params.yaml</code>.</p>
+      </div>
+
+    </div><!-- end exec-procura-view -->
+
+      <!-- ==================== PIMBA VIEW ==================== -->
+      <div id="exec-pimba-view" class="exec-pipeline-view hidden">
+
+        <!-- PIMBA command builder -->
+        <div id="exec-pimba-form" class="editor-layout exec-editor-layout">
+
+        <!-- FORM PANEL -->
+        <div class="form-panel">
+
+          <!-- Step 1: Core Parameters -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">1</div>
+              <div class="section-header-text">
+                <div class="section-title">Core Parameters</div>
+                <div class="section-desc">Required paths for working directory and configuration file.</div>
+              </div>
+            </div>
+            <div class="section-body">
+
+              <!-- Working directory -->
+              <div class="field-group">
+                <label class="field-label">
+                  Working Directory
+                  <code class="flag-inline">-d</code>
+                  <span class="flag-badge flag-required">Required</span>
+                </label>
+                <div class="yn-control">
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-wd-type" value="submitdir" id="pimba-wd-submit" checked />
+                    <span id="pimba-wd-submit-label">$SLURM_SUBMIT_DIR</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-wd-type" value="custom" id="pimba-wd-custom" />
+                    <span>Custom path</span>
+                  </label>
+                </div>
+                <div id="pimba-workdir-group" class="hidden">
+                  <input class="field-input" type="text" id="pimba-workdir" placeholder="/path/to/work/dir" />
+                </div>
+                <span class="field-hint">Directory where PIMBA will run. Should contain the cloned <code>pimba_smk</code> repository.</span>
+              </div>
+
+              <!-- Config file -->
+              <div class="field-group">
+                <label class="field-label">
+                  Config File
+                  <code class="flag-inline">-c</code>
+                  <span class="flag-badge flag-required">Required</span>
+                </label>
+                <input class="field-input" type="text" id="pimba-config" placeholder="config/config.yaml" />
+                <span class="field-hint">Path to the PIMBA configuration YAML file (e.g. <code>config/config.yaml</code>). Edit this file before running.</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Step 2: Pipeline Modes -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">2</div>
+              <div class="section-header-text">
+                <div class="section-title">Pipeline Modes</div>
+                <div class="section-desc">Select the analysis modes to run. All four must be specified.</div>
+              </div>
+            </div>
+            <div class="section-body">
+
+              <!-- Prepare mode -->
+              <div class="field-group">
+                <label class="field-label">
+                  Prepare Mode
+                  <code class="flag-inline">-p</code>
+                  <span class="flag-badge flag-required">Required</span>
+                </label>
+                <select class="field-input" id="pimba-prepare-mode">
+                  <option value="paired_end">paired_end — Paired-end reads</option>
+                  <option value="single_index">single_index — Single-end, single-index reads</option>
+                  <option value="dual_index">dual_index — Single-end, dual-index reads</option>
+                  <option value="no">no — Skip prepare step</option>
+                </select>
+                <span class="field-hint">Choose the sequencing read layout. Use <code>no</code> if reads are already demultiplexed and trimmed.</span>
+              </div>
+
+              <!-- Run mode (database) -->
+              <div class="field-group">
+                <label class="field-label">
+                  Run Mode (Database)
+                  <code class="flag-inline">-r</code>
+                  <span class="flag-badge flag-required">Required</span>
+                </label>
+                <select class="field-input" id="pimba-run-mode">
+                  <option value="ITS">ITS — Internal Transcribed Spacer (fungi)</option>
+                  <option value="16S">16S — 16S rRNA (bacteria/archaea)</option>
+                  <option value="COI">COI — Cytochrome c oxidase I (animals)</option>
+                  <option value="18S">18S — 18S rRNA (eukaryotes)</option>
+                  <option value="custom">custom — User-provided database</option>
+                </select>
+                <span class="field-hint">Reference database for OTU/ASV taxonomic assignment. Must match the database paths in <code>config.yaml</code>.</span>
+              </div>
+
+              <!-- Plot mode -->
+              <div class="field-group">
+                <label class="field-label">
+                  Plot Mode
+                  <code class="flag-inline">-g</code>
+                  <span class="flag-badge flag-required">Required</span>
+                </label>
+                <div class="yn-control">
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-plot-mode" value="yes" id="pimba-plot-yes" checked />
+                    <span>Yes</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-plot-mode" value="no" id="pimba-plot-no" />
+                    <span>No</span>
+                  </label>
+                </div>
+                <span class="field-hint">Generate downstream diversity and abundance visualizations.</span>
+              </div>
+
+              <!-- Place mode -->
+              <div class="field-group">
+                <label class="field-label">
+                  Place Mode
+                  <code class="flag-inline">-l</code>
+                  <span class="flag-badge flag-required">Required</span>
+                </label>
+                <div class="yn-control">
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-place-mode" value="yes" id="pimba-place-yes" />
+                    <span>Yes</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-place-mode" value="no" id="pimba-place-no" checked />
+                    <span>No</span>
+                  </label>
+                </div>
+                <span class="field-hint">Run phylogenetic placement of unclassified sequences using EPA-ng.</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Step 3: Execution & Advanced -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-step sub-step">3</div>
+              <div class="section-header-text">
+                <div class="section-title">Execution &amp; Advanced</div>
+                <div class="section-desc">Thread count and optional flags.</div>
+              </div>
+            </div>
+            <div class="section-body">
+
+              <!-- Threads -->
+              <div class="field-group">
+                <label class="field-label">
+                  Threads
+                  <code class="flag-inline">-t</code>
+                  <span class="flag-badge flag-required">Required</span>
+                </label>
+                <input class="field-input" type="number" id="pimba-threads" value="4" min="1" max="256" />
+                <span class="field-hint">Number of CPU threads for tasks that support parallelization.</span>
+              </div>
+
+              <!-- Dry run -->
+              <div class="field-group">
+                <label class="field-label">
+                  Dry Run First
+                  <code class="flag-inline">--dry-run</code>
+                  <span class="flag-badge flag-recommended">Recommended</span>
+                </label>
+                <div class="yn-control">
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-dry-run" value="yes" id="pimba-dry-yes" checked />
+                    <span>Yes</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-dry-run" value="no" id="pimba-dry-no" />
+                    <span>No</span>
+                  </label>
+                </div>
+                <span class="field-hint">When enabled, the preview shows <strong>two commands</strong>: a safe dry run first (Snakemake <code>--dry-run</code> passed internally), then the actual execution.</span>
+              </div>
+
+              <!-- Unlock -->
+              <div class="field-group">
+                <label class="field-label">
+                  Unlock Working Directory
+                  <code class="flag-inline">-u</code>
+                </label>
+                <div class="yn-control">
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-unlock" value="yes" id="pimba-unlock-yes" />
+                    <span>Yes</span>
+                  </label>
+                  <label class="yn-pill">
+                    <input type="radio" name="pimba-unlock" value="no" id="pimba-unlock-no" checked />
+                    <span>No</span>
+                  </label>
+                </div>
+                <span class="field-hint">Unlock if Snakemake locked the directory after a crash. Run this separately before re-running normally.</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div><!-- end form-panel -->
+
+        <!-- COMMAND PREVIEW PANEL -->
+        <div class="yaml-panel" id="pimba-cmd-panel" role="region" aria-label="Generated command preview">
+          <div class="yaml-header">
+            <div class="yaml-title">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                <path d="M2.5 9.5l3-3-3-3" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M7.5 9.5h3" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round" />
+              </svg>
+              PIMBA Command
+            </div>
+            <div class="yaml-actions">
+              <label class="wrap-toggle-label">
+                <input type="checkbox" id="pimba-wrap-toggle" />
+                <span>Wrap</span>
+              </label>
+              <button class="yaml-action-btn" id="pimba-copy-btn" aria-label="Copy command">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                  <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M1 9V2a1 1 0 0 1 1-1h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                Copy
+              </button>
+              <span id="pimba-copy-toast" class="copy-toast hidden">Copied!</span>
+              <button class="yaml-action-btn" id="pimba-dl-btn" aria-label="Download as shell script">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                  <path d="M6.5 1v8M3 7l3.5 3.5L10 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path d="M1 11.5h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                Save .sh
+              </button>
+            </div>
+          </div>
+          <pre class="yaml-pre exec-pre" id="pimba-cmd-pre" aria-live="polite"></pre>
+        </div>
+
+        </div><!-- end exec-pimba-form -->
+
+        <!-- ── Unlock warning banner ── -->
+        <div class="smart-hint smart-hint-warn exec-unlock-banner" style="margin-top:24px">
+          <div class="smart-hint-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 2L16.9 16H1.1L9 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"
+                fill="none" />
+              <path d="M9 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <circle cx="9" cy="13" r="0.9" fill="currentColor" />
+            </svg>
+          </div>
+          <div class="smart-hint-body">
+            <strong>Snakemake directory lock:</strong> If a job does not complete or Snakemake crashes, it may leave the
+            working directory locked. To recover:
+            <ol style="margin:8px 0 0 18px;line-height:1.9">
+              <li>Enable <strong>Unlock Working Directory (<code>-u</code>)</strong> above and run that command once</li>
+              <li>Disable the <code>-u</code> flag and run normally again</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- ── Flag Reference Table ── -->
+        <div class="flag-ref-section" style="margin-top:32px">
+          <div class="section-label" style="margin-bottom:16px">
+            <span class="section-label-text">PIMBA — Flag Reference</span>
+            <span class="section-label-line"></span>
+          </div>
+          <div class="flag-ref-table-wrap">
+            <table class="flag-ref-table">
+              <thead>
+                <tr>
+                  <th>Flag</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>-d &lt;path&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Working directory containing the cloned <code>pimba_smk</code> repository</td>
+                </tr>
+                <tr>
+                  <td><code>-c &lt;path&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Path to the configuration YAML file (e.g. <code>config/config.yaml</code>)</td>
+                </tr>
+                <tr>
+                  <td><code>-p &lt;mode&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Read preparation mode: <code>paired_end</code>, <code>single_index</code>, <code>dual_index</code>, or <code>no</code></td>
+                </tr>
+                <tr>
+                  <td><code>-r &lt;db&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Reference database for taxonomic assignment (e.g. <code>ITS</code>, <code>16S</code>, <code>COI</code>, <code>18S</code>, <code>custom</code>)</td>
+                </tr>
+                <tr>
+                  <td><code>-g &lt;yes|no&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Enable diversity and abundance visualization plots</td>
+                </tr>
+                <tr>
+                  <td><code>-l &lt;yes|no&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Enable phylogenetic placement of unclassified sequences (EPA-ng)</td>
+                </tr>
+                <tr>
+                  <td><code>-t &lt;int&gt;</code></td>
+                  <td><span class="flag-badge flag-required">Required</span></td>
+                  <td>Number of CPU threads for parallelizable tasks</td>
+                </tr>
+                <tr>
+                  <td><code>-u</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Unlock the Snakemake working directory after a crash. Run once, then remove before re-running</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="flag-ref-note">Configure input file paths, adapter sequences, and database paths in <code>config/config.yaml</code> before running. Always use <strong>absolute paths</strong> in the config file.</p>
+        </div>
+
+      </div><!-- end exec-pimba-view -->
+
+    </div><!-- end exec-layout -->
+
+      <!-- Footer -->
+      <div class="page-wrapper">
+        <footer class="site-footer">
+          <span class="footer-left">Pipeline Config Hub &mdash; ITV Genomics</span>
+          <span class="footer-right">v1.0.0</span>
+        </footer>
+      </div>
+
+      <script src="submission.js"></script>
+</body>
+
+</html>
