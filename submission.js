@@ -683,16 +683,18 @@ function buildPimbaCommand() {
 
   const config      = execVal('pimba-config') || 'config/config.yaml';
   const prepareMode = execVal('pimba-prepare-mode') || 'paired_end';
-  const runMode     = execVal('pimba-run-mode') || 'ITS';
+  const runMode     = execVal('pimba-run-mode') || 'COI-BOLD';
   const plotMode    = execChecked('pimba-plot-mode') || 'yes';
   const placeMode   = execChecked('pimba-place-mode') || 'no';
   const threads     = execVal('pimba-threads') || '4';
   const dryRun      = execChecked('pimba-dry-run') === 'yes';
   const unlock      = execChecked('pimba-unlock') === 'yes';
+  const customDbPath = execVal('pimba-custom-db-path') || '/path/to/custom_db/';
 
   const flags = [];
   flags.push(['-p', prepareMode]);
   flags.push(['-r', runMode]);
+  if (runMode === 'Custom') flags.push(['-b', customDbPath]);
   flags.push(['-g', plotMode]);
   flags.push(['-l', placeMode]);
   flags.push(['-t', threads]);
@@ -957,7 +959,13 @@ function initExecLiveUpdate() {
   forms.forEach(form => {
     if (!form) return;
     form.querySelectorAll('input:not([type="radio"]), textarea, select').forEach(el => {
-      el.addEventListener('input', buildExecCommand);
+      el.addEventListener('input', () => {
+        // Toggle custom DB path group when PIMBA run mode changes
+        if (el.id === 'pimba-run-mode') {
+          $('pimba-custom-db-group').classList.toggle('hidden', el.value !== 'Custom');
+        }
+        buildExecCommand();
+      });
     });
     form.querySelectorAll('input[type="radio"]').forEach(el => {
       el.addEventListener('change', () => {

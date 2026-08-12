@@ -1773,13 +1773,24 @@
                   <span class="flag-badge flag-required">Required</span>
                 </label>
                 <select class="field-input" id="pimba-run-mode">
-                  <option value="ITS">ITS — Internal Transcribed Spacer (fungi)</option>
-                  <option value="16S">16S — 16S rRNA (bacteria/archaea)</option>
-                  <option value="COI">COI — Cytochrome c oxidase I (animals)</option>
-                  <option value="18S">18S — 18S rRNA (eukaryotes)</option>
-                  <option value="custom">custom — User-provided database</option>
+                  <option value="COI-BOLD">COI-BOLD — Cytochrome c oxidase I (BOLD)</option>
+                  <option value="COI-NCBI">COI-NCBI — Cytochrome c oxidase I (NCBI)</option>
+                  <option value="16S-SILVA">16S-SILVA — 16S rRNA (SILVA)</option>
+                  <option value="16S-GREENGENES">16S-GREENGENES — 16S rRNA (Greengenes)</option>
+                  <option value="16S-RDP">16S-RDP — 16S rRNA (RDP)</option>
+                  <option value="16S-NCBI">16S-NCBI — 16S rRNA (NCBI)</option>
+                  <option value="ITS-PLANTS-NCBI">ITS-PLANTS-NCBI — ITS Plants (NCBI)</option>
+                  <option value="ITS-FUNGI-UNITE">ITS-FUNGI-UNITE — ITS Fungi (UNITE)</option>
+                  <option value="ITS-FUNGI-NCBI">ITS-FUNGI-NCBI — ITS Fungi (NCBI)</option>
+                  <option value="ALL-NCBI">ALL-NCBI — All markers (NCBI)</option>
+                  <option value="Custom">Custom — User-provided database</option>
                 </select>
-                <span class="field-hint">Reference database for OTU/ASV taxonomic assignment. Must match the database paths in <code>config.yaml</code>.</span>
+                <div id="pimba-custom-db-group" class="hidden">
+                  <input class="field-input" type="text" id="pimba-custom-db-path"
+                    placeholder="/path/to/custom_db/" style="margin-top:6px;" />
+                  <span class="field-hint">Absolute path to your custom reference database directory.</span>
+                </div>
+                <span class="field-hint">Reference database for OTU/ASV taxonomic assignment. Must match the <code>marker_gene</code> setting in <code>config.yaml</code>.</span>
               </div>
 
               <!-- Plot mode -->
@@ -1984,7 +1995,12 @@
                 <tr>
                   <td><code>-r &lt;db&gt;</code></td>
                   <td><span class="flag-badge flag-required">Required</span></td>
-                  <td>Reference database for taxonomic assignment (e.g. <code>ITS</code>, <code>16S</code>, <code>COI</code>, <code>18S</code>, <code>custom</code>)</td>
+                  <td>Reference database for taxonomic assignment: <code>COI-BOLD</code>, <code>COI-NCBI</code>, <code>16S-SILVA</code>, <code>16S-GREENGENES</code>, <code>16S-RDP</code>, <code>16S-NCBI</code>, <code>ITS-PLANTS-NCBI</code>, <code>ITS-FUNGI-UNITE</code>, <code>ITS-FUNGI-NCBI</code>, <code>ALL-NCBI</code>, or <code>Custom</code></td>
+                </tr>
+                <tr>
+                  <td><code>-b &lt;path&gt;</code></td>
+                  <td><span class="flag-badge flag-optional">Optional</span></td>
+                  <td>Path to a custom reference database directory. Required when <code>-r Custom</code> is used</td>
                 </tr>
                 <tr>
                   <td><code>-g &lt;yes|no&gt;</code></td>
