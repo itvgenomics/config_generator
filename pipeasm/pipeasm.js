@@ -13,6 +13,7 @@ const state = {
   hic_r1: '',
   hic_r2: '',
   ont_reads: '',
+  genome_size: '',
 
   // Section 2: Assembly Settings
   taxid: '',
@@ -158,6 +159,21 @@ function bindEvents() {
     });
   });
 
+  // ---- Select fields ----
+  const selectFields = [
+    ['f-genome-size', 'genome_size'],
+  ];
+
+  selectFields.forEach(([id, key]) => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener('change', (e) => {
+      state[key] = e.target.value;
+      updateConditionals();
+      updateYAML();
+    });
+  });
+
   // ---- Radio groups ----
   const radioGroups = ['solo_asm', 'diff_species_hic', 'run_mitohifi'];
 
@@ -217,11 +233,12 @@ function generateYAML() {
   let y = '';
 
   // ── Sample & Reads ─────────────────────────────────────────────
-  y += qline('sample',    s.sample);
-  y += qline('hifi_reads',s.hifi_reads);
-  y += qline('hic_r1',    s.hic_r1);
-  y += qline('hic_r2',    s.hic_r2);
-  y += qline('ont_reads', s.ont_reads);
+  y += qline('sample',      s.sample);
+  y += qline('hifi_reads',  s.hifi_reads);
+  y += qline('hic_r1',      s.hic_r1);
+  y += qline('hic_r2',      s.hic_r2);
+  y += qline('ont_reads',   s.ont_reads);
+  y += qline('genome_size', s.genome_size);
 
   // ── Assembly Settings ──────────────────────────────────────────
   y += line( 'taxid',          s.taxid);

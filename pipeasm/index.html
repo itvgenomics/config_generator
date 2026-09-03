@@ -162,6 +162,22 @@
                 autocomplete="off" />
             </div>
 
+            <div class="field-group" id="fg-genome-size">
+              <label class="field-label" for="f-genome-size">
+                Genome Size <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">
+                Estimated genome size. Small &lt; 2 Gb, medium 2–4 Gb, large &gt; 4 Gb.
+                Used for memory allocation on Slurm config files.
+              </p>
+              <select class="field-input" id="f-genome-size">
+                <option value="">-- Select genome size --</option>
+                <option value="small">small (&lt; 2 Gb)</option>
+                <option value="medium">medium (2–4 Gb)</option>
+                <option value="large">large (&gt; 4 Gb)</option>
+              </select>
+            </div>
+
           </div>
         </section>
 
