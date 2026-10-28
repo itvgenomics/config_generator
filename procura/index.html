@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="ProCura YAML configuration generator — Haplotype Curation, Dual Curation, and Final Genome modes." />
+    content="ProCura 1.1.0 YAML configuration generator — Haplotype Curation, Dual Curation, and Final Genome modes." />
   <title>ProCura — Pipeline Config Generator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -74,7 +74,7 @@
       </div>
       <div class="pc-header-text">
         <h1>ProCura Configuration</h1>
-        <p>Generate a <code>config.yaml</code> file for the ProCura pipeline</p>
+        <p>Generate a <code>config/config_&lt;mode&gt;.yaml</code> file for the ProCura pipeline (v1.1.0)</p>
       </div>
       <div class="pc-header-actions">
         <button id="btn-reset" class="pc-btn pc-btn-ghost" title="Reset all fields">
@@ -126,8 +126,9 @@
                   </svg>
                 </div>
                 <div class="pc-mode-card-body">
+                  <span class="pc-mode-flag">Step 1 · -hapcuration</span>
                   <span class="pc-mode-title">Haplotype Curation</span>
-                  <span class="pc-mode-desc">Hi-C contact maps for hap1 &amp; hap2</span>
+                  <span class="pc-mode-desc">Hi-C maps of hap1 &amp; hap2 with curation tracks</span>
                 </div>
                 <div class="pc-mode-check" aria-hidden="true">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -152,8 +153,9 @@
                   </svg>
                 </div>
                 <div class="pc-mode-card-body">
+                  <span class="pc-mode-flag">Step 2 · -dualcuration</span>
                   <span class="pc-mode-title">Dual Curation</span>
-                  <span class="pc-mode-desc">Scaffolded contact maps with AGP files</span>
+                  <span class="pc-mode-desc">Curated hap1/hap2 joined into one diploid map</span>
                 </div>
                 <div class="pc-mode-check" aria-hidden="true">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -176,8 +178,9 @@
                   </svg>
                 </div>
                 <div class="pc-mode-card-body">
+                  <span class="pc-mode-flag">Step 3 · -finalgenome</span>
                   <span class="pc-mode-title">Final Genome</span>
-                  <span class="pc-mode-desc">Full QC &amp; validation for diploid assembly</span>
+                  <span class="pc-mode-desc">Final hap1/hap2 FASTA with QC reports</span>
                 </div>
                 <div class="pc-mode-check" aria-hidden="true">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -191,7 +194,9 @@
 
           </div>
           <!-- Mode hint (hidden after selection) -->
-          <p class="pc-mode-hint" id="mode-hint">Select a mode above to configure the pipeline</p>
+          <p class="pc-mode-hint" id="mode-hint">Select a mode above to configure the pipeline. Run the modes in
+            order, curating the maps in PretextView between them.</p>
+          <p class="pc-mode-next hidden" id="mode-next" aria-live="polite"></p>
         </section>
 
 
@@ -203,7 +208,7 @@
             <div class="pc-section-step">1</div>
             <div class="pc-section-header-text">
               <h2 class="pc-section-title">Sample &amp; Reads</h2>
-              <p class="pc-section-desc">Sample name and Hi-C / HiFi input reads</p>
+              <p class="pc-section-desc">Sample name, Hi-C and HiFi reads, and genome size</p>
             </div>
           </div>
           <div class="pc-section-body">
@@ -212,8 +217,9 @@
               <label class="pc-field-label" for="f-sample">
                 Sample Name <span class="pc-field-req" title="Required">*</span>
               </label>
-              <p class="pc-field-hint">Unique identifier used for naming outputs.</p>
-              <input class="pc-field-input" type="text" id="f-sample" placeholder="e.g. idAphHypo1"
+              <p class="pc-field-hint">Unique identifier used to name all output files (e.g. a DToL/VGP ID). Letters,
+                numbers and underscores only. Use the same value in the three modes.</p>
+              <input class="pc-field-input" type="text" id="f-sample" placeholder="e.g. bHypStr1"
                 autocomplete="off" />
             </div>
 
@@ -222,25 +228,42 @@
                 <label class="pc-field-label" for="f-r1">
                   Hi-C Read R1 <span class="pc-field-req" title="Required">*</span>
                 </label>
-                <p class="pc-field-hint">Forward read (<code>.fastq.gz</code>, QC-passed).</p>
-                <input class="pc-field-input" type="text" id="f-r1" placeholder="/data/hic/sample_R1.fastq.gz"
-                  autocomplete="off" />
+                <p class="pc-field-hint">Forward read (<code>.fastq.gz</code>), already trimmed or QC-passed.</p>
+                <input class="pc-field-input" type="text" id="f-r1"
+                  placeholder="/data/raw_data/hic/bHypStr1.R1.fastq.gz" autocomplete="off" />
               </div>
               <div class="pc-field-group" id="fg-r2">
                 <label class="pc-field-label" for="f-r2">
                   Hi-C Read R2 <span class="pc-field-req" title="Required">*</span>
                 </label>
-                <p class="pc-field-hint">Reverse read (<code>.fastq.gz</code>, QC-passed).</p>
-                <input class="pc-field-input" type="text" id="f-r2" placeholder="/data/hic/sample_R2.fastq.gz"
-                  autocomplete="off" />
+                <p class="pc-field-hint">Reverse read (<code>.fastq.gz</code>), already trimmed or QC-passed.</p>
+                <input class="pc-field-input" type="text" id="f-r2"
+                  placeholder="/data/raw_data/hic/bHypStr1.R2.fastq.gz" autocomplete="off" />
               </div>
             </div>
 
             <div class="pc-field-group" id="fg-hifi">
-              <label class="pc-field-label" for="f-hifi">HiFi Reads</label>
-              <p class="pc-field-hint">HiFi reads if available (<code>.fastq.gz</code>). Leave empty to skip.</p>
-              <input class="pc-field-input" type="text" id="f-hifi" placeholder="/data/hifi/sample.fastq.gz"
+              <label class="pc-field-label" for="f-hifi">
+                HiFi Reads <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint" id="hifi-hint">PacBio HiFi reads merged into a single <code>.fastq.gz</code>
+                file.</p>
+              <input class="pc-field-input" type="text" id="f-hifi" placeholder="/data/raw_data/hifi/bHypStr1.fastq.gz"
                 autocomplete="off" />
+            </div>
+
+            <div class="pc-field-group" id="fg-genome-size">
+              <label class="pc-field-label" for="f-genome-size">
+                Genome Size <span class="pc-field-req" title="Required">*</span>
+              </label>
+              <p class="pc-field-hint">Estimated haploid genome size. Selects the memory requested per rule in SLURM
+                mode (<code>config/resources/{genome_size}.yaml</code>). Required in local mode too.</p>
+              <select class="pc-field-input" id="f-genome-size">
+                <option value="">-- Select genome size --</option>
+                <option value="small">small (&lt; 2 Gb)</option>
+                <option value="medium">medium (2–4 Gb)</option>
+                <option value="large">large (&gt; 4 Gb)</option>
+              </select>
             </div>
 
           </div>
@@ -255,7 +278,7 @@
             <div class="pc-section-step">2</div>
             <div class="pc-section-header-text">
               <h2 class="pc-section-title">Assembly Files</h2>
-              <p class="pc-section-desc">Input FASTA assemblies and AGP scaffold files</p>
+              <p class="pc-section-desc">Input FASTA assemblies and the AGP files saved from PretextView</p>
             </div>
             <span class="pc-section-badge" id="assembly-badge">—</span>
           </div>
@@ -268,36 +291,44 @@
                   <label class="pc-field-label" for="f-hap1">
                     Haplotype 1 FASTA <span class="pc-field-req" title="Required">*</span>
                   </label>
-                  <p class="pc-field-hint">Path to hap1 FASTA. Must be uncompressed.</p>
-                  <input class="pc-field-input" type="text" id="f-hap1" placeholder="/data/hap1.fasta"
-                    autocomplete="off" />
+                  <p class="pc-field-hint">Uncompressed FASTA, e.g. the hap1 scaffolds produced by Pipeasm. Use the
+                    same file in <code>-hapcuration</code> and <code>-dualcuration</code>.</p>
+                  <input class="pc-field-input" type="text" id="f-hap1"
+                    placeholder="/data/assembly/bHypStr1.hap1.fasta" autocomplete="off" />
                 </div>
                 <div class="pc-field-group" id="fg-hap2">
                   <label class="pc-field-label" for="f-hap2">
                     Haplotype 2 FASTA <span class="pc-field-req" title="Required">*</span>
                   </label>
-                  <p class="pc-field-hint">Path to hap2 FASTA. Must be uncompressed.</p>
-                  <input class="pc-field-input" type="text" id="f-hap2" placeholder="/data/hap2.fasta"
-                    autocomplete="off" />
+                  <p class="pc-field-hint">Uncompressed FASTA, e.g. the hap2 scaffolds produced by Pipeasm. Use the
+                    same file in <code>-hapcuration</code> and <code>-dualcuration</code>.</p>
+                  <input class="pc-field-input" type="text" id="f-hap2"
+                    placeholder="/data/assembly/bHypStr1.hap2.fasta" autocomplete="off" />
                 </div>
               </div>
             </div>
 
             <!-- AGP files (dualcuration only) -->
             <div id="group-agp-hap" class="pc-conditional-group hidden">
-              <div class="pc-subsection-divider"><span>AGP Scaffold Files</span></div>
+              <div class="pc-subsection-divider"><span>AGP Files from PretextView</span></div>
               <div class="pc-field-row">
                 <div class="pc-field-group" id="fg-agp-hap1">
-                  <label class="pc-field-label" for="f-agp-hap1">AGP — Hap1</label>
-                  <p class="pc-field-hint">AGP file for haplotype 1 scaffolding.</p>
-                  <input class="pc-field-input" type="text" id="f-agp-hap1" placeholder="/data/hap1.agp"
-                    autocomplete="off" />
+                  <label class="pc-field-label" for="f-agp-hap1">
+                    AGP — Hap1 <span class="pc-field-req" title="Required">*</span>
+                  </label>
+                  <p class="pc-field-hint">AGP saved after curating the <code>-hapcuration</code> map of hap1
+                    (<code>{sample}.ProCura.hap1.*.pretext</code>).</p>
+                  <input class="pc-field-input" type="text" id="f-agp-hap1"
+                    placeholder="/data/curation/bHypStr1.hap1.pretext.agp" autocomplete="off" />
                 </div>
                 <div class="pc-field-group" id="fg-agp-hap2">
-                  <label class="pc-field-label" for="f-agp-hap2">AGP — Hap2</label>
-                  <p class="pc-field-hint">AGP file for haplotype 2 scaffolding.</p>
-                  <input class="pc-field-input" type="text" id="f-agp-hap2" placeholder="/data/hap2.agp"
-                    autocomplete="off" />
+                  <label class="pc-field-label" for="f-agp-hap2">
+                    AGP — Hap2 <span class="pc-field-req" title="Required">*</span>
+                  </label>
+                  <p class="pc-field-hint">AGP saved after curating the <code>-hapcuration</code> map of hap2
+                    (<code>{sample}.ProCura.hap2.*.pretext</code>).</p>
+                  <input class="pc-field-input" type="text" id="f-agp-hap2"
+                    placeholder="/data/curation/bHypStr1.hap2.pretext.agp" autocomplete="off" />
                 </div>
               </div>
             </div>
@@ -306,17 +337,24 @@
             <div id="group-diploid" class="pc-conditional-group hidden">
               <div class="pc-field-group" id="fg-diploid">
                 <label class="pc-field-label" for="f-diploid">
-                  Diploid FASTA <span class="pc-field-req" title="Required">*</span>
+                  Curated Diploid FASTA <span class="pc-field-req" title="Required">*</span>
                 </label>
-                <p class="pc-field-hint">Path to the diploid assembly FASTA. Must be uncompressed.</p>
-                <input class="pc-field-input" type="text" id="f-diploid" placeholder="/data/diploid.fasta"
+                <p class="pc-field-hint">Uncompressed FASTA built by <code>-dualcuration</code>:
+                  <code>results/dualcuration/GetFastas/{sample}_curated_diploid.fasta</code> (also in
+                  <code>workflow/report/dualcuration/</code>).</p>
+                <input class="pc-field-input" type="text" id="f-diploid"
+                  placeholder="/data/procura/results/dualcuration/GetFastas/bHypStr1_curated_diploid.fasta"
                   autocomplete="off" />
               </div>
               <div class="pc-field-group" id="fg-agp-diploid">
-                <label class="pc-field-label" for="f-agp-diploid">AGP — Diploid</label>
-                <p class="pc-field-hint">AGP scaffold file for the diploid assembly.</p>
-                <input class="pc-field-input" type="text" id="f-agp-diploid" placeholder="/data/diploid.agp"
-                  autocomplete="off" />
+                <label class="pc-field-label" for="f-agp-diploid">
+                  AGP — Diploid <span class="pc-field-req" title="Required">*</span>
+                </label>
+                <p class="pc-field-hint">AGP saved after curating the <code>-dualcuration</code> map
+                  (<code>{sample}.ProCura.diploid.dup.pretext</code>). Each contig goes to hap1 or hap2 by its
+                  <code>h1.</code>/<code>h2.</code> prefix; rows already tagged HAP1/HAP2 are kept.</p>
+                <input class="pc-field-input" type="text" id="f-agp-diploid"
+                  placeholder="/data/curation/bHypStr1.diploid.pretext.agp" autocomplete="off" />
               </div>
             </div>
 
@@ -325,28 +363,30 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 3: References & Extras             -->
+        <!-- SECTION 3: Optional Annotations / Evaluation -->
         <!-- ─────────────────────────────────────────── -->
         <section class="pc-form-section pc-section-hidden" id="section-refs" aria-hidden="true">
           <div class="pc-section-header">
             <div class="pc-section-step">3</div>
             <div class="pc-section-header-text">
-              <h2 class="pc-section-title">References &amp; Extras</h2>
-              <p class="pc-section-desc">Annotation references and quality databases</p>
+              <h2 class="pc-section-title" id="refs-title">References &amp; Extras</h2>
+              <p class="pc-section-desc" id="refs-desc">Annotation references and quality databases</p>
             </div>
             <span class="pc-section-badge" id="refs-badge">—</span>
           </div>
           <div class="pc-section-body">
 
-            <!-- BUSCO database (finalgenome only) -->
+            <!-- BUSCO lineage (finalgenome only) -->
             <div id="group-buscodb" class="pc-conditional-group hidden">
               <div class="pc-field-group" id="fg-buscodb">
                 <label class="pc-field-label" for="f-buscodb">
-                  BUSCO Database <span class="pc-field-req" title="Required">*</span>
+                  BUSCO Lineage <span class="pc-field-req" title="Required">*</span>
                 </label>
-                <p class="pc-field-hint">Compleasm lineage name, e.g. <code>eukaryota</code>. Required for Final Genome
-                  mode.</p>
-                <input class="pc-field-input" type="text" id="f-buscodb" placeholder="e.g. eukaryota"
+                <p class="pc-field-hint">Lineage used by Compleasm, from the closest taxonomic group (e.g.
+                  <code>aves</code>, <code>vertebrata</code>), without the <code>_odb10</code> suffix. See the
+                  <a href="https://busco-data.ezlab.org/v5/data/lineages/" target="_blank" rel="noopener">available
+                    lineages</a>.</p>
+                <input class="pc-field-input" type="text" id="f-buscodb" placeholder="e.g. vertebrata"
                   autocomplete="off" />
               </div>
             </div>
@@ -354,23 +394,25 @@
             <!-- NCBI RefSeq (hapcuration & finalgenome) -->
             <div id="group-ncbi-refseq" class="pc-conditional-group hidden">
               <div class="pc-field-group" id="fg-ncbi-refseq">
-                <label class="pc-field-label" for="f-ncbi-refseq">NCBI RefSeq Assembly</label>
+                <label class="pc-field-label" for="f-ncbi-refseq">NCBI RefSeq Assemblies (synteny)</label>
                 <p class="pc-field-hint">
-                  Accession(s) starting with <code>GCF_</code> to extract annotations. Enter <strong>one per
-                    line</strong> for multiple assemblies. Leave empty to skip.
+                  RefSeq accession(s) of related species, downloaded with NCBI Datasets and aligned to hap1 and hap2
+                  with minimap2 (PAF files). Must start with <code>GCF_</code>. Enter <strong>one per line</strong>
+                  for several assemblies. Leave empty to skip.
                 </p>
                 <textarea class="pc-field-input pc-field-textarea" id="f-ncbi-refseq" rows="2"
-                  placeholder="GCF_016699485.2&#10;GCF_016699489.2" spellcheck="false"></textarea>
+                  placeholder="GCF_016699485.2&#10;GCF_000002315.6" spellcheck="false"></textarea>
               </div>
             </div>
 
-            <!-- OrthoFinder taxon (hapcuration only) -->
+            <!-- Ortholog taxon (hapcuration only) -->
             <div id="group-ortholog" class="pc-conditional-group hidden">
               <div class="pc-field-group" id="fg-ortholog">
-                <label class="pc-field-label" for="f-ortholog">OrthoFinder Taxon</label>
-                <p class="pc-field-hint">Ortholog taxon name for OrthoFinder, e.g. <code>Hyloidea</code>. Optional —
-                  leave empty to skip.</p>
-                <input class="pc-field-input" type="text" id="f-ortholog" placeholder="e.g. Hyloidea"
+                <label class="pc-field-label" for="f-ortholog">Ortholog Taxon</label>
+                <p class="pc-field-hint">NCBI taxon name or Taxonomy ID (e.g. <code>Hyloidea</code>,
+                  <code>Passeriformes</code>). Its annotated genomes are clustered with OrthoFinder and CD-HIT and
+                  aligned to hap1/hap2 with miniprot for the ortholog track. Leave empty to skip.</p>
+                <input class="pc-field-input" type="text" id="f-ortholog" placeholder="e.g. Passeriformes"
                   autocomplete="off" />
               </div>
             </div>
@@ -380,16 +422,17 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 4: Tool Parameters                 -->
+        <!-- SECTION 4: Advanced Tool Parameters        -->
         <!-- ─────────────────────────────────────────── -->
         <section class="pc-form-section pc-section-hidden" id="section-tools" aria-hidden="true">
           <div class="pc-section-header">
             <div class="pc-section-step" id="tools-step-num">4</div>
             <div class="pc-section-header-text">
-              <h2 class="pc-section-title">Tool Parameters</h2>
-              <p class="pc-section-desc">PretextMap, BWA-MEM2, Pairtools, and FastK flags</p>
+              <h2 class="pc-section-title">Advanced Tool Parameters</h2>
+              <p class="pc-section-desc">The defaults work for most genomes. Each value is passed as-is to the
+                tool's command line.</p>
             </div>
-            <span class="pc-section-badge-tool">PretextMap · BWA-MEM2 · Pairtools</span>
+            <span class="pc-section-badge-tool" id="tools-badge">BWA-MEM2 · pairtools · PretextMap</span>
           </div>
           <div class="pc-section-body">
 
@@ -399,48 +442,65 @@
               <div class="pc-field-row">
                 <div class="pc-field-group" id="fg-fastk-default">
                   <label class="pc-field-label" for="f-fastk-default">FastK Default Flags</label>
-                  <p class="pc-field-hint">General options, e.g. <code>-v -M32 -t1</code>.</p>
+                  <p class="pc-field-hint"><code>-v</code>: verbose; <code>-M32</code>: up to 32 GB of memory for
+                    sorting; <code>-t1</code>: keep k-mers seen at least once.</p>
                   <input class="pc-field-input" type="text" id="f-fastk-default" placeholder="-v -M32 -t1"
                     autocomplete="off" />
                 </div>
                 <div class="pc-field-group" id="fg-fastk-kmer">
                   <label class="pc-field-label" for="f-fastk-kmer">K-mer Size</label>
-                  <p class="pc-field-hint">Integer k-mer size, e.g. <code>31</code>.</p>
+                  <p class="pc-field-hint">K-mer size used by FastK and MerquryFK, e.g. <code>31</code>.</p>
                   <input class="pc-field-input" type="number" id="f-fastk-kmer" min="1" placeholder="31" />
                 </div>
               </div>
-            </div>
-
-            <div class="pc-subsection-divider"><span>PretextMap</span></div>
-
-            <div class="pc-field-group" id="fg-pretexmap">
-              <label class="pc-field-label" for="f-pretexmap">PretextMap Default Flags</label>
-              <p class="pc-field-hint">Sorting and mapping options. Mode default applied automatically.</p>
-              <input class="pc-field-input" type="text" id="f-pretexmap" placeholder="--sortby nosort"
-                autocomplete="off" />
             </div>
 
             <div class="pc-subsection-divider"><span>BWA-MEM2</span></div>
 
             <div class="pc-field-group" id="fg-bwa-mem2">
               <label class="pc-field-label" for="f-bwa-mem2">BWA-MEM2 mem Flags</label>
-              <p class="pc-field-hint">Alignment flags, e.g. <code>-SP -T0</code>.</p>
+              <p class="pc-field-hint"><code>-S</code>: skip mate rescue; <code>-P</code>: skip pairing, so each read
+                of a pair is aligned on its own, as required for Hi-C; <code>-T0</code>: output all alignments
+                (pairtools filters them).</p>
               <input class="pc-field-input" type="text" id="f-bwa-mem2" placeholder="-SP -T0" autocomplete="off" />
             </div>
 
-            <div class="pc-subsection-divider"><span>Pairtools</span></div>
+            <div class="pc-subsection-divider"><span>pairtools</span></div>
 
             <div class="pc-field-row">
               <div class="pc-field-group" id="fg-pairtools-mapq">
                 <label class="pc-field-label" for="f-pairtools-mapq">Min MAPQ</label>
-                <p class="pc-field-hint">Minimum mapping quality score.</p>
+                <p class="pc-field-hint">Alignments with a lower mapping quality are treated as multimapping.</p>
                 <input class="pc-field-input" type="number" id="f-pairtools-mapq" min="0" max="60" placeholder="5" />
               </div>
               <div class="pc-field-group" id="fg-pairtools">
-                <label class="pc-field-label" for="f-pairtools">Pairtools Default Flags</label>
-                <p class="pc-field-hint">Walk policy and gap settings.</p>
+                <label class="pc-field-label" for="f-pairtools">pairtools Default Flags</label>
+                <p class="pc-field-hint"><code>--walks-policy 5unique</code>: 5'-most unique alignment of each side;
+                  <code>--max-inter-align-gap 30</code>: longer unaligned stretches are unmapped segments.</p>
                 <input class="pc-field-input" type="text" id="f-pairtools"
                   placeholder="--walks-policy 5unique --max-inter-align-gap 30" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="pc-subsection-divider"><span>PretextMap</span></div>
+
+            <div class="pc-field-row">
+              <div class="pc-field-group" id="fg-pretext-res">
+                <label class="pc-field-label" for="f-pretext-res">Contact Map Resolution</label>
+                <p class="pc-field-hint">Sets the resolution argument in PretextMap flags. Open
+                  <code>--ultraRes</code> maps in a recent PretextView (1.x).</p>
+                <select class="pc-field-input" id="f-pretext-res">
+                  <option value="--ultraRes">Ultra (--ultraRes, ~40 GB RAM per map)</option>
+                  <option value="--highRes">High (--highRes, ~16 GB RAM per map)</option>
+                  <option value="">Default (~3 GB RAM per map)</option>
+                </select>
+              </div>
+              <div class="pc-field-group" id="fg-pretextmap">
+                <label class="pc-field-label" for="f-pretextmap">PretextMap Flags</label>
+                <p class="pc-field-hint" id="pretextmap-hint">Sorting and resolution. The mode default is applied
+                  automatically.</p>
+                <input class="pc-field-input" type="text" id="f-pretextmap" placeholder="--sortby nosort --ultraRes"
+                  autocomplete="off" />
               </div>
             </div>
 
@@ -458,7 +518,7 @@
               <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
               <path d="M4 4.5h6M4 7h4M4 9.5h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
             </svg>
-            config.yaml
+            <span id="yaml-filename">config.yaml</span>
           </div>
           <button id="btn-copy-yaml" class="pc-yaml-copy-btn" title="Copy to clipboard">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -472,6 +532,23 @@
         <div class="pc-yaml-body">
           <pre class="pc-yaml-pre" id="yaml-output" aria-live="polite"
             aria-label="Generated YAML output"><code id="yaml-code"><span class="pc-yaml-placeholder">← Select a mode to generate YAML</span></code></pre>
+        </div>
+        <!-- Config check, filled by renderCheck() -->
+        <div class="pc-check hidden" id="pc-check">
+          <button type="button" class="pc-check-head" id="pc-check-toggle" aria-expanded="true"
+            aria-controls="pc-check-body">
+            <span class="pc-check-dot" aria-hidden="true"></span>
+            <span class="pc-check-summary" id="pc-check-summary">Config check</span>
+            <svg class="pc-check-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+          <div class="pc-check-body" id="pc-check-body">
+            <ul class="pc-check-list" id="pc-check-list"></ul>
+            <p class="pc-check-note">Same rules as ProCura's <code>check_config.py</code>. Whether files exist is
+              checked when ProCura runs.</p>
+          </div>
         </div>
         <div class="pc-yaml-footer">
           <span id="yaml-line-count">— lines</span>

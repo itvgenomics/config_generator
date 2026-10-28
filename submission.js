@@ -640,12 +640,7 @@ function buildProcuraCommand() {
     : '$SLURM_SUBMIT_DIR';
 
   const mode      = execChecked('procura-mode') || '-hapcuration';
-  const config    = execVal('procura-config') || (
-    mode === '-hapcuration' ? 'config/config_hapcuration.yaml' :
-    mode === '-dualcuration' ? 'config/config_dualcuration.yaml' :
-    'config/config_finalgenome.yaml'
-  );
-  const snakefile = execVal('procura-snakefile');
+  const config    = execVal('procura-config');   // empty: ProCura.sh uses config/config_<mode>.yaml
   const sifdir    = execVal('procura-sifdir');
   const runMode   = execChecked('procura-run-mode');   // 'local' | 'slurm'
   const threads   = execVal('procura-threads') || '32';
@@ -656,8 +651,8 @@ function buildProcuraCommand() {
 
   const flags = [];
   flags.push(['-d', workdir]);
+  flags.push([mode, null]);
   if (config) flags.push(['-c', config]);
-  if (mode) flags.push([mode, null]);
 
   if (runMode === 'slurm') {
     flags.push(['-slurm', null]);
@@ -668,7 +663,6 @@ function buildProcuraCommand() {
   }
 
   if (sifdir) flags.push(['-sifdir', sifdir]);
-  if (snakefile) flags.push(['-s', snakefile]);
 
   return { flags, dryRun };
 }
@@ -844,7 +838,7 @@ function buildProcuraPreview() {
   if (dryRun) {
     // ── Step 1: Dry run ──
     allLines.push('# ── Step 1: Dry Run (recommended) ──────────────────────────');
-    allLines.push('# Validates all paths and shows planned jobs without executing.');
+    allLines.push('# Checks the config file, pulls the container images and shows planned jobs without executing.');
     allLines.push('');
     allLines.push(...flagsToLines(flags, 'ProCura.sh', [['-np', null]]));
     allLines.push('');
@@ -915,7 +909,9 @@ function getRawExecCommand(pipeline = activeExecPipeline) {
     lines.push('# ── Step 1: Dry Run ───────────────────────────────────────────');
     lines.push(isPipeasm
       ? '# Checks config.yaml, pulls the container images and shows planned jobs without executing.'
-      : '# Validates paths and shows planned jobs without executing.');
+      : isProcura
+        ? '# Checks the config file, pulls the container images and shows planned jobs without executing.'
+        : '# Validates paths and shows planned jobs without executing.');
     lines.push('');
     flagsToLines(flags, scriptName, [['-np', null]]).forEach(l => lines.push(decode(l)));
     lines.push('');
@@ -1009,29 +1005,19 @@ function initExecLiveUpdate() {
         }
         if (el.name === 'procura-mode') {
           const modeHints = {
-            '-hapcuration': 'Adds annotation tracks and prepares pretext/ortholog/synteny data for haplotype curation.',
-            '-dualcuration': 'Prepares inputs, AGP mappings, and Hi-C maps for dual diploid curation.',
-            '-finalgenome': 'Generates final curated hap1/hap2 FASTA assemblies and runs quality assessment reports (GFAstats, etc.).'
+            '-hapcuration': 'Step 1: Hi-C maps of hap1 and hap2 with coverage, repeat, telomere and gap tracks (plus optional synteny and ortholog tracks). Then curate each haplotype in PretextView and save one AGP per haplotype.',
+            '-dualcuration': 'Step 2: applies the hap1/hap2 AGP files, joins the curated haplotypes into one diploid FASTA and builds its Hi-C map. Then curate it in PretextView and save one diploid AGP.',
+            '-finalgenome': 'Step 3: applies the diploid AGP and writes the final curated hap1/hap2 FASTA files, with Hi-C maps, gfastats, Compleasm, MerquryFK and snail plots.'
           };
           const hintEl = $('procura-mode-hint');
           if (hintEl && modeHints[el.value]) hintEl.textContent = modeHints[el.value];
 
-          // Auto-suggest config filename if default pattern is present
+          // Show the default config file of the mode (used when -c is left empty)
+          const defaultConfig = `config/config_${el.value.slice(1)}.yaml`;
           const cfgInput = $('procura-config');
-          if (cfgInput) {
-            const current = cfgInput.value.trim();
-            if (!current || current.startsWith('config/config_')) {
-              const map = {
-                '-hapcuration': 'config/config_hapcuration.yaml',
-                '-dualcuration': 'config/config_dualcuration.yaml',
-                '-finalgenome': 'config/config_finalgenome.yaml'
-              };
-              if (map[el.value]) {
-                cfgInput.value = map[el.value];
-                cfgInput.placeholder = map[el.value];
-              }
-            }
-          }
+          if (cfgInput) cfgInput.placeholder = defaultConfig;
+          const cfgDefault = $('procura-config-default');
+          if (cfgDefault) cfgDefault.textContent = defaultConfig;
         }
 
         // PIMBA toggles
