@@ -74,7 +74,7 @@
       </div>
       <div class="op-header-text">
         <h1>PipeASM Configuration</h1>
-        <p>Generate a <code>config.yaml</code> file for the Pipeasm pipeline</p>
+        <p>Generate a <code>config.yaml</code> file for the Pipeasm pipeline (v1.2.0)</p>
       </div>
       <div class="op-header-actions">
         <button id="btn-reset" class="op-btn op-btn-ghost" title="Reset all fields">
@@ -125,50 +125,73 @@
               <label class="field-label" for="f-sample">
                 Sample Name <span class="field-required" title="Required">*</span>
               </label>
-              <p class="field-hint">Unique identifier for the sample, e.g., a DToL ID.</p>
-              <input class="field-input" type="text" id="f-sample" placeholder="e.g. idAphHypo1" autocomplete="off" />
+              <p class="field-hint">Unique sample identifier, used to name all output files. Letters, numbers and
+                underscores only (e.g. a DToL/VGP ID).</p>
+              <input class="field-input" type="text" id="f-sample" placeholder="e.g. bHypStr1" autocomplete="off" />
             </div>
 
             <div class="field-group" id="fg-hifi-reads">
               <label class="field-label" for="f-hifi-reads">
                 HiFi Reads <span class="field-required" title="Required">*</span>
               </label>
-              <p class="field-hint">Absolute path to HiFi reads merged into a single <code>.fastq.gz</code> file.</p>
-              <input class="field-input" type="text" id="f-hifi-reads" placeholder="/data/hifi/sample.fastq.gz"
-                autocomplete="off" />
+              <p class="field-hint">Absolute path to the PacBio HiFi reads, merged into a single <code>.fastq.gz</code>
+                file.</p>
+              <input class="field-input" type="text" id="f-hifi-reads"
+                placeholder="/data/raw_data/hifi/bHypStr1.fastq.gz" autocomplete="off" />
             </div>
 
             <div class="subsection-divider"><span>Optional Read Files</span></div>
+
+            <p class="field-hint">Set both Hi-C files or leave both empty. Without Hi-C, no phasing or scaffolding is
+              done.</p>
 
             <div class="field-row">
               <div class="field-group" id="fg-hic-r1">
                 <label class="field-label" for="f-hic-r1">Hi-C Forward Reads (R1)</label>
                 <p class="field-hint">Absolute path to Hi-C forward reads (<code>.fastq.gz</code>).</p>
-                <input class="field-input" type="text" id="f-hic-r1" placeholder="/data/hic/sample_R1.fastq.gz"
-                  autocomplete="off" />
+                <input class="field-input" type="text" id="f-hic-r1"
+                  placeholder="/data/raw_data/hic/bHypStr1.R1.fastq.gz" autocomplete="off" />
               </div>
               <div class="field-group" id="fg-hic-r2">
                 <label class="field-label" for="f-hic-r2">Hi-C Reverse Reads (R2)</label>
                 <p class="field-hint">Absolute path to Hi-C reverse reads (<code>.fastq.gz</code>).</p>
-                <input class="field-input" type="text" id="f-hic-r2" placeholder="/data/hic/sample_R2.fastq.gz"
-                  autocomplete="off" />
+                <input class="field-input" type="text" id="f-hic-r2"
+                  placeholder="/data/raw_data/hic/bHypStr1.R2.fastq.gz" autocomplete="off" />
               </div>
             </div>
 
             <div class="field-group" id="fg-ont-reads">
               <label class="field-label" for="f-ont-reads">ONT Reads</label>
-              <p class="field-hint">Absolute path to Oxford Nanopore reads in <code>.fastq.gz</code> format.</p>
-              <input class="field-input" type="text" id="f-ont-reads" placeholder="/data/ont/sample.fastq.gz"
-                autocomplete="off" />
+              <p class="field-hint">Absolute path to Oxford Nanopore reads (<code>.fastq.gz</code>). They are trimmed
+                with Dorado and added to Hifiasm as ultra-long reads (<code>--ul</code>).</p>
+              <input class="field-input" type="text" id="f-ont-reads"
+                placeholder="/data/raw_data/ont/bHypStr1.ONT.fastq.gz" autocomplete="off" />
             </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 2: Assembly Options                -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-assembly">
+          <div class="section-header">
+            <div class="section-step pa-step">2</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Assembly Options</h2>
+              <p class="section-desc">Genome size and assembly mode</p>
+            </div>
+          </div>
+          <div class="section-body">
 
             <div class="field-group" id="fg-genome-size">
               <label class="field-label" for="f-genome-size">
                 Genome Size <span class="field-required" title="Required">*</span>
               </label>
               <p class="field-hint">
-                Estimated genome size. Small &lt; 2 Gb, medium 2–4 Gb, large &gt; 4 Gb.
-                Used for memory allocation on Slurm config files.
+                Estimated haploid genome size. Selects the memory requested per rule in SLURM mode
+                (<code>config/resources/{genome_size}.yaml</code>). Required in local mode too.
               </p>
               <select class="field-input" id="f-genome-size">
                 <option value="">-- Select genome size --</option>
@@ -178,55 +201,13 @@
               </select>
             </div>
 
-          </div>
-        </section>
-
-
-        <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 2: Assembly Settings               -->
-        <!-- ─────────────────────────────────────────── -->
-        <section class="form-section" id="section-assembly">
-          <div class="section-header">
-            <div class="section-step pa-step">2</div>
-            <div class="section-header-text">
-              <h2 class="section-title">Assembly Settings</h2>
-              <p class="section-desc">Taxonomy, BUSCO lineage, and assembly mode</p>
-            </div>
-          </div>
-          <div class="section-body">
-
-            <div class="field-row">
-              <div class="field-group" id="fg-taxid">
-                <label class="field-label" for="f-taxid">
-                  NCBI Taxonomy ID <span class="field-required" title="Required">*</span>
-                </label>
-                <p class="field-hint">Use a close relative if unavailable. Critical for decontamination.</p>
-                <input class="field-input" type="number" id="f-taxid" min="1" placeholder="e.g. 9606" />
-              </div>
-              <div class="field-group" id="fg-buscodb">
-                <label class="field-label" for="f-buscodb">
-                  BUSCO Lineage <span class="field-required" title="Required">*</span>
-                </label>
-                <p class="field-hint">Closest taxonomic group. Omit <code>_odb10</code> suffix.</p>
-                <input class="field-input" type="text" id="f-buscodb" placeholder="e.g. aves" autocomplete="off" />
-              </div>
-            </div>
-
-            <div class="field-group" id="fg-sif-dir">
-              <label class="field-label" for="f-sif-dir">
-                Singularity Images Directory <span class="field-required" title="Required">*</span>
-              </label>
-              <p class="field-hint">Directory for storing Singularity <code>.sif</code> image files.</p>
-              <input class="field-input" type="text" id="f-sif-dir" placeholder="/scratch/sif_files/pipeasm"
-                autocomplete="off" />
-            </div>
-
             <div class="field-group" id="fg-solo-asm">
               <label class="field-label">
                 Solo Assembly <span class="field-required" title="Required">*</span>
               </label>
-              <p class="field-hint">Set <code>Yes</code> for both solo and phased assemblies, or <code>No</code> for
-                phased only.</p>
+              <p class="field-hint"><code>Yes</code> to also run a Hifiasm solo (primary/alternate) assembly;
+                <code>No</code> for the Hi-C phased assembly only. With HiFi reads only (no Hi-C), set
+                <code>Yes</code>, otherwise no assembly is produced.</p>
               <div class="yn-control" role="radiogroup" aria-label="Solo assembly">
                 <label class="yn-pill"><input type="radio" name="solo_asm" value="Yes"><span>Yes</span></label>
                 <label class="yn-pill"><input type="radio" name="solo_asm" value="No" checked><span>No</span></label>
@@ -237,8 +218,10 @@
               <label class="field-label">
                 Different Species Hi-C <span class="field-required" title="Required">*</span>
               </label>
-              <p class="field-hint">Set <code>Yes</code> if Hi-C data is from a different species. Runs Hifiasm in solo
-                primary mode and YAHS on that assembly only.</p>
+              <p class="field-hint"><code>Yes</code> if the Hi-C reads come from a different species than the HiFi
+                reads. Hifiasm then runs in solo primary mode (<code>--primary</code>) and YaHS scaffolds the primary
+                and alternate assemblies. Hi-C contact maps are still generated before and after scaffolding.
+                Requires Hi-C reads.</p>
               <div class="yn-control" role="radiogroup" aria-label="Different species Hi-C">
                 <label class="yn-pill"><input type="radio" name="diff_species_hic" value="Yes"><span>Yes</span></label>
                 <label class="yn-pill"><input type="radio" name="diff_species_hic" value="No"
@@ -251,13 +234,61 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 3: Mitochondrial Assembly          -->
+        <!-- SECTION 3: Completeness & Contaminants     -->
         <!-- ─────────────────────────────────────────── -->
-        <section class="form-section" id="section-mito">
+        <section class="form-section" id="section-completeness">
           <div class="section-header">
             <div class="section-step pa-step">3</div>
             <div class="section-header-text">
-              <h2 class="section-title">Mitochondrial Assembly</h2>
+              <h2 class="section-title">Completeness &amp; Contaminants</h2>
+              <p class="section-desc">BUSCO lineage, taxonomy and contamination screening</p>
+            </div>
+            <span class="section-tool-badge pa-badge">Compleasm · FCS-GX</span>
+          </div>
+          <div class="section-body">
+
+            <div class="field-row">
+              <div class="field-group" id="fg-buscodb">
+                <label class="field-label" for="f-buscodb">
+                  BUSCO Lineage <span class="field-required" title="Required">*</span>
+                </label>
+                <p class="field-hint">Lineage used by Compleasm, from the closest taxonomic group. Do not add the
+                  <code>_odb10</code>/<code>_odb12</code> suffix. See the
+                  <a href="https://busco-data.ezlab.org/v5/data/lineages/" target="_blank" rel="noopener">available
+                    lineages</a>.</p>
+                <input class="field-input" type="text" id="f-buscodb" placeholder="e.g. aves" autocomplete="off" />
+              </div>
+              <div class="field-group" id="fg-taxid">
+                <label class="field-label" for="f-taxid">
+                  NCBI Taxonomy ID <span class="field-required" title="Required">*</span>
+                </label>
+                <p class="field-hint">Used by FCS-GX to tell contaminants from the target organism. Use a closely
+                  related species if unavailable. Search the
+                  <a href="https://www.ncbi.nlm.nih.gov/taxonomy" target="_blank" rel="noopener">NCBI Taxonomy</a>.</p>
+                <input class="field-input" type="number" id="f-taxid" min="1" placeholder="e.g. 1202453" />
+              </div>
+            </div>
+
+            <div class="field-group" id="fg-gxdb">
+              <label class="field-label" for="f-gxdb">FCS-GX Database Path</label>
+              <p class="field-hint">Absolute path to the FCS-GX database directory. Leave empty to skip
+                decontamination. The database takes ~470 GB of disk and FCS-GX needs ~512 GB of RAM.</p>
+              <input class="field-input" type="text" id="f-gxdb" placeholder="/databases/fcs-gx/gxdb  (optional)"
+                autocomplete="off" />
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- SECTION 4: Mitogenome                      -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="form-section" id="section-mito">
+          <div class="section-header">
+            <div class="section-step pa-step">4</div>
+            <div class="section-header-text">
+              <h2 class="section-title">Mitogenome</h2>
               <p class="section-desc">MitoHiFi settings for mitochondrial genome assembly</p>
             </div>
             <span class="section-tool-badge pa-badge">MitoHiFi</span>
@@ -268,7 +299,7 @@
               <label class="field-label">
                 Run MitoHiFi <span class="field-required" title="Required">*</span>
               </label>
-              <p class="field-hint">Run MitoHiFi for mitochondrial genome assembly.</p>
+              <p class="field-hint">Assemble the mitochondrial genome with MitoHiFi.</p>
               <div class="yn-control" role="radiogroup" aria-label="Run MitoHiFi">
                 <label class="yn-pill"><input type="radio" name="run_mitohifi" value="Yes"><span>Yes</span></label>
                 <label class="yn-pill"><input type="radio" name="run_mitohifi" value="No"
@@ -280,18 +311,23 @@
             <div id="group-mitohifi-fields" class="conditional-group hidden">
 
               <div class="field-group" id="fg-species">
-                <label class="field-label" for="f-species">Species Name</label>
-                <p class="field-hint">Scientific name of the species for naming and mito annotation reference. Must be
-                  present in NCBI taxonomy database.</p>
-                <input class="field-input" type="text" id="f-species" placeholder="e.g. Homo sapiens"
+                <label class="field-label" for="f-species">
+                  Species Name <span class="field-required" title="Required when MitoHiFi runs">*</span>
+                </label>
+                <p class="field-hint">Scientific name, used to search NCBI for a mitochondrial reference of the same
+                  or a related species. Must exist in the NCBI Taxonomy database.</p>
+                <input class="field-input" type="text" id="f-species" placeholder="e.g. Hypocnemis striata"
                   autocomplete="off" />
               </div>
 
               <div class="field-group" id="fg-geneticcode">
-                <label class="field-label" for="f-geneticcode">Mitochondrial Genetic Code</label>
-                <p class="field-hint">Genetic code for mitochondrial annotation (e.g. <code>2</code> for vertebrates).
-                  See <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank"
-                    rel="noopener">NCBI genetic codes</a>.</p>
+                <label class="field-label" for="f-geneticcode">
+                  Mitochondrial Genetic Code <span class="field-required" title="Required when MitoHiFi runs">*</span>
+                </label>
+                <p class="field-hint">Genetic code for mitogenome annotation: <code>2</code> = vertebrate
+                  mitochondrial, <code>5</code> = invertebrate mitochondrial. See the
+                  <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank"
+                    rel="noopener">full list</a>.</p>
                 <input class="field-input" type="number" id="f-geneticcode" min="1" max="33" placeholder="e.g. 2" />
               </div>
 
@@ -302,24 +338,28 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 4: Databases                       -->
+        <!-- SECTION 5: Containers                      -->
         <!-- ─────────────────────────────────────────── -->
-        <section class="form-section" id="section-dbs">
+        <section class="form-section" id="section-containers">
           <div class="section-header">
-            <div class="section-step pa-step">4</div>
+            <div class="section-step pa-step">5</div>
             <div class="section-header-text">
-              <h2 class="section-title">Databases</h2>
-              <p class="section-desc">External database paths for contamination screening</p>
+              <h2 class="section-title">Containers</h2>
+              <p class="section-desc">Where the Singularity images are stored</p>
             </div>
-            <span class="section-tool-badge pa-badge">FCS-GX</span>
+            <span class="section-tool-badge pa-badge">Singularity</span>
           </div>
           <div class="section-body">
 
-            <div class="field-group" id="fg-gxdb">
-              <label class="field-label" for="f-gxdb">FCS-GX Database Path</label>
-              <p class="field-hint">Path to FCS-GX contamination database. Leave empty to skip contamination screening.
-              </p>
-              <input class="field-input" type="text" id="f-gxdb" placeholder="/path/to/gxdb  (optional)"
+            <div class="field-group" id="fg-sif-dir">
+              <label class="field-label" for="f-sif-dir">
+                Singularity Images Directory <span class="field-required" title="Required">*</span>
+              </label>
+              <p class="field-hint">Absolute path to the directory for the <code>.sif</code> images. They are
+                downloaded on the first run as <code>&lt;name&gt;_&lt;tag&gt;.sif</code> and reused afterwards, so the
+                directory can be shared between runs. When upgrading from Pipeasm 1.1.x, all images are pulled again
+                and the old unversioned <code>.sif</code> files can be deleted.</p>
+              <input class="field-input" type="text" id="f-sif-dir" placeholder="/data/singularity_images/pipeasm"
                 autocomplete="off" />
             </div>
 
@@ -327,25 +367,35 @@
         </section>
 
 
+        <div class="pa-advanced-divider" role="note">
+          <span>Advanced tool parameters</span>
+          <p>The defaults follow the VGP/DToL assembly pipelines and work for most genomes. Each value is passed
+            as-is to the tool's command line.</p>
+        </div>
+
+
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 5: Read QC                         -->
+        <!-- SECTION 6: Read QC                         -->
         <!-- ─────────────────────────────────────────── -->
         <section class="form-section" id="section-qc">
           <div class="section-header">
-            <div class="section-step pa-step">5</div>
+            <div class="section-step pa-step">6</div>
             <div class="section-header-text">
               <h2 class="section-title">Read QC</h2>
-              <p class="section-desc">Adapter trimming and quality control parameters</p>
+              <p class="section-desc">Hi-C read trimming and HiFi adapter removal</p>
             </div>
             <span class="section-tool-badge pa-badge">Fastp · Cutadapt</span>
           </div>
           <div class="section-body">
 
-            <div class="subsection-divider"><span>Fastp</span></div>
+            <div class="subsection-divider"><span>Fastp — Hi-C reads</span></div>
 
             <div class="field-group" id="fg-fastp-flags">
               <label class="field-label" for="f-fastp-flags">Fastp Flags</label>
-              <p class="field-hint">Main fastp flags for adapter detection and trimming.</p>
+              <p class="field-hint"><code>--cut_tail</code>: trim low-quality 3′ bases (sliding window, see quality
+                threshold); <code>--detect_adapter_for_pe</code>: detect adapters by read overlap;
+                <code>--trim_poly_g</code>: trim poly-G tails (NovaSeq/NextSeq); <code>--dont_eval_duplication</code>:
+                skip the duplication analysis.</p>
               <input class="field-input" type="text" id="f-fastp-flags"
                 placeholder="--cut_tail --detect_adapter_for_pe --dont_eval_duplication --trim_poly_g"
                 autocomplete="off" />
@@ -354,13 +404,14 @@
             <div class="field-row">
               <div class="field-group" id="fg-fastp-minlen">
                 <label class="field-label" for="f-fastp-minlen">Min Read Length</label>
-                <p class="field-hint">Minimum read length flag, e.g. <code>--length_required 35</code>.</p>
+                <p class="field-hint">Discard shorter reads after trimming, e.g. <code>--length_required 35</code>.</p>
                 <input class="field-input" type="text" id="f-fastp-minlen" placeholder="--length_required 35"
                   autocomplete="off" />
               </div>
               <div class="field-group" id="fg-fastp-quality">
                 <label class="field-label" for="f-fastp-quality">Quality Threshold</label>
-                <p class="field-hint">Mean quality trim flag, e.g. <code>--cut_mean_quality 24</code>.</p>
+                <p class="field-hint">Mean quality of the <code>--cut_tail</code> sliding window, e.g.
+                  <code>--cut_mean_quality 24</code>.</p>
                 <input class="field-input" type="text" id="f-fastp-quality" placeholder="--cut_mean_quality 24"
                   autocomplete="off" />
               </div>
@@ -368,16 +419,18 @@
 
             <div class="field-group" id="fg-fastp-crop">
               <label class="field-label" for="f-fastp-crop">5′ Crop</label>
-              <p class="field-hint">Trim bases from start of read 1, e.g. <code>--trim_front1 5</code>.</p>
+              <p class="field-hint">Trim bases from the start of read 1 only, e.g. <code>--trim_front1 5</code>. Add
+                <code>--trim_front2</code> for read 2.</p>
               <input class="field-input" type="text" id="f-fastp-crop" placeholder="--trim_front1 5"
                 autocomplete="off" />
             </div>
 
-            <div class="subsection-divider"><span>Cutadapt</span></div>
+            <div class="subsection-divider"><span>Cutadapt — HiFi reads</span></div>
 
             <div class="field-group" id="fg-cutadapt-adaptors">
               <label class="field-label" for="f-cutadapt-adaptors">Adapter Sequences</label>
-              <p class="field-hint">Adapter sequences to remove. Customize if needed.</p>
+              <p class="field-hint">PacBio SMRTbell adapter sequences; <code>-b</code> searches for them anywhere in
+                the read.</p>
               <textarea class="field-input field-textarea" id="f-cutadapt-adaptors" rows="3"
                 spellcheck="false">-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT</textarea>
             </div>
@@ -385,7 +438,7 @@
             <div class="field-row">
               <div class="field-group" id="fg-cutadapt-filtering">
                 <label class="field-label" for="f-cutadapt-filtering">Filtering</label>
-                <p class="field-hint">Discard reads with adapter and require overlap, e.g.
+                <p class="field-hint">Discard the whole read when an adapter is found, with a minimum overlap, e.g.
                   <code>--discard -O 35</code>.
                 </p>
                 <input class="field-input" type="text" id="f-cutadapt-filtering" placeholder="--discard -O 35"
@@ -393,7 +446,8 @@
               </div>
               <div class="field-group" id="fg-cutadapt-adap-find">
                 <label class="field-label" for="f-cutadapt-adap-find">Adapter Finding</label>
-                <p class="field-hint">RC search &amp; error rate, e.g. <code>--rc -e 0.1</code>.</p>
+                <p class="field-hint">Also search the reverse complement, with an error rate, e.g.
+                  <code>--rc -e 0.1</code>.</p>
                 <input class="field-input" type="text" id="f-cutadapt-adap-find" placeholder="--rc -e 0.1"
                   autocomplete="off" />
               </div>
@@ -404,14 +458,14 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 6: Read Quality Plots              -->
+        <!-- SECTION 7: Read Quality Plots              -->
         <!-- ─────────────────────────────────────────── -->
         <section class="form-section" id="section-nanoplot">
           <div class="section-header">
-            <div class="section-step pa-step">6</div>
+            <div class="section-step pa-step">7</div>
             <div class="section-header-text">
               <h2 class="section-title">Read Quality Plots</h2>
-              <p class="section-desc">NanoPlot output format and plot types</p>
+              <p class="section-desc">HiFi and ONT read length and quality plots</p>
             </div>
             <span class="section-tool-badge pa-badge">NanoPlot</span>
           </div>
@@ -419,7 +473,7 @@
 
             <div class="field-group" id="fg-nanoplot-args">
               <label class="field-label" for="f-nanoplot-args">NanoPlot Arguments</label>
-              <p class="field-hint">Output format and statistical tables, e.g. <code>--tsv_stats --format svg</code>.
+              <p class="field-hint">Write statistics as TSV and plots as SVG, e.g. <code>--tsv_stats --format svg</code>.
               </p>
               <input class="field-input" type="text" id="f-nanoplot-args" placeholder="--tsv_stats --format svg"
                 autocomplete="off" />
@@ -427,7 +481,8 @@
 
             <div class="field-group" id="fg-nanoplot-plots">
               <label class="field-label" for="f-nanoplot-plots">Plot Types</label>
-              <p class="field-hint">Types of plots to generate, e.g. <code>--plots kde hex dot</code>.</p>
+              <p class="field-hint">Plot types for the length vs. quality plots, e.g. <code>--plots kde hex dot</code>.
+              </p>
               <input class="field-input" type="text" id="f-nanoplot-plots" placeholder="--plots kde hex dot"
                 autocomplete="off" />
             </div>
@@ -437,14 +492,14 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 7: K-mer Analysis                  -->
+        <!-- SECTION 8: K-mer Analysis                  -->
         <!-- ─────────────────────────────────────────── -->
         <section class="form-section" id="section-kmer">
           <div class="section-header">
-            <div class="section-step pa-step">7</div>
+            <div class="section-step pa-step">8</div>
             <div class="section-header-text">
               <h2 class="section-title">K-mer Analysis</h2>
-              <p class="section-desc">K-mer counting, genome scope, and ploidy estimation</p>
+              <p class="section-desc">K-mer counting, genome profiling and ploidy estimation</p>
             </div>
             <span class="section-tool-badge pa-badge">FastK · GeneScopeFK · SmudgePlot</span>
           </div>
@@ -455,13 +510,14 @@
             <div class="field-row">
               <div class="field-group" id="fg-fastk-default">
                 <label class="field-label" for="f-fastk-default">FastK Default Flags</label>
-                <p class="field-hint">General options, e.g. <code>-v -M32 -t1</code>.</p>
+                <p class="field-hint"><code>-v</code>: verbose; <code>-M32</code>: up to 32 GB of memory for sorting;
+                  <code>-t1</code>: keep k-mers seen at least once.</p>
                 <input class="field-input" type="text" id="f-fastk-default" placeholder="-v -M32 -t1"
                   autocomplete="off" />
               </div>
               <div class="field-group" id="fg-fastk-kmer">
                 <label class="field-label" for="f-fastk-kmer">K-mer Size</label>
-                <p class="field-hint">K-mer size flag, e.g. <code>-k31</code>.</p>
+                <p class="field-hint">K-mer size, e.g. <code>-k31</code>. Must match GeneScopeFK.</p>
                 <input class="field-input" type="text" id="f-fastk-kmer" placeholder="-k31" autocomplete="off" />
               </div>
             </div>
@@ -471,12 +527,12 @@
             <div class="field-row">
               <div class="field-group" id="fg-genescopefk-kmer">
                 <label class="field-label" for="f-genescopefk-kmer">K-mer Size</label>
-                <p class="field-hint">Should match FastK, e.g. <code>-k 31</code>.</p>
+                <p class="field-hint">Must match FastK, e.g. <code>-k 31</code>.</p>
                 <input class="field-input" type="text" id="f-genescopefk-kmer" placeholder="-k 31" autocomplete="off" />
               </div>
               <div class="field-group" id="fg-genescopefk-ploidy">
                 <label class="field-label" for="f-genescopefk-ploidy">Ploidy</label>
-                <p class="field-hint">Ploidy level, e.g. <code>-p 2</code> for diploids.</p>
+                <p class="field-hint">Expected ploidy, e.g. <code>-p 2</code> for diploids.</p>
                 <input class="field-input" type="text" id="f-genescopefk-ploidy" placeholder="-p 2"
                   autocomplete="off" />
               </div>
@@ -485,8 +541,9 @@
             <div class="subsection-divider"><span>SmudgePlot</span></div>
 
             <div class="field-group" id="fg-smudgeplot-minsize">
-              <label class="field-label" for="f-smudgeplot-minsize">Min K-mer Pair Size</label>
-              <p class="field-hint">Minimum size of k-mer pairs to consider, e.g. <code>-L 12</code>.</p>
+              <label class="field-label" for="f-smudgeplot-minsize">Error Count Threshold</label>
+              <p class="field-hint">K-mers with a count below this value are treated as sequencing errors. Set it just
+                above the error peak of the GeneScopeFK k-mer spectrum, e.g. <code>-L 12</code>.</p>
               <input class="field-input" type="text" id="f-smudgeplot-minsize" placeholder="-L 12" autocomplete="off" />
             </div>
 
@@ -495,11 +552,11 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 8: Assembly Tools                  -->
+        <!-- SECTION 9: Assembly Tools                  -->
         <!-- ─────────────────────────────────────────── -->
         <section class="form-section" id="section-asm-tools">
           <div class="section-header">
-            <div class="section-step pa-step">8</div>
+            <div class="section-step pa-step">9</div>
             <div class="section-header-text">
               <h2 class="section-title">Assembly Tools</h2>
               <p class="section-desc">Hifiasm, gfastats, and Bellerophon parameters</p>
@@ -513,13 +570,16 @@
             <div class="field-row">
               <div class="field-group" id="fg-hifiasm-purge">
                 <label class="field-label" for="f-hifiasm-purge">Purge Level</label>
-                <p class="field-hint">Controls haplotig purging, e.g. <code>-l 1 -O 1</code>.</p>
+                <p class="field-hint"><code>-l</code>: haplotig purge level (0 = none, 1 = light, 2/3 = aggressive; use
+                  <code>-l 0</code> for inbred or highly homozygous genomes). <code>-O</code>: minimum overlapping
+                  reads to remove a duplicated contig.</p>
                 <input class="field-input" type="text" id="f-hifiasm-purge" placeholder="-l 1 -O 1"
                   autocomplete="off" />
               </div>
               <div class="field-group" id="fg-hifiasm-similarity">
                 <label class="field-label" for="f-hifiasm-similarity">Similarity</label>
-                <p class="field-hint">Contig comparison stringency, e.g. <code>-s 0.75</code>.</p>
+                <p class="field-hint">Similarity threshold to call two contigs duplicated haplotigs, e.g.
+                  <code>-s 0.75</code> (Hifiasm default: 0.75 for <code>-l 1/2</code>, 0.55 for <code>-l 3</code>).</p>
                 <input class="field-input" type="text" id="f-hifiasm-similarity" placeholder="-s 0.75"
                   autocomplete="off" />
               </div>
@@ -529,7 +589,8 @@
 
             <div class="field-group" id="fg-gfastats-params">
               <label class="field-label" for="f-gfastats-params">gfastats Parameters</label>
-              <p class="field-hint">Output format and stats options, e.g. <code>-o fa --discover-paths</code>.</p>
+              <p class="field-hint">Write FASTA, building the sequences from the paths in the Hifiasm GFA, e.g.
+                <code>-o fa --discover-paths</code>.</p>
               <input class="field-input" type="text" id="f-gfastats-params" placeholder="-o fa --discover-paths"
                 autocomplete="off" />
             </div>
@@ -538,7 +599,8 @@
 
             <div class="field-group" id="fg-bellerophon">
               <label class="field-label" for="f-bellerophon">Bellerophon Flags</label>
-              <p class="field-hint">Filter mapped reads spanning junctions, e.g. <code>--quality 10</code>.</p>
+              <p class="field-hint">Keeps only the 5′ side of Hi-C reads that span a ligation junction and merges
+                R1/R2. Minimum mapping quality (MAPQ) to keep a read, e.g. <code>--quality 10</code>.</p>
               <input class="field-input" type="text" id="f-bellerophon" placeholder="--quality 10" autocomplete="off" />
             </div>
 
@@ -547,44 +609,69 @@
 
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- SECTION 9: Scaffolding & Visualization     -->
+        <!-- SECTION 10: Scaffolding & Visualization    -->
         <!-- ─────────────────────────────────────────── -->
         <section class="form-section" id="section-scaffold">
           <div class="section-header">
-            <div class="section-step pa-step">9</div>
+            <div class="section-step pa-step">10</div>
             <div class="section-header-text">
               <h2 class="section-title">Scaffolding &amp; Visualization</h2>
               <p class="section-desc">Hi-C scaffolding and contact map generation</p>
             </div>
-            <span class="section-tool-badge pa-badge">YAHS · Pretext</span>
+            <span class="section-tool-badge pa-badge">YaHS · Pretext</span>
           </div>
           <div class="section-body">
 
             <div class="subsection-divider"><span>Pretext</span></div>
 
-            <div class="field-group" id="fg-pretext-map">
-              <label class="field-label" for="f-pretext-map">PretextMap Flags</label>
-              <p class="field-hint">Minimum mapping quality for PretextMap, e.g. <code>--mapq 10</code>.</p>
-              <input class="field-input" type="text" id="f-pretext-map" placeholder="--mapq 10" autocomplete="off" />
+            <div class="field-row">
+              <div class="field-group" id="fg-pretext-res">
+                <label class="field-label" for="f-pretext-res">Contact Map Resolution</label>
+                <p class="field-hint">Sets the resolution argument in PretextMap flags. For Ultra and High, requires
+                  Pipeasm v1.2.0.</p>
+                <select class="field-input" id="f-pretext-res">
+                  <option value="--ultraRes">Ultra (--ultraRes, ~40 GB RAM per map)</option>
+                  <option value="--highRes">High (--highRes, ~16 GB RAM per map)</option>
+                  <option value="">Default (~3 GB RAM per map)</option>
+                </select>
+              </div>
+              <div class="field-group" id="fg-pretext-map">
+                <label class="field-label" for="f-pretext-map">PretextMap Flags</label>
+                <p class="field-hint">Minimum mapping quality and resolution. Open <code>--ultraRes</code> maps in a
+                  recent PretextView.</p>
+                <input class="field-input" type="text" id="f-pretext-map" placeholder="--mapq 10 --ultraRes"
+                  autocomplete="off" />
+              </div>
             </div>
 
             <div class="field-group" id="fg-pretext-snapshot">
               <label class="field-label" for="f-pretext-snapshot">PretextSnapshot Flags</label>
-              <p class="field-hint">Snapshot rendering settings for Hi-C contact maps.</p>
+              <p class="field-hint">Image of the full map (all sequences), "Mellow Rainbow" colour map, black grid,
+                4000 px resolution.</p>
               <input class="field-input" type="text" id="f-pretext-snapshot"
                 placeholder="--sequences '=full' -c 'Mellow Rainbow' --gridSize 1 --gridColour black --jpegQuality 100 -r 4000"
                 autocomplete="off" />
             </div>
 
-            <div class="subsection-divider"><span>YAHS</span></div>
+            <div class="subsection-divider"><span>YaHS</span></div>
 
-            <div class="field-group" id="fg-yahs">
-              <label class="field-label" for="f-yahs">YAHS Flags</label>
-              <p class="field-hint">Enzyme cut sites and scaffolding options, e.g.
-                <code>-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1</code>.
-              </p>
-              <input class="field-input" type="text" id="f-yahs"
-                placeholder="-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1" autocomplete="off" />
+            <div class="field-row">
+              <div class="field-group" id="fg-yahs-kit">
+                <label class="field-label" for="f-yahs-kit">Hi-C Library Kit</label>
+                <p class="field-hint">Sets the <code>-e</code> restriction enzyme motifs in YaHS flags.</p>
+                <select class="field-input" id="f-yahs-kit">
+                  <option value="arima">Arima (GATC, GANTC, CTNAG, TTAA)</option>
+                  <option value="enzyme-free">Enzyme-free, e.g. Omni-C (no -e)</option>
+                  <option value="custom">Custom motifs</option>
+                </select>
+              </div>
+              <div class="field-group" id="fg-yahs">
+                <label class="field-label" for="f-yahs">YaHS Flags</label>
+                <p class="field-hint"><code>-e</code>: enzyme motifs; <code>--no-mem-check</code>: skip the memory
+                  check; <code>-v 1</code>: verbosity level.</p>
+                <input class="field-input" type="text" id="f-yahs"
+                  placeholder="-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1" autocomplete="off" />
+              </div>
             </div>
 
           </div>
@@ -615,6 +702,23 @@
         <div class="yaml-body">
           <pre class="yaml-pre" id="yaml-output" aria-live="polite"
             aria-label="Generated YAML output"><code id="yaml-code"></code></pre>
+        </div>
+        <!-- Config check, filled by renderCheck() -->
+        <div class="pa-check" id="pa-check">
+          <button type="button" class="pa-check-head" id="pa-check-toggle" aria-expanded="true"
+            aria-controls="pa-check-body">
+            <span class="pa-check-dot" aria-hidden="true"></span>
+            <span class="pa-check-summary" id="pa-check-summary">Config check</span>
+            <svg class="pa-check-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+          <div class="pa-check-body" id="pa-check-body">
+            <ul class="pa-check-list" id="pa-check-list"></ul>
+            <p class="pa-check-note">Same rules as Pipeasm's <code>check_config.py</code>. Whether files exist is
+              checked when Pipeasm runs.</p>
+          </div>
         </div>
         <div class="yaml-footer" id="yaml-footer">
           <span id="yaml-line-count">— lines</span>

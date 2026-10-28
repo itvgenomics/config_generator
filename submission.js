@@ -610,7 +610,7 @@ function buildPipeasmCommand() {
   const threads   = execVal('pipeasm-threads') || '4';
 
   const dryRun    = execChecked('pipeasm-dry-run') === 'yes';
-  const step      = execVal('pipeasm-step');
+  const steps     = [...document.querySelectorAll('input[name="pipeasm-step"]:checked')].map(el => el.value);
   
   const slurmJobs = execVal('pipeasm-slurm-jobs') || '8';
   const partition = execVal('pipeasm-partition');
@@ -628,9 +628,7 @@ function buildPipeasmCommand() {
     flags.push(['-t', threads]);
   }
 
-  if (step) {
-    flags.push([step, null]);
-  }
+  steps.forEach(step => flags.push([step, null]));
 
   return { flags, dryRun };
 }
@@ -814,7 +812,7 @@ function buildPipeasmPreview() {
   if (dryRun) {
     // ── Step 1: Dry run ──
     allLines.push('# ── Step 1: Dry Run (recommended) ──────────────────────────');
-    allLines.push('# Validates all paths and shows planned jobs without executing.');
+    allLines.push('# Checks config.yaml, pulls the container images and shows planned jobs without executing.');
     allLines.push('');
     allLines.push(...flagsToLines(flags, 'Pipeasm.sh', [['-np', null]]));
     allLines.push('');
@@ -915,7 +913,9 @@ function getRawExecCommand(pipeline = activeExecPipeline) {
   let lines = [];
   if (dryRun && !isPimba) {
     lines.push('# ── Step 1: Dry Run ───────────────────────────────────────────');
-    lines.push('# Validates paths and shows planned jobs without executing.');
+    lines.push(isPipeasm
+      ? '# Checks config.yaml, pulls the container images and shows planned jobs without executing.'
+      : '# Validates paths and shows planned jobs without executing.');
     lines.push('');
     flagsToLines(flags, scriptName, [['-np', null]]).forEach(l => lines.push(decode(l)));
     lines.push('');

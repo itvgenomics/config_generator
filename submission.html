@@ -1090,18 +1090,30 @@
 
                 <!-- Pipeline Steps -->
                 <div class="field-group">
-                  <label class="field-label" for="pipeasm-step">
-                    Pipeline Step
+                  <label class="field-label">
+                    Pipeline Steps
                     <span class="flag-badge flag-optional" style="font-size:10px;padding:1px 6px">Optional</span>
                   </label>
-                  <select class="field-select" id="pipeasm-step">
-                    <option value="">Full Pipeline (Default)</option>
-                    <option value="-trimming_qc">Trimming and Quality Control (-trimming_qc)</option>
-                    <option value="-kmer_eval">k-mer Evaluation (-kmer_eval)</option>
-                    <option value="-assembly">Assembly &amp; Decontamination (-assembly)</option>
-                    <option value="-scaffolding">YAHS Auto-scaffolding &amp; Hi-C Maps (-scaffolding)</option>
-                  </select>
-                  <span class="field-hint">Run previous steps before running the next one.</span>
+                  <div class="step-checks" role="group" aria-label="Pipeline steps">
+                    <label class="step-check">
+                      <input type="checkbox" name="pipeasm-step" value="-trimming_qc" />
+                      <span>Trimming and quality control <code>-trimming_qc</code></span>
+                    </label>
+                    <label class="step-check">
+                      <input type="checkbox" name="pipeasm-step" value="-kmer_eval" />
+                      <span>K-mer profiling statistics and plots <code>-kmer_eval</code></span>
+                    </label>
+                    <label class="step-check">
+                      <input type="checkbox" name="pipeasm-step" value="-assembly" />
+                      <span>Assembly, statistics and decontamination <code>-assembly</code></span>
+                    </label>
+                    <label class="step-check">
+                      <input type="checkbox" name="pipeasm-step" value="-scaffolding" />
+                      <span>YaHS scaffolding and Hi-C contact maps <code>-scaffolding</code></span>
+                    </label>
+                  </div>
+                  <span class="field-hint">Leave all unchecked to run the full pipeline. Steps depend on the outputs of
+                    the previous ones, so run them in order.</span>
                 </div>
 
                 <!-- Dry run -->
@@ -1122,7 +1134,8 @@
                     </label>
                   </div>
                   <span class="field-hint">When enabled, the preview shows <strong>two commands</strong>: a safe dry run
-                    first, then the actual execution.</span>
+                    first, then the actual execution. The dry run also checks <code>config.yaml</code> and pulls the
+                    container images into <code>sif_dir</code>.</span>
                 </div>
 
               </div>
@@ -1226,26 +1239,28 @@
             <tr>
               <td><code>-s &lt;path&gt;</code></td>
               <td><span class="flag-badge flag-optional">Optional</span></td>
-              <td>Overwrite the default snakefile path (workflow/snakefile)</td>
+              <td>Overwrite the default Snakefile path (workflow/Snakefile)</td>
             </tr>
             <tr>
               <td><code>-t &lt;int&gt;</code> / <code>-j &lt;int&gt;</code></td>
               <td><span class="flag-badge flag-required">Required</span></td>
               <td>Number of threads (local mode) or jobs submitted at once (SLURM mode). Use <code>-t</code> for
-                local runs; when using <code>-slurm</code>, use <code>-j</code> to control SLURM job concurrency
+                local runs and <code>-j</code> with <code>-slurm</code>; <code>-t</code> is not allowed with
+                <code>-slurm</code>
               </td>
             </tr>
             <tr>
               <td><code>-np</code></td>
               <td><span class="flag-badge flag-optional">Optional</span></td>
-              <td>Dry run — shows what jobs will be executed without running them.
+              <td>Dry run — checks <code>config.yaml</code>, pulls the container images into <code>sif_dir</code>
+                and shows what jobs will be executed without running them.
               </td>
             </tr>
             <tr>
               <td><code>-unlock</code></td>
               <td><span class="flag-badge flag-optional">Optional</span></td>
               <td>Unlock the working directory if Snakemake has locked it after a crash. Run once with this flag,
-                then remove it and run normally</td>
+                then remove it and run normally. The config check is skipped when unlocking</td>
             </tr>
             <tr>
               <td><code>-trimming_qc</code></td>
@@ -1255,30 +1270,32 @@
             <tr>
               <td><code>-kmer_eval</code></td>
               <td><span class="flag-badge flag-optional">Optional</span></td>
-              <td>For k-mer Evaluation stats/plots</td>
+              <td>For k-mer profiling statistics and plots</td>
             </tr>
             <tr>
               <td><code>-assembly</code></td>
               <td><span class="flag-badge flag-optional">Optional</span></td>
-              <td>For all Assembly and Decontamination steps</td>
+              <td>For assembly, statistics and decontamination</td>
             </tr>
             <tr>
               <td><code>-scaffolding</code></td>
               <td><span class="flag-badge flag-optional">Optional</span></td>
-              <td>To run YAHS auto-scaffolding and create the Hi-C Maps</td>
+              <td>For YaHS scaffolding and Hi-C contact maps. Step flags can be combined; with none, all steps
+                run</td>
             </tr>
             <tr class="flag-ref-slurm">
               <td><code>-slurm</code></td>
               <td><span class="flag-badge"
                   style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM</span></td>
-              <td>Enable SLURM job submission mode using Snakemake's profile system</td>
+              <td>Submit each rule as a SLURM job, using <code>config/slurm_params.yaml</code> and
+                <code>config/resources/{genome_size}.yaml</code></td>
             </tr>
             <tr class="flag-ref-slurm">
               <td><code>-j &lt;int&gt;</code></td>
               <td><span class="flag-badge"
                   style="color:#0369a1;background:#e0f2fe;border-color:#bae6fd">SLURM only</span></td>
-              <td>Number of jobs to submit to the SLURM queue at once. Use alongside <code>-t</code> when running in
-                SLURM mode</td>
+              <td>Number of jobs to submit to the SLURM queue at once. Required with <code>-slurm</code>, in place
+                of <code>-t</code></td>
             </tr>
             <tr class="flag-ref-slurm">
               <td><code>-partition &lt;name&gt;</code></td>
@@ -1290,9 +1307,11 @@
         </table>
 
           </div>
-          <p class="flag-ref-note">To customize default thread counts and memory per rule, edit
-            <code>config/local_params.yaml</code>. Do not modify the <code>{WORKDIR}</code>, <code>{THREADS}</code>, or
-            <code>{PARTITION}</code> variables directly.</p>
+          <p class="flag-ref-note">To customize threads per rule (local and SLURM), edit
+            <code>config/threads.yaml</code>; memory per rule in SLURM mode, <code>config/resources/{genome_size}.yaml</code>;
+            general SLURM settings and <code>slurm_account</code>, <code>config/slurm_params.yaml</code>. Do not modify
+            the <code>{ WORKDIR }</code>, <code>{ THREADS }</code>, or <code>{ PARTITION }</code> placeholders. The
+            generated <code>profiles/*/config.yaml</code> files are overwritten on every run.</p>
         </div>
 
       </div><!-- end exec-pipeasm-view -->

@@ -511,6 +511,58 @@
 }
 
 /* ----------------------------------------------------------------
+   STEP CHECKBOXES
+   ---------------------------------------------------------------- */
+.step-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.step-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-white);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.step-check:hover { background: var(--bg-section); }
+
+.step-check input {
+  accent-color: var(--accent);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.step-check span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.step-check code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.step-check:has(input:checked) {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ----------------------------------------------------------------
    ENVIRONMENT PILLS
    ---------------------------------------------------------------- */
 .env-pills {

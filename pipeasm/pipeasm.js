@@ -1,68 +1,168 @@
 // ================================================================
 //  PipeASM — pipeasm.js
-//  State management, conditional display, YAML generation
+//  State management, conditional display, config check, YAML generation
 // ================================================================
 
 // ----------------------------------------------------------------
-// STATE
+// DEFAULTS (Pipeasm 1.2.0 config/config.yaml)
 // ----------------------------------------------------------------
-const state = {
+const DEFAULTS = {
   // Section 1: Sample & Reads
   sample: '',
   hifi_reads: '',
   hic_r1: '',
   hic_r2: '',
   ont_reads: '',
-  genome_size: '',
 
-  // Section 2: Assembly Settings
-  taxid: '',
-  buscodb: '',
-  sif_dir: '',
+  // Section 2: Assembly Options
+  genome_size: '',
   solo_asm: 'No',
   diff_species_hic: 'No',
 
-  // Section 3: Mitochondrial
+  // Section 3: Completeness & Contaminants
+  buscodb: '',
+  taxid: '',
+  gxdb: '',
+
+  // Section 4: Mitogenome
   run_mitohifi: 'No',
   species: '',
   geneticcode: '',
 
-  // Section 4: Databases
-  gxdb: '',
+  // Section 5: Containers
+  sif_dir: '',
 
-  // Section 5: Read QC — Fastp
+  // Section 6: Read QC — Fastp
   fastp_flags: '--cut_tail --detect_adapter_for_pe --dont_eval_duplication --trim_poly_g',
   fastp_min_len: '--length_required 35',
   fastp_quality: '--cut_mean_quality 24',
   fastp_crop: '--trim_front1 5',
 
-  // Section 5: Read QC — Cutadapt
+  // Section 6: Read QC — Cutadapt
   cutadapt_adaptors: '-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT',
   cutadapt_filtering: '--discard -O 35',
   cutadapt_adap_find: '--rc -e 0.1',
 
-  // Section 6: NanoPlot
+  // Section 7: NanoPlot
   nanoplot_args: '--tsv_stats --format svg',
   nanoplot_plots: '--plots kde hex dot',
 
-  // Section 7: K-mer
+  // Section 8: K-mer
   fastk_default: '-v -M32 -t1',
   fastk_kmer: '-k31',
   genescopefk_kmer: '-k 31',
   genescopefk_ploidy: '-p 2',
   smudgeplot_minsize: '-L 12',
 
-  // Section 8: Assembly Tools
+  // Section 9: Assembly Tools
   hifiasm_purge: '-l 1 -O 1',
   hifiasm_similarity: '-s 0.75',
   gfastats_params: '-o fa --discover-paths',
   bellerophon: '--quality 10',
 
-  // Section 9: Scaffolding & Visualization
-  pretext_map: '--mapq 10',
+  // Section 10: Scaffolding & Visualization
+  pretext_map: '--mapq 10 --ultraRes',
   pretext_snapshot: "--sequences '=full' -c 'Mellow Rainbow' --gridSize 1 --gridColour black --jpegQuality 100 -r 4000",
   yahs: '-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1',
 };
+
+// ----------------------------------------------------------------
+// STATE
+// ----------------------------------------------------------------
+const state = { ...DEFAULTS };
+
+// Fields that were edited at least once (used to flag empty required fields)
+const touched = new Set();
+
+// ----------------------------------------------------------------
+// FIELD MAPS
+// ----------------------------------------------------------------
+const TEXT_FIELDS = [
+  ['f-sample',            'sample'],
+  ['f-hifi-reads',        'hifi_reads'],
+  ['f-hic-r1',            'hic_r1'],
+  ['f-hic-r2',            'hic_r2'],
+  ['f-ont-reads',         'ont_reads'],
+  ['f-buscodb',           'buscodb'],
+  ['f-taxid',             'taxid'],
+  ['f-gxdb',              'gxdb'],
+  ['f-species',           'species'],
+  ['f-geneticcode',       'geneticcode'],
+  ['f-sif-dir',           'sif_dir'],
+  ['f-fastp-flags',       'fastp_flags'],
+  ['f-fastp-minlen',      'fastp_min_len'],
+  ['f-fastp-quality',     'fastp_quality'],
+  ['f-fastp-crop',        'fastp_crop'],
+  ['f-cutadapt-adaptors', 'cutadapt_adaptors'],
+  ['f-cutadapt-filtering','cutadapt_filtering'],
+  ['f-cutadapt-adap-find','cutadapt_adap_find'],
+  ['f-nanoplot-args',     'nanoplot_args'],
+  ['f-nanoplot-plots',    'nanoplot_plots'],
+  ['f-fastk-default',     'fastk_default'],
+  ['f-fastk-kmer',        'fastk_kmer'],
+  ['f-genescopefk-kmer',  'genescopefk_kmer'],
+  ['f-genescopefk-ploidy','genescopefk_ploidy'],
+  ['f-smudgeplot-minsize','smudgeplot_minsize'],
+  ['f-hifiasm-purge',     'hifiasm_purge'],
+  ['f-hifiasm-similarity','hifiasm_similarity'],
+  ['f-gfastats-params',   'gfastats_params'],
+  ['f-bellerophon',       'bellerophon'],
+  ['f-pretext-map',       'pretext_map'],
+  ['f-pretext-snapshot',  'pretext_snapshot'],
+  ['f-yahs',              'yahs'],
+];
+
+const SELECT_FIELDS = [
+  ['f-genome-size', 'genome_size'],
+];
+
+const RADIO_GROUPS = ['solo_asm', 'diff_species_hic', 'run_mitohifi'];
+
+// state key -> element to highlight/focus for config check messages
+const FIELD_ELEMENT = Object.fromEntries([
+  ...[...TEXT_FIELDS, ...SELECT_FIELDS].map(([id, key]) => [key, id]),
+  ['solo_asm',         'fg-solo-asm'],
+  ['diff_species_hic', 'fg-diff-species-hic'],
+]);
+
+// ----------------------------------------------------------------
+// PRESETS: Pretext resolution and YaHS enzyme motifs
+// ----------------------------------------------------------------
+const PRETEXT_RES_FLAGS = ['--ultraRes', '--highRes'];
+const ARIMA_MOTIFS = '-e GATC,GANTC,CTNAG,TTAA';
+
+function pretextResOf(flags) {
+  const tokens = flags.split(/\s+/);
+  return PRETEXT_RES_FLAGS.find((f) => tokens.includes(f)) || '';
+}
+
+function setPretextRes(flag) {
+  const tokens = state.pretext_map.split(/\s+/).filter((t) => t && !PRETEXT_RES_FLAGS.includes(t));
+  if (flag) tokens.push(flag);
+  state.pretext_map = tokens.join(' ');
+  setFieldValue('f-pretext-map', state.pretext_map);
+}
+
+function yahsKitOf(flags) {
+  if (/(^|\s)-e\s+GATC,GANTC,CTNAG,TTAA(\s|$)/.test(flags)) return 'arima';
+  if (!/(^|\s)-e(\s|$)/.test(flags)) return 'enzyme-free';
+  return 'custom';
+}
+
+function setYahsKit(kit) {
+  if (kit === 'custom') {
+    $('f-yahs').focus();
+    return;
+  }
+  const rest = state.yahs.replace(/(^|\s)-e\s+\S+/g, ' ').replace(/\s+/g, ' ').trim();
+  state.yahs = kit === 'arima' ? `${ARIMA_MOTIFS} ${rest}`.trim() : rest;
+  setFieldValue('f-yahs', state.yahs);
+}
+
+function syncPresets() {
+  setFieldValue('f-pretext-res', pretextResOf(state.pretext_map));
+  setFieldValue('f-yahs-kit', yahsKitOf(state.yahs));
+}
 
 // ----------------------------------------------------------------
 // DOM HELPERS
@@ -75,38 +175,22 @@ const hide = (id) => { const el = $(id); if (el) el.classList.add('hidden'); };
 // INIT
 // ----------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-  // Set defaults for radio groups
-  setRadio('solo_asm', state.solo_asm);
-  setRadio('diff_species_hic', state.diff_species_hic);
-  setRadio('run_mitohifi', state.run_mitohifi);
-
-  // Populate textarea / text defaults
-  setFieldValue('f-cutadapt-adaptors', state.cutadapt_adaptors);
-  setFieldValue('f-fastp-flags',       state.fastp_flags);
-  setFieldValue('f-fastp-minlen',      state.fastp_min_len);
-  setFieldValue('f-fastp-quality',     state.fastp_quality);
-  setFieldValue('f-fastp-crop',        state.fastp_crop);
-  setFieldValue('f-cutadapt-filtering',state.cutadapt_filtering);
-  setFieldValue('f-cutadapt-adap-find',state.cutadapt_adap_find);
-  setFieldValue('f-nanoplot-args',     state.nanoplot_args);
-  setFieldValue('f-nanoplot-plots',    state.nanoplot_plots);
-  setFieldValue('f-fastk-default',     state.fastk_default);
-  setFieldValue('f-fastk-kmer',        state.fastk_kmer);
-  setFieldValue('f-genescopefk-kmer',  state.genescopefk_kmer);
-  setFieldValue('f-genescopefk-ploidy',state.genescopefk_ploidy);
-  setFieldValue('f-smudgeplot-minsize',state.smudgeplot_minsize);
-  setFieldValue('f-hifiasm-purge',     state.hifiasm_purge);
-  setFieldValue('f-hifiasm-similarity',state.hifiasm_similarity);
-  setFieldValue('f-gfastats-params',   state.gfastats_params);
-  setFieldValue('f-bellerophon',       state.bellerophon);
-  setFieldValue('f-pretext-map',       state.pretext_map);
-  setFieldValue('f-pretext-snapshot',  state.pretext_snapshot);
-  setFieldValue('f-yahs',              state.yahs);
-
+  populateForm();
   bindEvents();
+  refresh();
+});
+
+function populateForm() {
+  [...TEXT_FIELDS, ...SELECT_FIELDS].forEach(([id, key]) => setFieldValue(id, state[key]));
+  RADIO_GROUPS.forEach((name) => setRadio(name, state[name]));
+  syncPresets();
+}
+
+function refresh() {
   updateConditionals();
   updateYAML();
-});
+  renderCheck();
+}
 
 // ----------------------------------------------------------------
 // BIND EVENTS
@@ -114,77 +198,62 @@ document.addEventListener('DOMContentLoaded', () => {
 function bindEvents() {
 
   // ---- Text / number inputs & textareas ----
-  const textFields = [
-    ['f-sample',            'sample'],
-    ['f-hifi-reads',        'hifi_reads'],
-    ['f-hic-r1',            'hic_r1'],
-    ['f-hic-r2',            'hic_r2'],
-    ['f-ont-reads',         'ont_reads'],
-    ['f-taxid',             'taxid'],
-    ['f-buscodb',           'buscodb'],
-    ['f-sif-dir',           'sif_dir'],
-    ['f-species',           'species'],
-    ['f-geneticcode',       'geneticcode'],
-    ['f-gxdb',              'gxdb'],
-    ['f-fastp-flags',       'fastp_flags'],
-    ['f-fastp-minlen',      'fastp_min_len'],
-    ['f-fastp-quality',     'fastp_quality'],
-    ['f-fastp-crop',        'fastp_crop'],
-    ['f-cutadapt-adaptors', 'cutadapt_adaptors'],
-    ['f-cutadapt-filtering','cutadapt_filtering'],
-    ['f-cutadapt-adap-find','cutadapt_adap_find'],
-    ['f-nanoplot-args',     'nanoplot_args'],
-    ['f-nanoplot-plots',    'nanoplot_plots'],
-    ['f-fastk-default',     'fastk_default'],
-    ['f-fastk-kmer',        'fastk_kmer'],
-    ['f-genescopefk-kmer',  'genescopefk_kmer'],
-    ['f-genescopefk-ploidy','genescopefk_ploidy'],
-    ['f-smudgeplot-minsize','smudgeplot_minsize'],
-    ['f-hifiasm-purge',     'hifiasm_purge'],
-    ['f-hifiasm-similarity','hifiasm_similarity'],
-    ['f-gfastats-params',   'gfastats_params'],
-    ['f-bellerophon',       'bellerophon'],
-    ['f-pretext-map',       'pretext_map'],
-    ['f-pretext-snapshot',  'pretext_snapshot'],
-    ['f-yahs',              'yahs'],
-  ];
-
-  textFields.forEach(([id, key]) => {
+  TEXT_FIELDS.forEach(([id, key]) => {
     const el = $(id);
     if (!el) return;
     el.addEventListener('input', (e) => {
       state[key] = e.target.value.trim();
-      updateConditionals();
-      updateYAML();
+      if (key === 'pretext_map') setFieldValue('f-pretext-res', pretextResOf(state.pretext_map));
+      if (key === 'yahs') setFieldValue('f-yahs-kit', yahsKitOf(state.yahs));
+      refresh();
+    });
+    el.addEventListener('blur', () => {
+      touched.add(key);
+      renderCheck();
     });
   });
 
   // ---- Select fields ----
-  const selectFields = [
-    ['f-genome-size', 'genome_size'],
-  ];
-
-  selectFields.forEach(([id, key]) => {
+  SELECT_FIELDS.forEach(([id, key]) => {
     const el = $(id);
     if (!el) return;
     el.addEventListener('change', (e) => {
       state[key] = e.target.value;
-      updateConditionals();
-      updateYAML();
+      touched.add(key);
+      refresh();
     });
   });
 
-  // ---- Radio groups ----
-  const radioGroups = ['solo_asm', 'diff_species_hic', 'run_mitohifi'];
+  // ---- Presets (rewrite the related flags field) ----
+  $('f-pretext-res').addEventListener('change', (e) => {
+    setPretextRes(e.target.value);
+    refresh();
+  });
+  $('f-yahs-kit').addEventListener('change', (e) => {
+    setYahsKit(e.target.value);
+    refresh();
+  });
 
-  radioGroups.forEach((name) => {
+  // ---- Radio groups ----
+  RADIO_GROUPS.forEach((name) => {
     document.querySelectorAll(`input[name="${name}"]`).forEach((radio) => {
       radio.addEventListener('change', (e) => {
         state[name] = e.target.value;
-        updateConditionals();
-        updateYAML();
+        refresh();
       });
     });
+  });
+
+  // ---- Config check panel ----
+  $('pa-check-toggle').addEventListener('click', () => {
+    const btn = $('pa-check-toggle');
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    $('pa-check').classList.toggle('is-collapsed', expanded);
+  });
+  $('pa-check-list').addEventListener('click', (e) => {
+    const item = e.target.closest('[data-field]');
+    if (item) focusField(item.dataset.field);
   });
 
   // ---- Action buttons ----
@@ -208,6 +277,14 @@ function setFieldValue(id, value) {
   el.value = value;
 }
 
+function focusField(key) {
+  const el = $(FIELD_ELEMENT[key]);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const target = el.matches('input, select, textarea') ? el : el.querySelector('input:checked, input');
+  if (target) target.focus({ preventScroll: true });
+}
+
 // ----------------------------------------------------------------
 // CONDITIONALS
 // ----------------------------------------------------------------
@@ -218,46 +295,178 @@ function updateConditionals() {
 }
 
 // ----------------------------------------------------------------
+// CONFIG CHECK
+// Mirrors workflow/scripts/check_config.py from Pipeasm 1.2.0,
+// except for file/directory existence, which only Pipeasm can check.
+// ----------------------------------------------------------------
+const GENOME_SIZES = ['small', 'medium', 'large'];
+
+function checkConfig() {
+  const s = state;
+  const errors = [];
+  const warnings = [];
+  const error = (field, msg) => errors.push({ field, msg });
+  const warn = (field, msg) => warnings.push({ field, msg });
+  const isAbs = (p) => p.startsWith('/');
+
+  // Sample name (must match the `sample` wildcard constraint in workflow/rules/common.smk)
+  if (!s.sample) error('sample', "'sample' is required.");
+  else if (!/^[A-Za-z0-9_]+$/.test(s.sample)) {
+    error('sample', `'sample' must contain only letters, numbers and underscores: '${s.sample}'.`);
+  }
+
+  // Reads
+  const checkReads = (field, required) => {
+    const value = s[field];
+    if (!value) {
+      if (required) error(field, `'${field}' is required: set the absolute path to the reads (.fastq.gz).`);
+      return;
+    }
+    if (!isAbs(value)) error(field, `'${field}' must be an absolute path: '${value}'.`);
+    if (!/\.(fastq|fq)\.gz$/.test(value)) {
+      error(field, `'${field}' must be a gzip-compressed FASTQ file (.fastq.gz): '${value}'.`);
+    }
+  };
+  checkReads('hifi_reads', true);
+  checkReads('hic_r1', false);
+  checkReads('hic_r2', false);
+  checkReads('ont_reads', false);
+
+  const hasHic = Boolean(s.hic_r1 && s.hic_r2);
+  if (!s.hic_r1 !== !s.hic_r2) {
+    error(s.hic_r1 ? 'hic_r2' : 'hic_r1', "'hic_r1' and 'hic_r2' must be set together (or both left empty).");
+  }
+
+  // Assembly options
+  if (!GENOME_SIZES.includes(s.genome_size)) {
+    error('genome_size', "'genome_size' is required: choose small, medium or large.");
+  }
+  if (s.diff_species_hic === 'Yes' && !hasHic) {
+    error('diff_species_hic', "'diff_species_hic' is \"Yes\" but no Hi-C reads were set in 'hic_r1'/'hic_r2'.");
+  }
+  if (!hasHic && s.solo_asm === 'No') {
+    warn('solo_asm', "No Hi-C reads and 'solo_asm' is \"No\": no assembly will be produced " +
+      "(only trimming/QC and k-mer profiling). Set 'solo_asm' to \"Yes\" to assemble the HiFi reads.");
+  }
+
+  // Completeness and contaminants
+  if (!s.buscodb) error('buscodb', "'buscodb' is required (e.g., \"aves\").");
+  else if (/_odb1[02]$/.test(s.buscodb)) {
+    error('buscodb', `'buscodb' must not include the '_odb' suffix: '${s.buscodb}'.`);
+  }
+
+  if (!s.taxid) error('taxid', "'taxid' is required (NCBI Taxonomy ID, e.g., 1202453).");
+  else if (!/^\d+$/.test(s.taxid)) error('taxid', `'taxid' must be a number: '${s.taxid}'.`);
+
+  if (s.gxdb && !isAbs(s.gxdb)) error('gxdb', `'gxdb' must be an absolute path: '${s.gxdb}'.`);
+
+  // Mitogenome
+  if (s.run_mitohifi === 'Yes') {
+    if (!s.species) error('species', "'species' is required when 'run_mitohifi' is \"Yes\".");
+    if (!s.geneticcode) error('geneticcode', "'geneticcode' is required when 'run_mitohifi' is \"Yes\".");
+    else if (!/^\d+$/.test(s.geneticcode)) {
+      error('geneticcode', `'geneticcode' must be a number: '${s.geneticcode}'.`);
+    }
+  }
+
+  // Containers
+  if (!s.sif_dir) error('sif_dir', "'sif_dir' is required (directory to store the Singularity images).");
+  else if (!isAbs(s.sif_dir)) error('sif_dir', `'sif_dir' must be an absolute path: '${s.sif_dir}'.`);
+
+  // Advanced tool parameters
+  const fastkK = s.fastk_kmer.match(/\d+/);
+  const genescopeK = s.genescopefk_kmer.match(/\d+/);
+  if (fastkK && genescopeK && fastkK[0] !== genescopeK[0]) {
+    error('genescopefk_kmer',
+      `'fastk.kmer' (k=${fastkK[0]}) and 'genescopeFK.kmer' (k=${genescopeK[0]}) must use the same k-mer size.`);
+  }
+
+  return { errors, warnings };
+}
+
+function renderCheck() {
+  const { errors, warnings } = checkConfig();
+
+  // Field highlighting: empty required fields only after they were touched
+  document.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
+  errors.forEach(({ field }) => {
+    const el = $(FIELD_ELEMENT[field]);
+    if (el && el.matches('input, select, textarea') && (state[field] || touched.has(field))) {
+      el.classList.add('is-invalid');
+    }
+  });
+
+  const panel = $('pa-check');
+  const summary = $('pa-check-summary');
+  const list = $('pa-check-list');
+  if (!panel || !summary || !list) return;
+
+  panel.classList.toggle('has-errors', errors.length > 0);
+  panel.classList.toggle('has-warnings', errors.length === 0 && warnings.length > 0);
+  panel.classList.toggle('is-ok', errors.length === 0 && warnings.length === 0);
+
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  const parts = [];
+  if (errors.length) parts.push(plural(errors.length, 'error'));
+  if (warnings.length) parts.push(plural(warnings.length, 'warning'));
+  summary.textContent = parts.length ? `Config check: ${parts.join(' · ')}` : 'Config check: no problems found';
+
+  const item = (cls, label) => ({ field, msg }) =>
+    `<li><button type="button" class="pa-check-item ${cls}" data-field="${field}">` +
+    `<span class="pa-check-tag">${label}</span>${esc(msg)}</button></li>`;
+  list.innerHTML = [...errors.map(item('is-error', 'Error')), ...warnings.map(item('is-warning', 'Warning'))].join('');
+}
+
+// ----------------------------------------------------------------
 // YAML GENERATION
 // ----------------------------------------------------------------
 function generateYAML() {
   const s = state;
 
   // Helpers
-  const line  = (key, val) => `${key}: ${val ?? ''}\n`;
-  const qline = (key, val) => `${key}: "${val ?? ''}"\n`;
-  const iline = (indent, key, val) => `${indent}${key}: ${val ?? ''}\n`;
-  const iqline = (indent, key, val) => `${indent}${key}: "${val ?? ''}"\n`;
-
+  const quote  = (val) => `"${String(val ?? '').replace(/\r?\n/g, ' ').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  const line   = (key, val) => (val ? `${key}: ${val}\n` : `${key}:\n`);
+  const qline  = (key, val) => `${key}: ${quote(val)}\n`;
+  const oqline = (key, val) => (val ? qline(key, val) : `${key}:\n`);
+  const iqline = (indent, key, val) => `${indent}${key}: ${quote(val)}\n`;
+  const banner = (title) => `\n################################\n${title}\n################################\n\n`;
 
   let y = '';
 
   // ── Sample & Reads ─────────────────────────────────────────────
+  y += banner('#### SAMPLE AND INPUT READS ####').trimStart();
   y += qline('sample',      s.sample);
   y += qline('hifi_reads',  s.hifi_reads);
   y += qline('hic_r1',      s.hic_r1);
   y += qline('hic_r2',      s.hic_r2);
   y += qline('ont_reads',   s.ont_reads);
-  y += qline('genome_size', s.genome_size);
 
-  // ── Assembly Settings ──────────────────────────────────────────
-  y += line( 'taxid',          s.taxid);
-  y += qline('buscodb',        s.buscodb);
-  y += qline('solo_asm',       s.solo_asm || 'No');
-  y += qline('sif_dir',        s.sif_dir);
-
-  // ── Mitochondrial ──────────────────────────────────────────────
-  y += qline('run_mitohifi',   s.run_mitohifi || 'No');
-  y += qline('species',        s.species);
-  y += line( 'geneticcode',    s.geneticcode);
-
-  // ── Hi-C / Scaffolding mode ────────────────────────────────────
+  // ── Assembly Options ───────────────────────────────────────────
+  y += banner('####### ASSEMBLY OPTIONS #######');
+  y += qline('genome_size',      s.genome_size);
+  y += qline('solo_asm',         s.solo_asm || 'No');
   y += qline('diff_species_hic', s.diff_species_hic || 'No');
 
-  // ── Databases ──────────────────────────────────────────────────
-  y += line( 'gxdb',   s.gxdb);
+  // ── Completeness & Contaminants ────────────────────────────────
+  y += banner('## COMPLETENESS AND CONTAMINANTS');
+  y += qline( 'buscodb', s.buscodb);
+  y += line(  'taxid',   s.taxid);
+  y += oqline('gxdb',    s.gxdb);
+
+  // ── Mitogenome ─────────────────────────────────────────────────
+  y += banner('########## MITOGENOME ##########');
+  y += qline('run_mitohifi', s.run_mitohifi || 'No');
+  y += qline('species',      s.species);
+  y += line( 'geneticcode',  s.geneticcode);
+
+  // ── Containers ─────────────────────────────────────────────────
+  y += banner('########## CONTAINERS ##########');
+  y += qline('sif_dir', s.sif_dir);
+
+  y += banner('### ADVANCED TOOL PARAMETERS ###').trimEnd() + '\n';
 
   // ── Fastp (nested) ─────────────────────────────────────────────
+  y += `\n## fastp - Hi-C read trimming and QC\n`;
   y += `fastp:\n`;
   y += iqline('  ', 'flags',   s.fastp_flags);
   y += iqline('  ', 'min_len', s.fastp_min_len);
@@ -265,48 +474,58 @@ function generateYAML() {
   y += iqline('  ', 'quality', s.fastp_quality);
 
   // ── Cutadapt (nested) ──────────────────────────────────────────
+  y += `\n## Cutadapt - PacBio HiFi adapter removal\n`;
   y += `cutadapt:\n`;
   y += iqline('  ', 'adaptors', s.cutadapt_adaptors);
   y += iqline('  ', 'filtering',s.cutadapt_filtering);
   y += iqline('  ', 'adap_find',s.cutadapt_adap_find);
 
   // ── NanoPlot (nested) ──────────────────────────────────────────
+  y += `\n## NanoPlot - HiFi and ONT read length and quality plots\n`;
   y += `nanoplot:\n`;
   y += iqline('  ', 'args',  s.nanoplot_args);
   y += iqline('  ', 'plots', s.nanoplot_plots);
 
   // ── FastK (nested) ─────────────────────────────────────────────
+  y += `\n## FastK - k-mer counting of the HiFi reads\n`;
   y += `fastk:\n`;
   y += iqline('  ', 'default', s.fastk_default);
   y += iqline('  ', 'kmer',    s.fastk_kmer);
 
   // ── GeneScopeFK (nested) ───────────────────────────────────────
+  y += `\n## GeneScopeFK - genome size, heterozygosity and repeat content from the k-mer histogram\n`;
   y += `genescopeFK:\n`;
   y += iqline('  ', 'kmer',   s.genescopefk_kmer);
   y += iqline('  ', 'ploidy', s.genescopefk_ploidy);
 
   // ── SmudgePlot (nested) ────────────────────────────────────────
+  y += `\n## Smudgeplot - ploidy estimation from k-mer pairs\n`;
   y += `smudgeplot:\n`;
   y += iqline('  ', 'minsize', s.smudgeplot_minsize);
 
   // ── Hifiasm (nested) ───────────────────────────────────────────
+  y += `\n## Hifiasm - contig assembly\n`;
   y += `hifiasm:\n`;
   y += iqline('  ', 'purgelevel', s.hifiasm_purge);
   y += iqline('  ', 'similarity', s.hifiasm_similarity);
 
   // ── gfastats (nested) ──────────────────────────────────────────
+  y += `\n## gfastats - assembly graph to FASTA conversion and assembly statistics\n`;
   y += `gfastats:\n`;
   y += iqline('  ', 'params', s.gfastats_params);
 
   // ── Bellerophon (flat string) ──────────────────────────────────
+  y += `\n## Bellerophon - Hi-C read filtering\n`;
   y += qline('bellerophon', s.bellerophon);
 
   // ── Pretext (nested) ───────────────────────────────────────────
+  y += `\n## PretextMap / PretextSnapshot - Hi-C contact maps\n`;
   y += `pretext:\n`;
   y += iqline('  ', 'map',      s.pretext_map);
   y += iqline('  ', 'snapshot', s.pretext_snapshot);
 
   // ── YAHS (flat string) ─────────────────────────────────────────
+  y += `\n## YaHS - Hi-C scaffolding\n`;
   y += qline('yahs', s.yahs);
 
   return y;
@@ -318,6 +537,11 @@ function generateYAML() {
 function highlightYAML(text) {
   const lines = text.split('\n');
   return lines.map((line) => {
+    // Comment lines
+    if (/^\s*#/.test(line)) {
+      return `<span class="y-comment">${esc(line)}</span>`;
+    }
+
     // Indented key: value (nested YAML)
     const kv = line.match(/^(\s*)([\w_]+)(\s*:\s*)(.*)$/);
     if (kv) {
@@ -413,71 +637,10 @@ function downloadYAML() {
 function resetForm() {
   if (!confirm('Reset all fields to their defaults?')) return;
 
-  // Reset string fields to empty
-  Object.keys(state).forEach((k) => { state[k] = ''; });
+  Object.assign(state, DEFAULTS);
+  touched.clear();
 
-  // Restore radio defaults
-  state.solo_asm        = 'No';
-  state.diff_species_hic= 'No';
-  state.run_mitohifi    = 'No';
-
-  // Restore parameter defaults
-  state.fastp_flags         = '--cut_tail --detect_adapter_for_pe --dont_eval_duplication --trim_poly_g';
-  state.fastp_min_len       = '--length_required 35';
-  state.fastp_quality       = '--cut_mean_quality 24';
-  state.fastp_crop          = '--trim_front1 5';
-  state.cutadapt_adaptors   = '-b ATCTCTCTCAACAACAACAACGGAGGAGGAGGAAAAGAGAGAGAT -b ATCTCTCTCTTTTCCTCCTCCTCCGTTGTTGTTGTTGAGAGAGAT';
-  state.cutadapt_filtering  = '--discard -O 35';
-  state.cutadapt_adap_find  = '--rc -e 0.1';
-  state.nanoplot_args       = '--tsv_stats --format svg';
-  state.nanoplot_plots      = '--plots kde hex dot';
-  state.fastk_default       = '-v -M32 -t1';
-  state.fastk_kmer          = '-k31';
-  state.genescopefk_kmer    = '-k 31';
-  state.genescopefk_ploidy  = '-p 2';
-  state.smudgeplot_minsize  = '-L 12';
-  state.hifiasm_purge       = '-l 1 -O 1';
-  state.hifiasm_similarity  = '-s 0.75';
-  state.gfastats_params     = '-o fa --discover-paths';
-  state.bellerophon         = '--quality 10';
-  state.pretext_map         = '--mapq 10';
-  state.pretext_snapshot    = "--sequences '=full' -c 'Mellow Rainbow' --gridSize 1 --gridColour black --jpegQuality 100 -r 4000";
-  state.yahs                = '-e GATC,GANTC,CTNAG,TTAA --no-mem-check -v 1';
-
-  // Reset all inputs
-  document.querySelectorAll('.field-input').forEach((el) => {
-    const defaults = {
-      'f-cutadapt-adaptors':  state.cutadapt_adaptors,
-      'f-fastp-flags':        state.fastp_flags,
-      'f-fastp-minlen':       state.fastp_min_len,
-      'f-fastp-quality':      state.fastp_quality,
-      'f-fastp-crop':         state.fastp_crop,
-      'f-cutadapt-filtering': state.cutadapt_filtering,
-      'f-cutadapt-adap-find': state.cutadapt_adap_find,
-      'f-nanoplot-args':      state.nanoplot_args,
-      'f-nanoplot-plots':     state.nanoplot_plots,
-      'f-fastk-default':      state.fastk_default,
-      'f-fastk-kmer':         state.fastk_kmer,
-      'f-genescopefk-kmer':   state.genescopefk_kmer,
-      'f-genescopefk-ploidy': state.genescopefk_ploidy,
-      'f-smudgeplot-minsize': state.smudgeplot_minsize,
-      'f-hifiasm-purge':      state.hifiasm_purge,
-      'f-hifiasm-similarity': state.hifiasm_similarity,
-      'f-gfastats-params':    state.gfastats_params,
-      'f-bellerophon':        state.bellerophon,
-      'f-pretext-map':        state.pretext_map,
-      'f-pretext-snapshot':   state.pretext_snapshot,
-      'f-yahs':               state.yahs,
-    };
-    el.value = defaults[el.id] ?? '';
-  });
-
-  // Reset radios
   document.querySelectorAll('input[type="radio"]').forEach((r) => { r.checked = false; });
-  setRadio('solo_asm', 'No');
-  setRadio('diff_species_hic', 'No');
-  setRadio('run_mitohifi', 'No');
-
-  updateConditionals();
-  updateYAML();
+  populateForm();
+  refresh();
 }
