@@ -393,6 +393,15 @@ function updateFormatUI() {
 // ----------------------------------------------------------------
 // YAML GENERATION
 // ----------------------------------------------------------------
+
+// The NCBI seed search only feeds NOVOPlasty, which only runs on short reads.
+// When NOVOPlasty does not run, write an explicit "No".
+function searchNcbiValue(s) {
+  const isShort = String(s.sequencing_type || '').toLowerCase() === 'short';
+  const novoYes = String(s.run_novoplasty || 'Yes').toLowerCase() === 'yes';
+  return isShort && novoYes ? s.search_ncbi : 'No';
+}
+
 function generateYAML() {
   const s = state;
   const isShort       = s.sequencing_type === 'Short';
@@ -403,8 +412,10 @@ function generateYAML() {
   const novoYes       = (s.run_novoplasty || 'Yes') === 'Yes';
   const goYes         = s.run_getorganelle === 'Yes';
 
-  const line  = (key, val) => `${key}: ${val ?? ''}\n`;
-  const qline = (key, val) => `${key}: "${val ?? ''}"\n`;
+  // Blank values are written as `key:` (null in YAML), which OrganPipe 1.3.0 reads as blank.
+  const isBlank = (val) => val === undefined || val === null || String(val).trim() === '';
+  const line  = (key, val) => isBlank(val) ? `${key}:\n` : `${key}: ${val}\n`;
+  const qline = (key, val) => isBlank(val) ? `${key}:\n` : `${key}: "${val}"\n`;
   // Emit a compact 3-line section header with no blank lines between the ### rows
   const sectionHeader = (border, title) => `\n${border}\n${title}\n${border}\n`;
 
@@ -415,7 +426,8 @@ function generateYAML() {
   y += qline('sample',          s.sample);
   y += qline('reads_path',      s.reads_path);
   y += qline('organelle',       s.organelle);
-  y += line( 'genetic_code',    isShort && annYes ? s.genetic_code : '');
+  // Used by MitoHiFi (long reads) and the MITOS2 annotation (mito), so it is always written
+  y += line( 'genetic_code',    s.genetic_code);
   y += qline('sequencing_type', s.sequencing_type);
 
   // nhmmer: show when short+annYes OR long mito
@@ -443,7 +455,7 @@ function generateYAML() {
   y += qline('seed_format',    s.seed_format);
   y += qline('seed_file',      s.seed_file);
   y += qline('feature',        s.feature);
-  y += qline('search_ncbi',    s.search_ncbi);
+  y += qline('search_ncbi',    searchNcbiValue(s));
   y += qline('search_genes',   s.search_genes);
   y += qline('search_term',    s.search_term);
   y += line( 'max_references', s.max_references);
@@ -555,7 +567,7 @@ const CSV_COLUMNS = [
   ['seed_format',      (s) => s.seed_format],
   ['seed_file',        (s) => s.seed_file],
   ['feature',          (s) => s.feature],
-  ['search_ncbi',      (s) => s.search_ncbi],
+  ['search_ncbi',      searchNcbiValue],
   ['search_genes',     (s) => s.search_genes],
   ['search_term',      (s) => s.search_term],
   ['max_references',   (s) => s.max_references],

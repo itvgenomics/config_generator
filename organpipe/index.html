@@ -343,11 +343,11 @@
               <label class="field-label" for="f-genetic-code">Genetic Code</label>
               <p class="field-hint">
                 NCBI translation table number used for mitochondrial genome annotation. This defines which
-                codon table is applied when translating CDS features. Common values:
+                codon table is applied when translating CDS features. Required for long reads and for the
+                annotation of mitochondria; not used for chloroplasts. Common values:
                 <code>1</code> = Standard (most eukaryotes, nuclear genomes),
                 <code>2</code> = Vertebrate Mitochondrial (fish, amphibians, reptiles, birds, mammals),
-                <code>5</code> = Invertebrate Mitochondrial (insects, worms, molluscs, most invertebrates),
-                <code>11</code> = Bacterial, Archaeal &amp; Plant Plastid (chloroplast annotation).
+                <code>5</code> = Invertebrate Mitochondrial (insects, worms, molluscs, most invertebrates).
                 See <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank"
                 rel="noopener">NCBI Genetic Codes</a> for the full list.
               </p>
@@ -647,10 +647,9 @@
                   Search NCBI <span class="field-required" title="Required">*</span>
                 </label>
                 <p class="field-hint">
-                  Automatically search and download reference sequences from NCBI to use as seeds for assembly.
-                  Requires internet access. Set <em>Seed Format</em> to None when this is enabled. For long
-                  reads, this must be set to <em>Yes</em>. Set to <em>No</em> if you are providing a local seed
-                  file above.
+                  Automatically search and download reference sequences from NCBI to use as seeds for NOVOPlasty.
+                  Requires internet access. Set <em>Seed Format</em> to None when this is enabled. Set to
+                  <em>No</em> if you are providing a local seed file above.
                 </p>
                 <div class="yn-control" role="radiogroup" aria-label="Search NCBI">
                   <label class="yn-pill"><input type="radio" name="search_ncbi" value="Yes"><span>Yes</span></label>
